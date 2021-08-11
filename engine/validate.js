@@ -1132,8 +1132,8 @@ const validate = [
                     }
                     treeloop(global.bridges[color][0]);
                     for (const el of tree) {
-                        // console.info('checking', xy(el), tree.has(el+2), tree.has(el+(puzzle.width*2)), tree.has(el+(puzzle.width*2)+2));
-                        if (tree.has(el+2) && tree.has(el+(puzzle.width*2)) && tree.has(el+(puzzle.width*2)+2) && tree.has(el+puzzle.width+1)) res = true;
+                        let [x, y] = xy(el);
+                        if (x % 2 && y % 2 && tree.has(el+2) && tree.has(el+(puzzle.width*2)) && tree.has(el+(puzzle.width*2)+2) && tree.has(el+puzzle.width+1)) res = true;
                     }
                     seen = new Set(tree);
                     //* check if tree is unique
