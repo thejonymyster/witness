@@ -57,10 +57,13 @@ made work:
 - [x] Bridges
 - [x] Sizers
 - [ ] Negators, Copiers
-- [ ] Diagonal Lines
 - [x] Portals
 - [x] Black, Whiteholes
 - [x] Antitriangle
+- [ ] scratches
+- [ ] crystals
+- [ ] dice
+- [ ] xv mino
 
 todo tomorrow
 antitriangle svg
