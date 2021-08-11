@@ -3,7 +3,7 @@ namespace(function() {
 window.draw = function(puzzle, target='puzzle') {
   if (puzzle == null) return
   var svg = document.getElementById(target)
-  console.info('Drawing', puzzle, 'into', svg)
+  console.log('Drawing', puzzle, 'into', svg)
   while (svg.firstChild) svg.removeChild(svg.firstChild)
 
   // Prevent context menu popups within the puzzle
@@ -240,7 +240,7 @@ function drawSymbols(puzzle, svg, target) {
         }
         switch (cell.dot % 6) {
           case -1:
-            params.color = 'white';
+            params.color = 'var(--line-default)';
             break;
           case -2:
             params.color = 'black';

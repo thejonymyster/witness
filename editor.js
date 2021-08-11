@@ -517,7 +517,7 @@ function onElementClicked(event, x, y) {
         }
       }
     }
-  } else if (['square', 'star', 'nega', 'bridge', 'sizer', 'twobytwo', 'vtriangle', 'pentagon', 'copier', 'celledhex', 'scaler'].includes(activeParams.type)) {
+  } else if (['square', 'star', 'nega', 'bridge', 'sizer', 'twobytwo', 'vtriangle', 'pentagon', 'copier', 'celledhex', 'portal', 'blackhole', 'whitehole', 'pokerchip'].includes(activeParams.type)) {
     if (x%2 !== 1 || y%2 !== 1) return
     // Only remove the element if it's an exact match
     if (puzzle.grid[x][y] != null
@@ -530,6 +530,20 @@ function onElementClicked(event, x, y) {
         'color': activeParams.color,
       }
     }
+  } else if (['scaler'].includes(activeParams.type)) {
+    if (x%2 !== 1 || y%2 !== 1) return
+    if (puzzle.grid[x][y] != null
+      && puzzle.grid[x][y].type === activeParams.type
+      && puzzle.grid[x][y].color === activeParams.color) {
+        if (puzzle.grid[x][y].flip == activeParams.flip) puzzle.grid[x][y].flip = (1 - activeParams.flip);
+        else puzzle.grid[x][y] = null
+     } else {
+       puzzle.grid[x][y] = {
+         'type': activeParams.type,
+         'color': activeParams.color,
+         'flip': activeParams.flip,
+       }
+     }
   } else if (['poly', 'ylop', 'polynt'].includes(activeParams.type)) {
     if (x%2 !== 1 || y%2 !== 1) return
     // Only remove the element if it's an exact match
@@ -550,10 +564,10 @@ function onElementClicked(event, x, y) {
         'color': activeParams.color,
         'polyshape': activeParams.polyshape,
       }
-  } else if (activeParams.type == 'triangle' || activeParams.type == 'divdiamond') {
+  } else if (activeParams.type == 'triangle' || activeParams.type == 'atriangle' || activeParams.type == 'divdiamond') {
     let cycle;
-    if (activeParams.id == 'triangle') cycle = 4;
-    else cycle = 9;
+    if (activeParams.id == 'divdiamond') cycle = 9;
+    else cycle = 4;
     if (x%2 !== 1 || y%2 !== 1) return
     // Only increment count if exact match
     if (puzzle.grid[x][y] != null
@@ -625,9 +639,9 @@ var symbolData = {
   'triangle': {'type':'triangle', 'count':1, 'title':'Triangle'},
   'poly': {'type':'poly', 'title':'Polyomino'},
   'ylop': {'type':'ylop', 'title':'Negation polyomino'},
-  'bridge': {'type':'bridge', 'title':'Seren\'s Bridge: VALIDATION IS BUGGED'},
+  'bridge': {'type':'bridge', 'title':'Seren\'s Bridge'},
   'arrow': {'type':'arrow', 'count':1, 'rot':0, 'title':'Sigma\'s Arrow'},
-  'sizer': {'type':'sizer', 'title':'Radiazia\'s Sizer (Canonical Design by Seren)'},
+  'sizer': {'type':'sizer', 'title':'Radiazia\'s Sizer'},
   'cross': {'type':'cross', 'title':'Cross'},
   'curve': {'type':'curve', 'title':'Diamond'},
   'crossFilled': {'type':'crossFilled', 'title':'Filled Cross'},
@@ -642,14 +656,21 @@ var symbolData = {
   'x-ld': {'type':'x', 'spokes':16, 'title':'ItzShaun\' Xs'},
   'x-rd': {'type':'x', 'spokes':16, 'title':'ItzShaun\' Xs'},
   'pentagon': {'type':'pentagon', 'title':'ItzShaun\'s Pentagons'},
-  'copier': {'type':'copier', 'title':'artless\' Copiers'},
+  'copier': {'type':'copier', 'title':'Gentova\' Copiers'},
   'celledhex': {'type':'celledhex', 'title':'ItzShaun\'s Celled Hexes'},
-  'scaler': {'type':'scaler', 'title':'artless\' Scalers'},
+  'scaler': {'type':'scaler', 'flip': 0, 'title':'Scalers (Revised Artless\' Carrots)'},
+  'portal': {'type':'portal', 'rot': 0, 'title':'MarioMak\'s Portals'},
+  'blackhole': {'type':'blackhole', 'rot': 0, 'title':'Pruz\'s Black Holes (Klyzx\'s Revision)'},
+  'atriangle': {'type':'atriangle', 'count':1, 'title':'Klyzx\'s Antitriangles'},
+  'whitehole': {'type':'whitehole', 'rot': 0, 'title':'White Holes'},
+  'pokerchip': {'type':'pokerchip', 'title':'MarioMak\'s Chips'},
+  'none': {'type': 'none', 'title': 'Symbol Coming Soon!'}
 }
 
 let xButtons = [];
 
 function drawSymbolButtons() {
+
   var symbolTable = document.getElementById('symbolButtons')
   symbolTable.style.display = null
   for (var button of symbolTable.getElementsByTagName('button')) {
@@ -688,10 +709,10 @@ function drawSymbolButtons() {
           drawSymbolButtons()
         }
       }
-    } else if (button.id == 'triangle' || button.id == 'divdiamond') {
+    } else if (button.id == 'triangle' || button.id == 'atriangle' || button.id == 'divdiamond') {
       let cycle;
-      if (button.id == 'triangle') cycle = 4;
-      else cycle = 9;
+      if (button.id == 'divdiamond') cycle = 9;
+      else cycle = 4;
       button.onpointerdown = function(event) {
         reloadPuzzle() // Disable manual solve mode to allow puzzle editing
         if (activeParams.id === this.id) {
@@ -750,6 +771,20 @@ function drawSymbolButtons() {
           if (rot > 7) rot = 0
           symbolData.dart.rot = rot
           activeParams.rot = rot
+        }
+        activeParams = Object.assign(activeParams, this.params)
+        drawSymbolButtons()
+      }
+      button.oncontextmenu = function(event) {event.preventDefault()}
+    } else if (button.id == 'scaler') {
+      button.style.display = null
+      button.onpointerdown = function(event) {
+        reloadPuzzle() // Disable manual solve mode to allow puzzle editing
+        if (activeParams.id === this.id) {
+          var flip = symbolData.scaler.flip
+          flip = 1 - flip;
+          symbolData.scaler.flip = flip
+          activeParams.flip = flip
         }
         activeParams = Object.assign(activeParams, this.params)
         drawSymbolButtons()
@@ -920,7 +955,7 @@ function shapeChooser() {
       cell.style.height = 58
       if ((activeParams.polyshape & cell.powerOfTwo) !== 0) {
         cell.clicked = true
-        cell.style.background = 'black'
+        cell.style.background = 'var(--line-default)'
       } else {
         cell.clicked = false
         cell.style.background = 'var(--line-undone)'
@@ -930,11 +965,21 @@ function shapeChooser() {
 }
 
 function shapeChooserClick(event, cell) {
+  function polySort(shape) {
+    let xBar = 4369;
+    let yBar =   15;
+    if (shape == 0) return 0;
+    while ((shape & xBar) == 0) shape >>= 1;
+    while ((shape & yBar) == 0) shape >>= 4;
+    return shape;
+  }
+
   var chooser = document.getElementById('chooser')
   if (cell == null) { // Clicked outside the chooser, close the selection window
     var anchor = document.getElementById('anchor')
     var puzzle = document.getElementById('puzzle')
 
+    activeParams.polyshape = polySort(activeParams.polyshape)
     if (activeParams.polyshape === 0 || activeParams.polyshape === 1048576) {
       activeParams.polyshape += 1 // Ensure that at least one square is filled
       drawSymbolButtons()

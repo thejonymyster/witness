@@ -111,9 +111,10 @@ const triangleDistributions = [
 function triangleSingle(svg, params, xoffset, yoffset) {
   let path = createElement('path')
   svg.appendChild(path)
-  path.setAttribute('d', 'M -7 7 Q -9 7 -8 5 L -1 -6 Q 0 -7 1 -6 L 8 5 Q 9 7 7 7 z')
+  path.setAttribute('d', 'M -7 7 Q -9.1 7 -7.9 5 L -1 -6 Q 0 -7.7 1 -6 L 7.9 5 Q 9.1 7 7 7 z')
   setAttr(path, params)
   path.setAttribute('transform', 'translate(' + (mx(params) + xoffset) + ', ' + (my(params) + yoffset) + ')')
+  return path;
 }
 
 function onebyone(svg, params, xoffset, yoffset) {
@@ -122,6 +123,7 @@ function onebyone(svg, params, xoffset, yoffset) {
   setAttr(hex, params)
   hex.setAttribute('points', '7.07 0, 0 7.07, -7.07 0, 0 -7.07')
   hex.setAttribute('transform', 'translate(' + (mx(params) + xoffset) + ', ' + (my(params) + yoffset) + ')')
+  return hex;
 }
 
 function enobyeno(svg, params, xoffset, yoffset) {
@@ -130,6 +132,7 @@ function enobyeno(svg, params, xoffset, yoffset) {
   setAttr(hex, params)
   hex.setAttribute('points', '8.49 0, 0 8.49, -8.49 0, 0 -8.49, 8.49 0, 4.24 0, 0 -4.24, -4.24 0, 0 4.24, 4.24 0')
   hex.setAttribute('transform', 'translate(' + (mx(params) + xoffset) + ', ' + (my(params) + yoffset) + ')')
+  return hex;
 }
 
 function dartSingle(svg, params, rot, xoffset, yoffset) {
@@ -141,6 +144,7 @@ function dartSingle(svg, params, rot, xoffset, yoffset) {
   let transform = rotate(45 * params.rot)
   transform += ' translate(' + (mx(params) + xoffset) + ', ' + (my(params) + yoffset) + ')'
   path.setAttribute('transform', transform)
+  return path;
 }
 
 //********************** MAIN **********************//
@@ -218,19 +222,58 @@ window.drawSymbolWithSvg = function(svg, params) {
             triangleSingle(svg, params, 0, 0);
             break;
           case 2:
-            triangleSingle(svg, params, -10, 0);
-            triangleSingle(svg, params,  10, 0);
+            triangleSingle(svg, params, -9, 0);
+            triangleSingle(svg, params,  9, 0);
             break;
           case 3:
-            triangleSingle(svg, params,  0, -10);
-            triangleSingle(svg, params, -10, 10);
-            triangleSingle(svg, params,  10, 10);
+            triangleSingle(svg, params,  0, -8);
+            triangleSingle(svg, params, -9,  8);
+            triangleSingle(svg, params,  9,  8);
             break;
           case 4:
-            triangleSingle(svg, params, -10, -10);
-            triangleSingle(svg, params,  10, -10);
-            triangleSingle(svg, params, -10, 10);
-            triangleSingle(svg, params,  10, 10);
+            triangleSingle(svg, params, -9, -9);
+            triangleSingle(svg, params,  9, -9);
+            triangleSingle(svg, params, -9,  9);
+            triangleSingle(svg, params,  9,  9);
+            break;
+        }
+      break;
+    case 'atriangle': //------------------------------------TRIANGLE
+      if (localStorage.symbolTheme == "Canonical") {
+          let distribution = triangleDistributions[params.count]
+          let high = distribution.length
+          for (var y = 0; y < high; y++) {
+            let wide = distribution[y]
+            for (var x = 0; x < wide; x++) {
+              poly = createElement('polygon')
+              svg.appendChild(poly)
+              let Xcoord = midx + 11 * (2 * x - wide + 1)
+              let Ycoord = midy + 10 * (2 * y - high + 1)
+              poly.setAttribute('points', '0 9, 9 -7, -9 -7, 0 9, 0 4, -3.5 -3, 3.5 -3, 0 4')
+              setAttr(poly, params)
+              poly.setAttribute('transform', 'translate(' + Xcoord + ', ' + Ycoord + ')')
+            }
+          }
+        }
+      else
+        switch (params.count) {
+          case 1:
+            simplePath(svg, params, 'M -7 -8 L -4 -5 L 4 -5 Q 5 -5 3.8 -3 L 0.5 2 Q 0 3 -0.5 2 L -3.8 -3 Q -5 -5 -4 -5 L -7 -8 Q -10.9 -8 -9 -5 L -1 7 Q 0 8.2 1 7 L 9 -5 Q 10.9 -8 7 -8');
+            break;
+          case 2:
+            simplePath(svg, params, 'M -7 -8 L -4 -5 L 4 -5 Q 5 -5 3.8 -3 L 0.5 2 Q 0 3 -0.5 2 L -3.8 -3 Q -5 -5 -4 -5 L -7 -8 Q -10.9 -8 -9 -5 L -1 7 Q 0 8.2 1 7 L 9 -5 Q 10.9 -8 7 -8').setAttribute('transform', 'translate(' + (midx + 11) + ', ' + midy + ')');
+            simplePath(svg, params, 'M -7 -8 L -4 -5 L 4 -5 Q 5 -5 3.8 -3 L 0.5 2 Q 0 3 -0.5 2 L -3.8 -3 Q -5 -5 -4 -5 L -7 -8 Q -10.9 -8 -9 -5 L -1 7 Q 0 8.2 1 7 L 9 -5 Q 10.9 -8 7 -8').setAttribute('transform', 'translate(' + (midx - 11) + ', ' + midy + ')');
+            break;
+          case 3:
+            simplePath(svg, params, 'M -7 -8 L -4 -5 L 4 -5 Q 5 -5 3.8 -3 L 0.5 2 Q 0 3 -0.5 2 L -3.8 -3 Q -5 -5 -4 -5 L -7 -8 Q -10.9 -8 -9 -5 L -1 7 Q 0 8.2 1 7 L 9 -5 Q 10.9 -8 7 -8').setAttribute('transform', 'translate(' + midx + ', ' + (midy + 9) + ')');
+            simplePath(svg, params, 'M -7 -8 L -4 -5 L 4 -5 Q 5 -5 3.8 -3 L 0.5 2 Q 0 3 -0.5 2 L -3.8 -3 Q -5 -5 -4 -5 L -7 -8 Q -10.9 -8 -9 -5 L -1 7 Q 0 8.2 1 7 L 9 -5 Q 10.9 -8 7 -8').setAttribute('transform', 'translate(' + (midx + 11) + ', ' + (midy - 9) + ')');
+            simplePath(svg, params, 'M -7 -8 L -4 -5 L 4 -5 Q 5 -5 3.8 -3 L 0.5 2 Q 0 3 -0.5 2 L -3.8 -3 Q -5 -5 -4 -5 L -7 -8 Q -10.9 -8 -9 -5 L -1 7 Q 0 8.2 1 7 L 9 -5 Q 10.9 -8 7 -8').setAttribute('transform', 'translate(' + (midx - 11) + ', ' + (midy - 9) + ')');
+            break;
+          case 4:
+            simplePath(svg, params, 'M -7 -8 L -4 -5 L 4 -5 Q 5 -5 3.8 -3 L 0.5 2 Q 0 3 -0.5 2 L -3.8 -3 Q -5 -5 -4 -5 L -7 -8 Q -10.9 -8 -9 -5 L -1 7 Q 0 8.2 1 7 L 9 -5 Q 10.9 -8 7 -8').setAttribute('transform', 'translate(' + (midx + 11) + ', ' + (midy + 10) + ')');
+            simplePath(svg, params, 'M -7 -8 L -4 -5 L 4 -5 Q 5 -5 3.8 -3 L 0.5 2 Q 0 3 -0.5 2 L -3.8 -3 Q -5 -5 -4 -5 L -7 -8 Q -10.9 -8 -9 -5 L -1 7 Q 0 8.2 1 7 L 9 -5 Q 10.9 -8 7 -8').setAttribute('transform', 'translate(' + (midx - 11) + ', ' + (midy + 10) + ')');
+            simplePath(svg, params, 'M -7 -8 L -4 -5 L 4 -5 Q 5 -5 3.8 -3 L 0.5 2 Q 0 3 -0.5 2 L -3.8 -3 Q -5 -5 -4 -5 L -7 -8 Q -10.9 -8 -9 -5 L -1 7 Q 0 8.2 1 7 L 9 -5 Q 10.9 -8 7 -8').setAttribute('transform', 'translate(' + (midx + 11) + ', ' + (midy - 10) + ')');
+            simplePath(svg, params, 'M -7 -8 L -4 -5 L 4 -5 Q 5 -5 3.8 -3 L 0.5 2 Q 0 3 -0.5 2 L -3.8 -3 Q -5 -5 -4 -5 L -7 -8 Q -10.9 -8 -9 -5 L -1 7 Q 0 8.2 1 7 L 9 -5 Q 10.9 -8 7 -8').setAttribute('transform', 'translate(' + (midx - 11) + ', ' + (midy  - 10) + ')');
             break;
         }
       break;
@@ -493,7 +536,7 @@ window.drawSymbolWithSvg = function(svg, params) {
         simplePath(svg, params, 'M -13.5 12 Q -16.5 12 -13.5 7.5 L -1.5 -12 Q 0 -15 1.5 -12 L 15 9 Q 16.5 12 13.5 12 L 7 9 L 10.5 9 L 1.5 -6 Q 0 -8.3 -1.5 -6 L -10.5 9 L -7 9 L -1 -2 Q 0 -3.8 1 -2 L 7 9 L 13.5 12')
       }
       else {
-        triangleSingle(svg, params, 0, 3);
+        simplePath(svg, params, 'M -6 6 Q -8.2 6 -7 4 L -1 -5 Q 0 -6.6 1 -5 L 7 4 Q 8.2 6 6 6').setAttribute('transform', 'translate(' + midx + ', ' + (midy + 4) + ')');
         simplePath(svg, params, 'M -10 8.2 Q -11 10 -12 10 L -14 10 Q -15.2 10 -14 8 L -1 -12 Q 0 -13.6 1 -12 L 14 8 Q 15.2 10 14 10 L 12 10 Q 11 10 10 8.2 L 1 -6 Q 0 -7.7 -1 -6')
       }
       break;
@@ -537,8 +580,76 @@ window.drawSymbolWithSvg = function(svg, params) {
       simplePath(svg, params, 'M -2 -13.5 Q 0 -15 2 -13.5 L 10 -8 Q 12 -7 12 -5 L 12 5 Q 12 7 10 8 L 2 12.6 Q 0 14 -2 12.5 L -10 8 Q -12 7 -12 5 L -12 -5 Q -12 -7 -10 -8')
       break;
     case 'scaler':
-      simplePath(svg, params, 'M -13 14 Q -14 14 -13 12 L -2 -10 Q 0 -14 2 -10 L 13 12 Q 14 14 13 14 L 8 14 Q 7 14 6 11 L 1 0 Q 0 -2 -1 0 L -6 11 Q -7 14 -8 14')
+      if (localStorage.symbolTheme == "Canonical") {
+        if (params.flip) simplePath(svg, params, 'M -13 -14 Q -14 -14 -13 -12 L -2 10 Q 0 14.6 2 10 L 13 -12 Q 14 -14 13 -14 L 8 -14 Q 7.4 -14 7 -13 Q 6 -11 5 -11 L -1 -11 Q -2.3 -11 -2 -10 L -1 -6 Q -0.8 -5 0 -5 L 3 -5 Q 3.5 -5 3 -4 L 1 0 Q 0 2 -1 0 L -6 -11 Q -7.4 -14 -8 -14');
+        else simplePath(svg, params, 'M -13 14 Q -14 14 -13 12 L -2 -10 Q 0 -14.6 2 -10 L 13 12 Q 14 14 13 14 L 8 14 Q 7.4 14 6 11 L 1 0 Q 0 -2 -1 0 L -6 11 Q -7.4 14 -8 14');
+      } else {
+        if (params.flip) {
+          simplePath(svg, params, 'M 14 -13 Q 14 -15 12 -13 L 2 -2 Q 0 0 2 2 L 12 13 Q 14 15 14 13 L 14 8 Q 14 7 13 6 L 8 1 Q 7 0 8 -1 L 13 -6 Q 14 -7 14 -8');
+          simplePath(svg, params, 'M -14 -13 Q -14 -15 -12 -13 L -2 -2 Q 0 0 -2 2 L -12 13 Q -14 15 -14 13 L -14 8 Q -14 7 -13 6 L -8 1 Q -7 0 -8 -1 L -13 -6 Q -14 -7 -14 -8');
+        }
+        else {
+          simplePath(svg, params, 'M 2 -13 Q 2 -15 4 -13 L 14 -2 Q 16 0 14 2 L 4 13 Q 2 15 2 13 L 2 8 Q 2 7 3 6 L 8 1 Q 9 0 8 -1 L 3 -6 Q 2 -7 2 -8');
+          simplePath(svg, params, 'M -2 -13 Q -2 -15 -4 -13 L -14 -2 Q -16 0 -14 2 L -4 13 Q -2 15 -2 13 L -2 8 Q -2 7 -3 6 L -8 1 Q -9 0 -8 -1 L -3 -6 Q -2 -7 -2 -8');
+        }
+      }
       break;
+    case 'portal': // TODO: MAKE THIS OCTAGONAL
+      if (localStorage.symbolTheme == "Canonical") {
+        simpleDot(svg, params, 0, 0).setAttribute('r', '10px');
+        for (a of [0, 90, 180, 270]) {
+          simplePath(svg, params, 'M -6 -10 A 3 3 90 0 1 6 -10 C 6 -14 -6 -14 -6 -10').setAttribute('transform', rotate(a) + ' translate(' + midx + ', ' + midy + ')' );
+        }
+      } else {
+        let b0 = simpleDot(svg, params, 0, 0)
+        b0.setAttribute('r', '20px');
+        b0.setAttribute('fill', 'var(--inner)');
+        simpleDot(svg, params, 0, 0).setAttribute('r', '16px');
+        let b1 = simpleDot(svg, params, 0, 0)
+        b1.setAttribute('r', '13px');
+        b1.setAttribute('fill', 'var(--inner)');
+        let b2 = simpleLine(svg, params, 20, 7, 45);
+        let b3 = simpleLine(svg, params, 20, 7, 135);
+        let b4 = simpleLine(svg, params, 20, 7, 225);
+        let b5 = simpleLine(svg, params, 20, 7, 315);
+        b2.setAttribute('fill', 'var(--inner)');
+        b3.setAttribute('fill', 'var(--inner)');
+        b4.setAttribute('fill', 'var(--inner)');
+        b5.setAttribute('fill', 'var(--inner)');
+        simpleDot(svg, params, 0, 0).setAttribute('r', '10px');
+      }
+      break;
+    case 'blackhole':
+      if (localStorage.symbolTheme == "Canonical") {
+        simpleDot(svg, params, 0, 0).setAttribute('r', '20px');
+        let temp = simpleDot(svg, params, 0, 0);
+        temp.setAttribute('r', '25px');
+        temp.setAttribute('opacity', '0.5');
+      } else {
+        for (a of [0, 72, 144, 216, 288]) {
+          simplePath(svg, params, 'M 0 2 A 1 1 0 0 0 0 -14 A 1 1 0 0 0 0 -10 A 1 1 0 0 1 0 -2 A 1 1 0 0 0 0 2').setAttribute('transform', rotate(a) + ' translate(' + midx + ', ' + midy + ')' );
+        }
+      }
+      break;
+    case 'whitehole':
+      if (localStorage.symbolTheme == "Canonical") {
+        simpleDot(svg, params, 0, 0).setAttribute('r', '20px');
+        let b2 = simpleDot(svg, params, 0, 0);
+        b2.setAttribute('r', '17px');
+        b2.setAttribute('fill', 'var(--inner)');
+        let temp = simpleDot(svg, params, 0, 0);
+        temp.setAttribute('r', '25px');
+        temp.setAttribute('opacity', '0.5');
+      } else {
+        for (a of [0, 72, 144, 216, 288]) {
+          simplePath(svg, params, 'M 0 4 A 1 1 90 0 1 0 -16 L 0 -13 A 1 1 90 0 0 0 0 A 1 1 90 0 0 0 0 A 1 1 90 0 1 0 -11 A 1 1 90 0 0 0 -13 L 0 -16 A 1 1 90 0 1 0 -8 A 1 1 90 0 0 0 -4 A 1 1 90 0 1 0 4').setAttribute('transform', rotate(a) + ' translate(' + midx + ', ' + midy + ')' );
+        }
+      }
+      break;
+    case 'pokerchip':
+      simplePath(svg, params, 'M 1.2 -8.4 Q 0 -9.24 -1.2 -8.4 C -3.6 -7.2 -1.2 -7.2 -3.6 -5.4 C -6 -3.6 -4.8 -6 -7.2 -4.8 Q -8.4 -4.32 -8.4 -2.4 C -8.4 -1.2 -7 -3 -7 0 C -7 3 -8.4 1.2 -8.4 2.4 Q -8.4 4.56 -7.2 4.8 C -4.8 6 -6 3.6 -3.6 5.52 C -1.2 7.2 -3.6 7.2 -1.2 8.4 Q 0 9.12 1.2 8.4 C 3.6 7.2 1.2 7.2 3.6 5.52 C 6 3.6 4.8 6 7.2 4.8 Q 8.4 4.32 8.4 2.4 C 8.4 1.2 7 3 7 0 C 7 -3 8.4 -1.2 8.4 -2.52 Q 8.4 -4.32 7.2 -4.8 C 4.8 -6 6 -3.6 3.6 -5.52 C 1.2 -7.2 3.6 -7.2 1.2 -8.4 L 2.4 -15.6 C 4.8 -14.4 4.8 -12 7.2 -10.8 C 9.6 -9.6 10.8 -10.8 13.2 -9.6 Q 14.4 -8.76 14.4 -6 C 14.4 -3.6 12 -2.4 12 0 C 12 2.4 14.4 3.6 14.4 6 Q 14.4 9 13.2 9.6 C 10.8 10.8 9.6 9.6 7.2 10.8 C 4.8 12 4.8 14.4 2.4 15.6 Q 0 16.56 -2.4 15.6 C -4.8 14.4 -4.8 12 -7.2 10.8 C -9.6 9.6 -10.8 10.8 -13.2 9.6 Q -14.4 9 -14.4 6 C -14.4 3.6 -12 2.4 -12 0 C -12 -2.4 -14.4 -3.6 -14.4 -6 Q -14.4 -8.76 -13.2 -9.6 C -10.8 -10.8 -9.6 -9.6 -7.2 -10.8 C -4.8 -12 -4.8 -14.4 -2.4 -15.6 Q 0 -16.44 2.4 -15.6');
+      break;
+    case 'none':  break;
     default: //------------------------------------ERROR HANDLING
       console.error('Cannot draw unknown SVG type: ' + params.type)
       break;
