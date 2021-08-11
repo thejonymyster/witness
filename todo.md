@@ -24,8 +24,7 @@ things to do
 - [ ] draw svg for multitriangles (for graph mode)
 
 ## important stuffs (h)
-- [ ] validate.js revamp cuz i feel like im tacking on things
-- [ ] diag lines
+- [x] validate.js revamp cuz i feel like im tacking on things
 - [x] finally tackle seren's code
 - [ ] optimize solver to prune bad regions (all my homies hate negators)
 - [ ] fix android being h to play with

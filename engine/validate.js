@@ -78,7 +78,7 @@ class Polyomino {
         return this.aon(51) && this.aon(204) && this.aon(13056) && this.aon(52224); // check if each 2x2 square is in same state
     }
     upscalable() { 
-        return (this.cell.polyshape == this.cell.polyshape & 1048627); // check if only first 2x2 exist (+1048576)
+        return (this.cell.polyshape & 1048627 == this.cell.polyshape); // check if only first 2x2 exist (+1048576)
     }
     downscale() { // nearest neighbor
         let ret = this.cell.polyshape & 1048576;
@@ -192,13 +192,13 @@ window.validate = function(puzzle, quick) {
             }
         }
         for (fn of lineValidate) { // zeroth region (on-the-line) detection
-            if (fn.or ? intersects(fn.or, global.regionShapes[0]) : (fn.orNot ? !intersects(fn.orNot, global.shapes) : fn.orCustom(puzzle, global))) { 
+            if (fn.or ? intersects(fn.or, global.regionShapes[0]) : (fn.orNot ? !intersects(fn.orNot, global.regionShapes[0]) : fn.orCustom(puzzle, global))) { 
                 fn.exec(puzzle, global, quick); if (!puzzle.valid && quick) return;
             }
         }
         for (let i = 1; i < global.regions.all.length; i++) { // there is at least 1 region (i think)
             for (fn of validate) {
-                if (fn.or ? intersects(fn.or, global.regionShapes[i]) : (fn.orNot ? !intersects(fn.orNot, global.shapes) : fn.orCustom(puzzle, global))) { 
+                if (fn.or ? intersects(fn.or, global.regionShapes[i]) : (fn.orNot ? !intersects(fn.orNot, global.regionShapes[i]) : fn.orCustom(puzzle, global))) { 
                     fn.exec(puzzle, i, global, quick); if (!puzzle.valid && quick) return;
                 }
             }
@@ -211,6 +211,7 @@ window.validate = function(puzzle, quick) {
         }
     }
     for (r of global.regionData) puzzle.invalidElements = puzzle.invalidElements.concat(r.invalids);
+    if (global.invalidXs) puzzle.invalidElements = puzzle.invalidElements.concat(global.invalidXs);
     console.info(puzzle.invalidElements)
     for (let i = 0; i < puzzle.invalidElements.length; i++) {
         let c = puzzle.invalidElements[i];
@@ -220,7 +221,7 @@ window.validate = function(puzzle, quick) {
     puzzle.grid = window.savedGrid;
     delete window.savedGrid;
     puzzle.valid = puzzle.invalidElements.length == 0;
-    // console.warn(puzzle, global);
+    console.info(puzzle, global);
 }
 
 function init(puzzle) { // initialize globals
@@ -518,6 +519,7 @@ function init(puzzle) { // initialize globals
             }
         }
     }
+    if (global.shapes.includes('bridge')) global.portalColorPos = portalColorPos;
     return [puzzle, global];
 }
 
@@ -714,8 +716,8 @@ const lineValidate = [
                 if (spokes & 2) regions.add(matrix(global, x+1, y-1));
                 if (spokes & 4) regions.add(matrix(global, x-1, y+1));
                 if (spokes & 8) regions.add(matrix(global, x+1, y+1));
-                regions = Array.from(regions);
-                global.invalidXs.push(regions);
+                for (const region of regions) global.regionShapes[region].push('x');
+                global.invalidXs.push(c);
             }
         }
     }
@@ -1111,9 +1113,11 @@ const validate = [
                         if (isCellBridgePathFriendly(x, y-2, color)) adj[c].push(ret(x, y-2));
                         if (isCellBridgePathFriendly(x, y+2, color)) adj[c].push(ret(x, y+2));
                     }
-                    for (const p1 of portals) for (const p2 of portals) {
-                        if (puzzle.getCell(...xy(p1)).color == puzzle.getCell(...xy(p2)).color && p1 != p2) adj[p1].push(p2);
+                    for (const color of Object.values(global.portalColorPos)) for (let i = 0; i < color.length; i++) for (let j = i+1; j < color.length; j++) {
+                        adj[color[i]].push(color[j]); adj[color[j]].push(color[i]);
                     }
+                    for (i in adj) adj[i].sort((a, b) => a - b);
+                    console.info(adj);
                     //* make tree
                     let seen = new Set();
                     let tree = new Set(global.bridges[color]);
@@ -1129,6 +1133,7 @@ const validate = [
                     seen = new Set(tree);
                     //* check if tree is unique
                     function uniqueloop(from) {
+                        console.info('uniqueloop at', xy(from));
                         seen.add(from);
                         let reachableTreeNode = null;
                         for (const child of adj[from]) {

@@ -136,18 +136,28 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
     // Intentional fall-through
   case 'Default':
     var newPuzzle = new Puzzle(x, y)
+    newPuzzle.grid[0][y*2].start = true;
+    newPuzzle.grid[x*2][0].end = 'right';
     break;
 
   case 'Horizontal Symmetry':
     x = Math.max(1, x)
     var newPuzzle = new Puzzle(x, y)
     newPuzzle.symmetry = {'x':true, 'y':false}
+    newPuzzle.grid[0][y*2].start = true;
+    newPuzzle.grid[x*2][y*2].start = true;
+    newPuzzle.grid[0][0].end = 'top';
+    newPuzzle.grid[x*2][0].end = 'top';
     break;
 
   case 'Vertical Symmetry':
     y = Math.max(1, y)
     var newPuzzle = new Puzzle(x, y)
     newPuzzle.symmetry = {'x':false, 'y':true}
+    newPuzzle.grid[0][0].start = true;
+    newPuzzle.grid[0][y*2].start = true;
+    newPuzzle.grid[x*2][0].end = 'right';
+    newPuzzle.grid[x*2][y*2].end = 'right';
     break;
 
   case 'Rotational Symmetry':
@@ -155,17 +165,27 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
     y = Math.max(1, y)
     var newPuzzle = new Puzzle(x, y)
     newPuzzle.symmetry = {'x':true, 'y':true}
+    newPuzzle.grid[0][y*2].start = true;
+    newPuzzle.grid[x*2][0].start = true;
+    newPuzzle.grid[0][0].end = 'left';
+    newPuzzle.grid[x*2][y*2].end = 'right';
     break;
 
   case 'Pillar':
     x = Math.max(1, x)
     var newPuzzle = new Puzzle(x, y, true)
+    newPuzzle.grid[0][y*2].start = true;
+    newPuzzle.grid[x][0].end = 'top';
     break;
 
   case 'Pillar (H Symmetry)':
     x = Math.max(2, x)
     var newPuzzle = new Puzzle(x, y, true)
     newPuzzle.symmetry = {'x':true, 'y':false}
+    newPuzzle.grid[0][y*2].start = true;
+    newPuzzle.grid[x][y*2].start = true;
+    newPuzzle.grid[0][0].end = 'top';
+    newPuzzle.grid[x][0].end = 'top';
     break;
 
   case 'Pillar (V Symmetry)':
@@ -173,6 +193,10 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
     y = Math.max(1, y)
     var newPuzzle = new Puzzle(x, y, true)
     newPuzzle.symmetry = {'x':false, 'y':true}
+    newPuzzle.grid[0][y*2].start = true;
+    newPuzzle.grid[x][0].start = true;
+    newPuzzle.grid[0][0].end = 'top';
+    newPuzzle.grid[x][y*2].end = 'bottom';
     break;
 
   case 'Pillar (R Symmetry)':
@@ -180,6 +204,10 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
     y = Math.max(1, y)
     var newPuzzle = new Puzzle(x, y, true)
     newPuzzle.symmetry = {'x':true, 'y':true}
+    newPuzzle.grid[0][y*2].start = true;
+    newPuzzle.grid[x][0].start = true;
+    newPuzzle.grid[0][0].end = 'top';
+    newPuzzle.grid[x][y*2].end = 'bottom';
     break;
 
   case 'Pillar (Two Lines)':
@@ -187,6 +215,10 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
     y = Math.max(1, y)
     var newPuzzle = new Puzzle(x, y, true)
     newPuzzle.symmetry = {'x':false, 'y':false}
+    newPuzzle.grid[0][y*2].start = true;
+    newPuzzle.grid[x][y*2].start = true;
+    newPuzzle.grid[0][0].end = 'top';
+    newPuzzle.grid[x][0].end = 'top';
     break;
   }
   newPuzzle.name = 'e'

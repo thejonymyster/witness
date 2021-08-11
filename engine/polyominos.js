@@ -103,7 +103,7 @@ function matrix(global, x, y) {
   if (!global.regionMatrix[y]) return undefined;
   return global.regionMatrix[y][x];
 }
-function getPortalCoords(c, data, w) { // from: <real>, to: PortalCoords(portalOffset-Adjusted)<virtual>
+/* function getPortalCoords(c, data, w) { // from: <real>, to: PortalCoords(portalOffset-Adjusted)<virtual>
   for (const i in data.originalRegions.all) {
       if (data.originalRegions.all[i].includes(c)) {
           let [x, y] = xy(c, w);
@@ -112,9 +112,10 @@ function getPortalCoords(c, data, w) { // from: <real>, to: PortalCoords(portalO
       }
   }
   return undefined;
-}
+} */
 // that is a long list
 window.polyFitMaster = function(puzzle, regionNum, global, polys, scalers, downscalable, upscalable) {
+  console.info(polys, scalers, downscalable, upscalable);
   if (scalers[0] > 0 && scalers[1] > 0 && // Pre-calculate scenarios where they cross each other out
       window.polyFitMaster(puzzle, regionNum, global, polys.slice(), [scalers[0] - 1, scalers[1] - 1], downscalable.slice(), upscalable.slice()).length == 0) return [];
   if ((scalers[0] > 0 && upscalable.length == 0) || (scalers[1] > 0 && downscalable.length == 0)) return ['scaler'];
@@ -169,9 +170,9 @@ window.polyFitMaster = function(puzzle, regionNum, global, polys, scalers, downs
 }
 
 window.polyFit = function(puzzle, regionNum, global, polys, ylops) {
+  console.info(polys);
   const isPortaled = global.portalRegion && (global.portalRegion.indexOf(regionNum) + 1);
   const data = isPortaled ? global.portalData[isPortaled-1] : null;
-  let span = data ? data.totalSpan : [0, 0, puzzle.width, puzzle.height];
   const w = data ? data.width : puzzle.width;
   let polyCount = polys.reduce((prev, cur) => prev + getPolySize(cur.cell.polyshape), 0) - ylops.reduce((prev, cur) => prev + getPolySize(cur.cell.polyshape), 0);
   let key, res;
