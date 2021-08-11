@@ -1098,6 +1098,7 @@ const validate = [
                         if (matrix(global, x, y) == regionNum) global.regionData[regionNum].addInvalid(puzzle, c);
                     }
                 } else { // valid, start logic
+                    let res = false;
                     //* make adjacency graph
                     let adj = {};
                     function isCellBridgePathFriendly(x, y, color) { 
@@ -1116,8 +1117,7 @@ const validate = [
                     for (const color of Object.values(global.portalColorPos)) for (let i = 0; i < color.length; i++) for (let j = i+1; j < color.length; j++) {
                         adj[color[i]].push(color[j]); adj[color[j]].push(color[i]);
                     }
-                    for (i in adj) adj[i].sort((a, b) => a - b);
-                    console.info(adj);
+                    // for (i in adj) adj[i].sort((a, b) => a - b);
                     //* make tree
                     let seen = new Set();
                     let tree = new Set(global.bridges[color]);
@@ -1130,10 +1130,13 @@ const validate = [
                         }
                     }
                     treeloop(global.bridges[color][0]);
+                    for (const el of tree) {
+                        // console.info('checking', xy(el), tree.has(el+2), tree.has(el+(puzzle.width*2)), tree.has(el+(puzzle.width*2)+2));
+                        if (tree.has(el+2) && tree.has(el+(puzzle.width*2)) && tree.has(el+(puzzle.width*2)+2)) res = true;
+                    }
                     seen = new Set(tree);
                     //* check if tree is unique
                     function uniqueloop(from) {
-                        console.info('uniqueloop at', xy(from));
                         seen.add(from);
                         let reachableTreeNode = null;
                         for (const child of adj[from]) {
@@ -1145,7 +1148,6 @@ const validate = [
                         }
                         return reachableTreeNode;
                     }
-                    let res = false;
                     for (c of global.regions.cell[regionNum]) if (!seen.has(c) && (uniqueloop(c) === -1)) res = true;
                     if (res) {
                         console.info('[!] Bridge fault on region', regionNum, 'color', color, global.bridges[color]);
