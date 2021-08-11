@@ -1104,15 +1104,15 @@ const validate = [
                     function isCellBridgePathFriendly(x, y, color) { 
                         if (matrix(global, x, y) !== regionNum) return false;
                         let cell = puzzle.getCell(x, y);
-                        return !cell || !cell.color === null || cell.color === color; 
+                        return cell?.color == undefined || cell.color === color; 
                     }
-                    for (c of global.regions.cell[regionNum]) {
+                    for (c of global.regions.all[regionNum]) {
                         adj[c] = [];
                         let [x, y] = xy(c);
-                        if (isCellBridgePathFriendly(x-2, y, color)) adj[c].push(ret(x-2, y));
-                        if (isCellBridgePathFriendly(x+2, y, color)) adj[c].push(ret(x+2, y));
-                        if (isCellBridgePathFriendly(x, y-2, color)) adj[c].push(ret(x, y-2));
-                        if (isCellBridgePathFriendly(x, y+2, color)) adj[c].push(ret(x, y+2));
+                        if (isCellBridgePathFriendly(x-1, y, color)) adj[c].push(ret(x-1, y));
+                        if (isCellBridgePathFriendly(x+1, y, color)) adj[c].push(ret(x+1, y));
+                        if (isCellBridgePathFriendly(x, y-1, color)) adj[c].push(ret(x, y-1));
+                        if (isCellBridgePathFriendly(x, y+1, color)) adj[c].push(ret(x, y+1));
                     }
                     for (const color of Object.values(global.portalColorPos)) for (let i = 0; i < color.length; i++) for (let j = i+1; j < color.length; j++) {
                         adj[color[i]].push(color[j]); adj[color[j]].push(color[i]);
@@ -1120,9 +1120,10 @@ const validate = [
                     // for (i in adj) adj[i].sort((a, b) => a - b);
                     //* make tree
                     let seen = new Set();
-                    let tree = new Set(global.bridges[color]);
+                    let tree = new Set([global.bridges[color][0]]);
                     function treeloop(fromparam) {
                         const from = fromparam;
+                        if (global.bridges[color].includes(from)) tree.add(from);
                         seen.add(from);
                         for (const child of adj[from]) if (!seen.has(child)) {
                             treeloop(child);
@@ -1132,7 +1133,7 @@ const validate = [
                     treeloop(global.bridges[color][0]);
                     for (const el of tree) {
                         // console.info('checking', xy(el), tree.has(el+2), tree.has(el+(puzzle.width*2)), tree.has(el+(puzzle.width*2)+2));
-                        if (tree.has(el+2) && tree.has(el+(puzzle.width*2)) && tree.has(el+(puzzle.width*2)+2)) res = true;
+                        if (tree.has(el+2) && tree.has(el+(puzzle.width*2)) && tree.has(el+(puzzle.width*2)+2) && tree.has(el+puzzle.width+1)) res = true;
                     }
                     seen = new Set(tree);
                     //* check if tree is unique
@@ -1148,7 +1149,9 @@ const validate = [
                         }
                         return reachableTreeNode;
                     }
-                    for (c of global.regions.cell[regionNum]) if (!seen.has(c) && (uniqueloop(c) === -1)) res = true;
+                    console.info(adj, tree, global.bridges[color]);
+                    for (const bridge of global.bridges[color]) if (!tree.has(bridge)) res = true;
+                    for (c of global.regions.all[regionNum]) if (!seen.has(c) && (uniqueloop(c) === -1)) res = true;
                     if (res) {
                         console.info('[!] Bridge fault on region', regionNum, 'color', color, global.bridges[color]);
                         global.regionData[regionNum].addInvalids(puzzle, global.bridges[color]);
