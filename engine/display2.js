@@ -39,6 +39,18 @@ window.draw = function(puzzle, target='puzzle') {
   drawStartAndEnd(puzzle, svg)
   // Draw cell symbols after so they overlap the lines, if necessary
   drawSymbols(puzzle, svg, target)
+  
+  if (puzzle.image['foreground-image']) {
+    let foreground = createElement('image')
+    foreground.setAttribute('x', 0);
+    foreground.setAttribute('y', 0);
+    foreground.setAttribute('width', pixelWidth);
+    foreground.setAttribute('height', pixelHeight);
+    foreground.setAttribute('href', puzzle.image['foreground-image'].replace(/\\/g, ''));
+    foreground.setAttribute('pointer-events', 'none');
+    foreground.setAttribute('preserveAspectRatio', 'none');
+    svg.appendChild(foreground);
+  }
 
   // For pillar puzzles, add faders for the left and right sides
   if (puzzle.pillar === true) {

@@ -47,6 +47,7 @@ line, circle, polygon {
 header {
   border: 1px #767676 solid;
   border-radius: 5px;
+  background-color: var(--outer);
   align-self: center;
   display: block;
   margin: 1rem;
@@ -290,6 +291,8 @@ input[type="range"]::-ms-thumb {
   /* CANNOT (SHOULD NOT) MODIFY */
   --line-failure: transparent;
   --border: transparent;
+  --background-image:none;
+  --foreground-image:none;
 }
 
 .theme {
@@ -300,8 +303,29 @@ input[type="range"]::-ms-thumb {
   height: 32px;
   overflow: hidden;
   transition: height 0.5s;
+  background-color: var(--outer);
 }
 
 .theme:hover {
-  height: 265px;
+  height: 385px;
+}
+
+.theme [type=text] {
+  border: 1px #767676 solid;
+}
+
+body {
+  background-image: var(--background-image);
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+#symboltheme {
+  background-color: var(--inner) !important;
+}
+
+li button {
+  background-color: var(--inner);
+  display: inline-block;
+  font-size: 18px;
 }

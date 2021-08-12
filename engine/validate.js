@@ -562,7 +562,7 @@ const preValidate = [
                 if (matrix(global, x-1, y) === 0) count++;
                 if (matrix(global, x, y-1) === 0) count++;
                 if (matrix(global, x, y+1) === 0) count++;
-                if (!puzzle.settings.ALLOW_ZERO_TENUOUS_TRIANGLE && count == 0) count = -1;
+                if (count == 0) count = -1;
                 global.vtriangleColors[color] ??= count;
                 for (const [k, v] of Object.entries(global.vtriangleColors)) {
                     if (k == color) { if (v != count)   global.vtriangleColors[k] = -1; }
@@ -590,7 +590,7 @@ const preValidate = [
                 if (Object.keys(sizerInfo.pos).length === 0) continue; // no sizer in the region
                 for (const k in sizerInfo.pos) {
                     sizerInfo.weight[k] = sizerInfo.size / sizerInfo.pos[k].length;
-                    if (!puzzle.settings.ALLOW_FRACTION_SIZER && (sizerInfo.size % sizerInfo.pos[k].length != 0)) sizerInfo.weight[k] = -1;
+                    if (sizerInfo.size % sizerInfo.pos[k].length != 0) sizerInfo.weight[k] = -1;
                 }
                 globalSizerInfo.push(sizerInfo);
             }

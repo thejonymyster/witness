@@ -411,11 +411,11 @@ window.trace = function(event, puzzle, pos, start, symStart=null) {
           document.getElementsByClassName('cursor')[0].style.opacity = 0;
           data.animations.insertRule('.' + data.svg.id + ' {animation: 1s 1 forwards line-fail !important}\n')
           // Get list of invalid elements
-          if (puzzle.settings.FLASH_FOR_ERRORS) {
+          // if (puzzle.settings.FLASH_FOR_ERRORS) {
             for (var invalidElement of puzzle.invalidElements) {
               data.animations.insertRule('.' + data.svg.id + '_' + invalidElement.x + '_' + invalidElement.y + ' {animation: 0.4s 20 alternate-reverse error}\n')
             }
-          }
+          // }
         }
       }, 1)
 

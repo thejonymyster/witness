@@ -204,6 +204,7 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
     break;
   }
   copyTheme(newPuzzle);
+  copyImage(newPuzzle);
 
   if (document.getElementById('deleteButton').disabled === true) {
     // Previous puzzle was unmodified, overwrite it
@@ -224,7 +225,8 @@ fileInput.addEventListener("change", function() {
     let fileData = reader.readAsText(file)
     reader.onload = function(res) {
       window.puzzle = Puzzle.deserialize(res.currentTarget.result) // Will throw for most invalid puzzles
-      applyButton()
+      applyThemeButton();
+      applyImageButton();
       puzzleModified()
       writePuzzle()
       reloadPuzzle()
@@ -243,7 +245,8 @@ window.importPuzzle = function(serialized) {
   try {
     var newPuzzle = Puzzle.deserialize(serialized) // Will throw for most invalid puzzles
     window.puzzle = newPuzzle
-    applyButton()
+    applyThemeButton();
+    applyImageButton();
     writePuzzle()
     reloadPuzzle()
   } catch (e) {
@@ -282,7 +285,8 @@ window.onload = function() {
   drawColorButtons()
   if (localStorage.puzzle !== undefined) {
     window.puzzle = Puzzle.deserialize(localStorage.puzzle);
-    applyButton()
+    applyThemeButton();
+    applyImageButton();
   }
   else createEmptyPuzzle()
   reloadPuzzle()
@@ -1269,13 +1273,43 @@ window.changeColor = function (id, value) {
   if ((id.indexOf('line') + 1) && value == getComputedStyle(document.documentElement).getPropertyValue('--line-undone')) value += '00';
   document.documentElement.style.setProperty('--' + id.slice(0, -6), value);
   copyTheme(puzzle);
+  copyImage(puzzle);
   writePuzzle();
 }
 
-function applyButton() {
+window.changeImage = function (id, value) {
+  if (!value.length) value = 'none';
+  else value = `url(${value})`;
+  document.documentElement.style.setProperty('--' + id.slice(0, -6), value);
+  copyImage(puzzle);
+  writePuzzle();
+}
+
+function applyThemeButton() {
   for (const entry of themeArgs) {
     document.getElementById(entry+'-color').value = getComputedStyle(document.documentElement).getPropertyValue('--' + entry);
   }
+}
+function applyImageButton() {
+  for (const entry of ['background-image', 'foreground-image']) {
+    let res = getComputedStyle(document.documentElement).getPropertyValue('--' + entry);
+    if (res == 'none')  document.getElementById(entry+'-input').value = "";
+    else document.getElementById(entry+'-input').value = res.slice(4, -1).replace(/\\/g, '');
+  }
+}
+
+window.exportTheme = function () {
+  let res = serializeTheme(puzzle);
+  navigator.clipboard.writeText(res).then(() => console.warn(res));
+}
+
+window.importTheme = function () {
+  navigator.clipboard.readText().then((clipText) => {
+    deserializeTheme(puzzle, clipText)
+    applyThemeButton();
+    applyImageButton();
+    writePuzzle();
+  });
 }
 
 });

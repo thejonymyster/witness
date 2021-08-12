@@ -37,34 +37,36 @@ window.Puzzle = class {
       this.newGrid(2 * width + 1, 2 * height + 1)
     }
     this.pillar = pillar
-    this.settings = {
-      // If true, negation symbols are allowed to cancel other negation symbols.
-      NEGATIONS_CANCEL_NEGATIONS: true,
+    // this.settings = {
+    //   // If true, negation symbols are allowed to cancel other negation symbols.
+    //   NEGATIONS_CANCEL_NEGATIONS: true,
 
-      // If true, and the count of polyominos and onimoylops is zero, they cancel regardless of shape.
-      SHAPELESS_ZERO_POLY: false,
+    //   // If true, and the count of polyominos and onimoylops is zero, they cancel regardless of shape.
+    //   SHAPELESS_ZERO_POLY: false,
 
-      // If true, the traced line cannot go through the placement of a polyomino.
-      PRECISE_POLYOMINOS: true,
+    //   // If true, the traced line cannot go through the placement of a polyomino.
+    //   PRECISE_POLYOMINOS: true,
 
-      // If false, incorrect elements will not flash when failing the puzzle.
-      FLASH_FOR_ERRORS: true,
+    //   // If false, incorrect elements will not flash when failing the puzzle.
+    //   FLASH_FOR_ERRORS: true,
 
-      // If true, mid-segment startpoints will constitute solid lines, and form boundaries for the region.
-      FAT_STARTPOINTS: false,
-    }
+    //   // If true, mid-segment startpoints will constitute solid lines, and form boundaries for the region.
+    //   FAT_STARTPOINTS: false,
+    // }
   }
 
   static deserialize(json) {
     var parsed = JSON.parse(json)
     // Claim that it's not a pillar (for consistent grid sizing), then double-check ourselves later.
     var puzzle = new Puzzle((parsed.grid.length - 1)/2, (parsed.grid[0].length - 1)/2)
-    puzzle.name = parsed.name
-    puzzle.autoSolved = parsed.autoSolved
-    puzzle.grid = parsed.grid
-    puzzle.theme = parsed.theme
+    puzzle.autoSolved = parsed.autoSolved;
+    puzzle.grid = parsed.grid;
+    puzzle.theme = parsed.theme;
+    puzzle.image = parsed.image;
     if (puzzle.theme) applyTheme(puzzle);
     else copyTheme(puzzle);
+    if (puzzle.image) applyImage(puzzle);
+    else copyImage(puzzle);
     // Legacy: Grid squares used to use 'false' to indicate emptiness.
     // Legacy: Cells may use {} to represent emptiness
     // Now, we use:
@@ -129,11 +131,11 @@ window.Puzzle = class {
         puzzle.grid[gap.x][gap.y].gap = window.GAP_BREAK
       }
     }
-    if (parsed.settings) {
-      for (var key of Object.keys(parsed.settings)) {
-        puzzle.settings[key] = parsed.settings[key]
-      }
-    }
+    // if (parsed.settings) {
+    //   for (var key of Object.keys(parsed.settings)) {
+    //     puzzle.settings[key] = parsed.settings[key]
+    //   }
+    // }
     puzzle.pillar = parsed.pillar
     puzzle.symmetry = parsed.symmetry
     puzzle.largezero = puzzle.width * puzzle.height
@@ -409,13 +411,13 @@ window.Puzzle = class {
 
     // Starting at a mid-segment startpoint
     if (this.startPoint != null && this.startPoint.x%2 !== this.startPoint.y%2) {
-      if (this.settings.FAT_STARTPOINTS) {
+      // if (this.settings.FAT_STARTPOINTS) {
         // This segment is not in any region (acts as a barrier)
         this.grid[this.startPoint.x][this.startPoint.y] = MASKED_OOB
-      } else {
+      // } else {
         // This segment is part of this region (acts as an empty cell)
-        this.grid[this.startPoint.x][this.startPoint.y] = MASKED_INB_NONCOUNT
-      }
+        // this.grid[this.startPoint.x][this.startPoint.y] = MASKED_INB_NONCOUNT
+      // }
     }
 
     // Ending at a mid-segment endpoint

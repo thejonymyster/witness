@@ -363,12 +363,82 @@ window.applyTheme = function(puzzle) {
   }
 }
 
+window.copyImage = function(puzzle) {
+  puzzle.image = {};
+  for (entry of ['background-image', 'foreground-image']) {
+    let res = getComputedStyle(document.documentElement).getPropertyValue('--' + entry);
+    if (res == 'none') puzzle.image[entry] = null;
+    else puzzle.image[entry] = res.slice(4, -1);
+  }
+}
+
+window.applyImage = function(puzzle) {
+  for (entry of Object.entries(puzzle.image)) {
+    if (entry[1] == null) document.documentElement.style.setProperty('--' + entry[0], 'none');
+    else document.documentElement.style.setProperty('--' + entry[0], `url(${entry[1]})`);
+  }
+}
+
 window.hexToInt = function(hex) {
   return parseInt(hex.slice(1), 16);
 }
 
 window.intToHex = function(int) {
   return '#' + Number(int).toString(16).padStart(6, '0');
+}
+
+window.makeBitSwitch = function (...bits) {
+  let cur = 1;
+  let res = 0;
+  for (const b of bits) {
+    if (b) res += cur;
+    cur <<= 1;
+  }
+  res += cur;
+  return res;
+}
+
+window.readBitSwitch = function (bs) {
+  let cur = 0;
+  let res = [];
+  while ((bs >> cur) > 1) {
+    console.warn(bs >> cur);
+    if ((bs >> cur) % 2) res.push(true);
+    else res.push(false);
+    cur++;
+  }
+  return res;
+}
+
+window.intToByte = function(...num) {
+  return num.map(n => String.fromCharCode((n & 0xff000000) >> 24,
+  (n & 0x00ff0000) >> 16,
+  (n & 0x0000ff00) >> 8,
+  (n & 0x000000ff)));
+}
+
+window.byteToInt = function(...byte) {
+  return byte.map(b => (b.charCodeAt(0) << 24) + (b.charCodeAt(1) << 16) + (b.charCodeAt(2) << 8) + b.charCodeAt(3));
+}
+
+window.serializeTheme = function(puzzle) {
+  let ints = [];
+  for (const entry of themeArgs) ints.push(puzzle.theme[entry]);
+  return btoa([intToByte(...ints).join(''), puzzle.image['background-image'], puzzle.image['foreground-image']].join("\u0080\u0080\u0080\u0080")).replace(/\//g, '-').replace(/=/g, '_');
+}
+
+window.deserializeTheme = function(puzzle, string) {
+  let raw = atob(string.replace(/-/g, '/').replace(/_/g, '=')).split('\u0080\u0080\u0080\u0080');
+  let theme = byteToInt(...raw[0].match(/.{1,4}/g));
+  console.warn(string, raw, theme);
+  for (let i = 0; i < themeArgs.length; i++) puzzle.theme[themeArgs[i]] = theme[i];
+  puzzle.image ??= {};
+  if (raw[1].length) puzzle.image['background-image'] = raw[1];
+  else puzzle.image['background-image'] = null;
+  if (raw[2].length) puzzle.image['foreground-image'] = raw[2];
+  else puzzle.image['foreground-image'] = null;
+  applyTheme(puzzle);
+  applyImage(puzzle);
 }
 
 })

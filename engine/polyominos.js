@@ -186,7 +186,6 @@ window.polyFit = function(puzzle, regionNum, global, polys, ylops) {
   }
   key = null;
   if (polyCount === 0) {
-    if (puzzle.settings.SHAPELESS_ZERO_POLY) return true;
     // These will be ordered by the order of cells in the region, which isn't exactly consistent.
     // In practice, it seems to be good enough.
     key  = '';  for (const ylop of ylops) key += ' ' + ylop.polyshape;
