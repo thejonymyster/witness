@@ -63,7 +63,8 @@ window.Puzzle = class {
     puzzle.autoSolved = parsed.autoSolved
     puzzle.grid = parsed.grid
     puzzle.theme = parsed.theme
-    applyTheme(puzzle);
+    if (puzzle.theme) applyTheme(puzzle);
+    else copyTheme(puzzle);
     // Legacy: Grid squares used to use 'false' to indicate emptiness.
     // Legacy: Cells may use {} to represent emptiness
     // Now, we use:
