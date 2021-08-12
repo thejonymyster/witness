@@ -595,29 +595,9 @@ window.drawSymbolWithSvg = function(svg, params) {
       }
       break;
     case 'portal': // TODO: MAKE THIS OCTAGONAL
-      if (localStorage.symbolTheme == "Canonical") {
-        simpleDot(svg, params, 0, 0).setAttribute('r', '10px');
-        for (a of [0, 90, 180, 270]) {
-          simplePath(svg, params, 'M -6 -10 A 3 3 90 0 1 6 -10 C 6 -14 -6 -14 -6 -10').setAttribute('transform', rotate(a) + ' translate(' + midx + ', ' + midy + ')' );
-        }
-      } else {
-        let b0 = simpleDot(svg, params, 0, 0)
-        b0.setAttribute('r', '20px');
-        b0.setAttribute('fill', 'var(--inner)');
-        simpleDot(svg, params, 0, 0).setAttribute('r', '16px');
-        let b1 = simpleDot(svg, params, 0, 0)
-        b1.setAttribute('r', '13px');
-        b1.setAttribute('fill', 'var(--inner)');
-        let b2 = simpleLine(svg, params, 20, 7, 45);
-        let b3 = simpleLine(svg, params, 20, 7, 135);
-        let b4 = simpleLine(svg, params, 20, 7, 225);
-        let b5 = simpleLine(svg, params, 20, 7, 315);
-        b2.setAttribute('fill', 'var(--inner)');
-        b3.setAttribute('fill', 'var(--inner)');
-        b4.setAttribute('fill', 'var(--inner)');
-        b5.setAttribute('fill', 'var(--inner)');
-        simpleDot(svg, params, 0, 0).setAttribute('r', '10px');
-      }
+      simplePath(svg, params, 'M -0.2 -9.9 Q 0 -10 0.2 -9.9 L 6.8 -7.1 Q 7 -7 7.1 -6.8 L 9.9 -0.2 Q 10 0 9.9 0.2 L 7.1 6.8 Q 7 7 6.8 7.1 L 0.2 9.9 Q 0 10 -0.2 9.9 L -6.8 7.1 Q -7 7 -7.1 6.8 L -9.9 0.2 Q -10 0 -9.9 -0.2 L -7.1 -6.8 Q -7 -7 -6.8 -7.1');
+      for (a of [0, 90, 180, 270])
+        simplePath(svg, params, localStorage.symbolTheme == "Canonical" ? 'M -5.7 -10.2 Q -6 -10 -5.9 -10.2 L -4.1 -13.8 Q -4 -14 -3.8 -14.1 L -0.2 -15.9 Q 0 -16 0.2 -15.9 L 3.8 -14.1 Q 4 -14 4.1 -13.8 L 5.9 -10.2 Q 6 -10 5.7 -10.2 L 3.3 -11.8 Q 3 -12 2.7 -12.1 L 0.3 -12.9 Q 0 -13 -0.3 -12.9 L -2.8 -12.1 Q -3 -12 -3.3 -11.8' : 'M -4.9 -10.1 Q -5 -10 -5 -10.2 L -5 -12.8 Q -5 -13 -4.9 -13.1 L -3.2 -14.8 Q -3 -15 -2.7 -15.1 L -0.3 -15.9 Q 0 -16 0.3 -15.9 L 2.7 -15.1 Q 3 -15 3.2 -14.8 L 4.9 -13.1 Q 5 -13 5 -12.8 L 5 -10.2 Q 5 -10 4.9 -10.1 L 3.2 -11.8 Q 3 -12 2.7 -12.1 L 0.3 -12.9 Q 0 -13 -0.3 -12.9 L -2.8 -12.1 Q -3 -12 -3.2 -11.8').setAttribute('transform', rotate(a) + ' translate(' + midx + ', ' + midy + ')' );
       break;
     case 'blackhole':
       if (localStorage.symbolTheme == "Canonical") {

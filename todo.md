@@ -11,7 +11,7 @@ things to do
 - - [ ] vtriangle
 - - [ ] ask shaun to introduce other shapes too (smh)
 - [ ] now that there's more than crosses and diamonds, change your site description maybe
-- [ ] relocate all puzzles in 1 folder
+- [x] relocate all puzzles in 1 folder
 - [ ] hide symmetry lines toggle
 - [ ] support legacy editor
 
@@ -64,7 +64,3 @@ made work:
 - [ ] crystals
 - [ ] dice
 - [ ] xv mino
-
-todo tomorrow
-antitriangle svg
-redo code in editor.js
