@@ -1,6 +1,6 @@
 namespace(function() {
 
-var activeParams = {'id':'', 'color':'black', 'polyshape':71}
+var activeParams = {'id':'', 'color':'#000000ff', 'polyshape':71}
 window.puzzle = null
 var dragging = null
 
@@ -76,8 +76,8 @@ function reloadPuzzle() {
 
   var save = document.getElementById('save')
   save.disabled = true
-  save.innerText = 'Save'
-  save.onpointerdown = savePuzzle
+  save.innerText = 'Get URL'
+  save.onpointerdown = exportPuzzle
 
   var puzzleStyle = document.getElementById('puzzleStyle')
   if (puzzle.pillar === false) {
@@ -107,8 +107,8 @@ function reloadPuzzle() {
 }
 
 //** Buttons which the user can click on
-window.createEmptyPuzzle = function(x = 4, y = x, style=false) {
-  style |= (document.getElementById('puzzleStyle')?.value ?? false)
+window.createEmptyPuzzle = function(x = 4, y = x) {
+  style = document.getElementById('puzzleStyle')?.value ?? false
   console.log('Creating new puzzle with style', style)
 
   switch (style) {
@@ -218,24 +218,6 @@ window.createEmptyPuzzle = function(x = 4, y = x, style=false) {
   reloadPuzzle()
 }
 
-let reader = new FileReader()
-let fileInput = document.getElementById("loadButton");
-fileInput.addEventListener("change", function() {
-    let file = this.files[0]
-    let fileData = reader.readAsText(file)
-    reader.onload = function(res) {
-      window.puzzle = Puzzle.deserialize(res.currentTarget.result) // Will throw for most invalid puzzles
-      applyThemeButton();
-      applyImageButton();
-      puzzleModified()
-      writePuzzle()
-      reloadPuzzle()
-    }
-    reader.onerror = function() {
-      console.error(reader.error);
-    };
-}, false);
-
 window.importPuzzle = function(serialized) {
   if (!serialized) {
     serialized = prompt('Paste your puzzle here:')
@@ -281,9 +263,17 @@ window.reloadSymbolTheme = function() {
 }
 
 window.onload = function() {
+  let toLoad = (new URL(window.location.href).hash);
   drawSymbolButtons()
   drawColorButtons()
-  if (localStorage.puzzle !== undefined) {
+  if (toLoad) {
+    deserializePuzzle(toLoad.slice(1));
+    applyThemeButton();
+    applyImageButton();
+    reloadPuzzle();
+    writePuzzle();
+    document.getElementById('deleteButton').disabled = true
+  } else if (localStorage.puzzle !== undefined) {
     window.puzzle = Puzzle.deserialize(localStorage.puzzle);
     applyThemeButton();
     applyImageButton();
@@ -336,12 +326,6 @@ function download(filename, text) {
   document.body.appendChild(element);
   element.click();
   document.body.removeChild(element);
-}
-
-window.savePuzzle = function() {
-  // instead of publish, we save this puzzle
-  puzzle.clearLines()
-  download("puzzle.json", puzzle.serialize())
 }
 
 // Returns the next value in the list.
@@ -605,7 +589,7 @@ var symbolData = {
   'triangle': {'type':'triangle', 'count':1, 'title':'Triangle'},
   'poly': {'type':'poly', 'title':'Polyomino'},
   'ylop': {'type':'ylop', 'title':'Negation polyomino'},
-  'bridge': {'type':'bridge', 'title':'Seren\'s Bridge'},
+  'bridge': {'type':'bridge', 'title':'Seren\'s Incomplete Pentagon'},
   'arrow': {'type':'arrow', 'count':1, 'rot':0, 'title':'Sigma\'s Arrow'},
   'sizer': {'type':'sizer', 'title':'Radiazia\'s Sizer'},
   'cross': {'type':'cross', 'title':'Cross'},
@@ -1300,7 +1284,7 @@ function applyImageButton() {
 
 window.exportTheme = function () {
   let res = serializeTheme(puzzle);
-  navigator.clipboard.writeText(res).then(() => console.warn(res));
+  navigator.clipboard.writeText(res).then();
 }
 
 window.importTheme = function () {
@@ -1309,6 +1293,22 @@ window.importTheme = function () {
     applyThemeButton();
     applyImageButton();
     writePuzzle();
+  });
+}
+
+window.exportPuzzle = function() {
+  let res = serializePuzzle(puzzle);
+  navigator.clipboard.writeText('https://prodzpod.github.io/witness/editor.html#' + res).then();
+}
+
+window.importPuzzle = function() {
+  navigator.clipboard.readText().then(clipText => {
+    deserializePuzzle(clipText.replace('https://prodzpod.github.io/witness/editor.html#', ''));
+    applyThemeButton();
+    applyImageButton();
+    reloadPuzzle();
+    writePuzzle();
+    document.getElementById('deleteButton').disabled = true
   });
 }
 

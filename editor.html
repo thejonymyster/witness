@@ -49,8 +49,7 @@
             <div class="hlist metaButton-wrapper">
               <div id="metaButtons" style="display:inline">
                 <button id="deleteButton" onpointerdown="deletePuzzle()">New</button>
-                <label class="loadButtonWrapper" for="loadButton">Load</label>
-                <input id="loadButton" type="file" style="visibility: hidden; max-width: 0; max-height: 0;"></input>
+                <button id="loadButton" onpointerdown="importPuzzle()">Load from Clipboard</button>
               </div>
               <div class="spacer"></div>
               <label for="puzzleStyle" style="margin-left: 10px">Puzzle Style: </label>
@@ -148,50 +147,50 @@
               <div class="spacer"></div>
               <table id="colorButtons" style="padding: 5px; display:none" cellpadding="4" cellspacing="0">
                 <tr>
-                  <td><button id="black"></button></td>
+                  <td><button id="#000000ff"></button></td>
                   <td><button id="#00000080"></button></td>
                   <td><button id="#00000000"></button></td>
                 </tr>
                 <tr>
-                  <td><button id="white"></button></td>
+                  <td><button id="#ffffffff"></button></td>
                   <td><button id="#ffffff80"></button></td>
-                  <td><button id="#cccccc"></button></td>
+                  <td><button id="#ccccccff"></button></td>
                 </tr>
                 <tr>
-                  <td><button id="red"></button></td> 
-                  <td><button id="#ff66b3"></button></td>
-                  <td><button id="#800000"></button></td>
+                  <td><button id="#ff0000ff"></button></td> 
+                  <td><button id="#ff66b3ff"></button></td>
+                  <td><button id="#800000ff"></button></td>
                 </tr>
                 <tr>
-                  <td><button id="orange"></button></td>
-                  <td><button id="#fa8f04"></button></td>
-                  <td><button id="#ff6666"></button></td>
+                  <td><button id="#ffa500ff"></button></td>
+                  <td><button id="#fa8f04ff"></button></td>
+                  <td><button id="#ff6666ff"></button></td>
                 </tr>
                 <tr>
-                  <td><button id="yellow"></button></td>
-                  <td><button id="#ffff80"></button></td>
-                  <td><button id="#cccc44"></button></td>
+                  <td><button id="#ffff00ff"></button></td>
+                  <td><button id="#ffff80ff"></button></td>
+                  <td><button id="#cccc44ff"></button></td>
                 </tr>
                 <tr>
-                  <td><button id="green"></button></td>
-                  <td><button id="#b0ffb0"></button></td> 
-                  <td><button id="#3cd4d9"></button></td>
+                  <td><button id="#008000ff"></button></td>
+                  <td><button id="#b0ffb0ff"></button></td> 
+                  <td><button id="#3cd4d9ff"></button></td>
                 </tr>
                 <tr>
-                  <td><button id="blue"></button></td>
-                  <td><button id="#6867fd"></button></td>
-                  <td><button id="#80ffff"></button></td>
+                  <td><button id="#0000ffff"></button></td>
+                  <td><button id="#6867fdff"></button></td>
+                  <td><button id="#80ffffff"></button></td>
                 </tr>
                 <tr>
-                  <td><button id="purple"></button></td>
-                  <td><button id="#8101ff"></button></td>
-                  <td><button id="#ff07ff"></button></td>
+                  <td><button id="#800080ff"></button></td>
+                  <td><button id="#8101ffff"></button></td>
+                  <td><button id="#ff07ffff"></button></td>
                 </tr>
               </table>
             </div>
             <div>
               <script>addSolveButtons()</script>
-              <button id="save" onpointerdown="savePuzzle()" disabled>Save</button>
+              <button id="save" onpointerdown="exportPuzzle()" disabled>Get URL</button>
             </div>
             <div class="theme">
               <h1>Theme Setting</h1>
