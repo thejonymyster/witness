@@ -1109,6 +1109,8 @@ const validate = [
                     for (c of global.regions.all[regionNum]) {
                         adj[c] = [];
                         let [x, y] = xy(c);
+                        if (x % 2 === 0 && y % 2 === 0) continue;
+                        if (!isCellBridgePathFriendly(x, y, color)) continue;
                         if (isCellBridgePathFriendly(x-1, y, color)) adj[c].push(ret(x-1, y));
                         if (isCellBridgePathFriendly(x+1, y, color)) adj[c].push(ret(x+1, y));
                         if (isCellBridgePathFriendly(x, y-1, color)) adj[c].push(ret(x, y-1));
@@ -1133,7 +1135,8 @@ const validate = [
                     treeloop(global.bridges[color][0]);
                     for (const el of tree) {
                         let [x, y] = xy(el);
-                        if (x % 2 && y % 2 && tree.has(el+2) && tree.has(el+(puzzle.width*2)) && tree.has(el+(puzzle.width*2)+2) && tree.has(el+puzzle.width+1)) res = true;
+                        console.info(x, y, x%2, y%2, tree.has(el+2), tree.has(el+(puzzle.width*2)), tree.has(el+(puzzle.width*2)+2), matrix(global, x+1, y+1));
+                        if (x % 2 && y % 2 && tree.has(el+2) && tree.has(el+(puzzle.width*2)) && tree.has(el+(puzzle.width*2)+2) && matrix(global, x+1, y+1) == 0) res = true;
                     }
                     seen = new Set(tree);
                     //* check if tree is unique
@@ -1149,9 +1152,11 @@ const validate = [
                         }
                         return reachableTreeNode;
                     }
-                    console.info(adj, tree, global.bridges[color]);
                     for (const bridge of global.bridges[color]) if (!tree.has(bridge)) res = true;
-                    for (c of global.regions.all[regionNum]) if (!seen.has(c) && (uniqueloop(c) === -1)) res = true;
+                    for (c of global.regions.all[regionNum]) {
+                      // console.info(xy(c), isCellBridgePathFriendly(...xy(c), color), seen.has(c), uniqueloop(c));
+                      if (isCellBridgePathFriendly(...xy(c), color) && !seen.has(c) && (uniqueloop(c) === -1)) res = true;
+                    }
                     if (res) {
                         console.info('[!] Bridge fault on region', regionNum, 'color', color, global.bridges[color]);
                         global.regionData[regionNum].addInvalids(puzzle, global.bridges[color]);
