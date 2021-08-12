@@ -408,6 +408,7 @@ window.trace = function(event, puzzle, pos, start, symStart=null) {
           if (window.TRACE_COMPLETION_FUNC) window.TRACE_COMPLETION_FUNC(puzzle, rawPath)
         } else {
           window.PLAY_SOUND('fail')
+          document.getElementsByClassName('cursor')[0].style.opacity = 0;
           data.animations.insertRule('.' + data.svg.id + ' {animation: 1s 1 forwards line-fail !important}\n')
           // Get list of invalid elements
           if (puzzle.settings.FLASH_FOR_ERRORS) {

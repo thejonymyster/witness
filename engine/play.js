@@ -32,12 +32,14 @@ function getNext() {
     if (window.currentPanel == window.maxPanel) return;
     window.currentPanel++;
     window[window.puzzleSet]++;
-    window.updatePuzzle()
+    window.updatePuzzle();
+    window.clearAnimations();
 }
 
 function getPrev() {
     if (window.currentPanel == 0) return;
     window.currentPanel--;
     window[window.puzzleSet]--;
-    window.updatePuzzle()
+    window.updatePuzzle();
+    window.clearAnimations();
 }

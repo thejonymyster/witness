@@ -189,6 +189,10 @@
                 </tr>
               </table>
             </div>
+            <div>
+              <script>addSolveButtons()</script>
+              <button id="save" onpointerdown="savePuzzle()" disabled>Save</button>
+            </div>
             <div class="theme">
               <h1>Theme Setting</h1>
               <hr>
@@ -230,10 +234,6 @@
                   <input onchange="changeColor(this.id, this.value)" type="color" id="line-success-color" value="#ffffff" />
                 </li>
                 </ul>
-            </div>
-            <div>
-              <script>addSolveButtons()</script>
-              <button id="save" onpointerdown="savePuzzle()" disabled>Save</button>
             </div>
           </div>
         </div>
