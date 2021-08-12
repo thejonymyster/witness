@@ -107,8 +107,8 @@ function reloadPuzzle() {
 }
 
 //** Buttons which the user can click on
-window.createEmptyPuzzle = function(x = 4, y = x) {
-  var style = document.getElementById('puzzleStyle').value
+window.createEmptyPuzzle = function(x = 4, y = x, style=false) {
+  style |= (document.getElementById('puzzleStyle')?.value ?? false)
   console.log('Creating new puzzle with style', style)
 
   switch (style) {
