@@ -13,7 +13,7 @@ things to do
 - [ ] now that there's more than crosses and diamonds, change your site description maybe
 - [x] relocate all puzzles in 1 folder
 - [ ] hide symmetry lines toggle
-- [ ] support legacy editor
+- [x] support legacy editor
 
 ## relatively low effort (i can do it in a day)
 - [ ] navigation / main page
