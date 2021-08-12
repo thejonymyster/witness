@@ -450,7 +450,7 @@ window.onTraceStart = function(puzzle, pos, svg, start, symStart=null) {
 
   var cursor = createElement('circle')
   cursor.setAttribute('r', 12)
-  cursor.setAttribute('fill', 'var(--cursor)')
+  cursor.setAttribute('fill', 'var(--line-default)')
   cursor.setAttribute('stroke', 'black')
   cursor.setAttribute('stroke-width', '2px')
   cursor.setAttribute('stroke-opacity', '0.4')

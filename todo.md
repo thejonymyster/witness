@@ -17,7 +17,7 @@ things to do
 
 ## relatively low effort (i can do it in a day)
 - [ ] navigation / main page
-- [ ] theme customization v2 - embed within puzzle (puzzle back/foreground)
+- [x] theme customization v2 - embed within puzzle (puzzle back/foreground) (in progress)
 - [ ] puzzle load and export with URLSearchParams, after encoding puzzle data
 - [x] fix drag boy not working on less than 2x2s
 - [ ] play template so i dont have to copy code
@@ -27,7 +27,7 @@ things to do
 - [x] validate.js revamp cuz i feel like im tacking on things
 - [x] finally tackle seren's code
 - [ ] optimize solver to prune bad regions (all my homies hate negators)
-- [ ] fix android being h to play with
+- [x] fix android being h to play with
 - [ ] optimize editor.js and stuff
 
 ## low priority

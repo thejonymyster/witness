@@ -212,7 +212,7 @@ window.validate = function(puzzle, quick) {
     }
     for (r of global.regionData) puzzle.invalidElements = puzzle.invalidElements.concat(r.invalids);
     if (global.invalidXs) puzzle.invalidElements = puzzle.invalidElements.concat(global.invalidXs);
-    console.info(puzzle.invalidElements)
+    // console.info(puzzle.invalidElements)
     for (let i = 0; i < puzzle.invalidElements.length; i++) {
         let c = puzzle.invalidElements[i];
         let [x, y] = xy(c);
@@ -221,7 +221,7 @@ window.validate = function(puzzle, quick) {
     puzzle.grid = window.savedGrid;
     delete window.savedGrid;
     puzzle.valid = puzzle.invalidElements.length == 0;
-    console.info(puzzle, global);
+    // console.info(puzzle, global);
 }
 
 function init(puzzle) { // initialize globals
@@ -376,7 +376,6 @@ function init(puzzle) { // initialize globals
                 if (data.totalSpan[0] > data.totalSpan[2]) { let temp = data.totalSpan[0]; data.totalSpan[0] = data.totalSpan[2]; data.totalSpan[2] = temp; }
                 if (data.totalSpan[1] > data.totalSpan[3]) { let temp = data.totalSpan[1]; data.totalSpan[1] = data.totalSpan[3]; data.totalSpan[3] = temp; }
                 data.totalSpan[2] += 1; data.totalSpan[3] += 1;
-                // console.info(data.totalSpan);
                 if ((data.totalSpan[0] % 2) != 0) data.totalSpan[0] -= 1;
                 if ((data.totalSpan[1] % 2) != 0) data.totalSpan[1] -= 1;
                 if ((data.totalSpan[2] % 2) != 0) data.totalSpan[2] += 1;
@@ -1135,7 +1134,6 @@ const validate = [
                     treeloop(global.bridges[color][0]);
                     for (const el of tree) {
                         let [x, y] = xy(el);
-                        console.info(x, y, x%2, y%2, tree.has(el+2), tree.has(el+(puzzle.width*2)), tree.has(el+(puzzle.width*2)+2), matrix(global, x+1, y+1));
                         if (x % 2 && y % 2 && tree.has(el+2) && tree.has(el+(puzzle.width*2)) && tree.has(el+(puzzle.width*2)+2) && matrix(global, x+1, y+1) == 0) res = true;
                     }
                     seen = new Set(tree);
@@ -1154,7 +1152,6 @@ const validate = [
                     }
                     for (const bridge of global.bridges[color]) if (!tree.has(bridge)) res = true;
                     for (c of global.regions.all[regionNum]) {
-                      // console.info(xy(c), isCellBridgePathFriendly(...xy(c), color), seen.has(c), uniqueloop(c));
                       if (isCellBridgePathFriendly(...xy(c), color) && !seen.has(c) && (uniqueloop(c) === -1)) res = true;
                     }
                     if (res) {

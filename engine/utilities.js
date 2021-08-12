@@ -99,7 +99,7 @@ l('@keyframes fade {to {opacity: 0.35;}}')
 l('@keyframes start-grow {from {r:12;} to {r: 24;}}')
 // Neutral button style
 l('#symboltheme, .loadButtonWrapper, button {')
-l('  background-color: var(--alt-background);')
+l('  background-color: var(--outer);')
 l('  border: 1px solid var(--border);')
 l('  color: var(--text);')
 l('  display: inline-block;')
@@ -111,7 +111,7 @@ l('  -moz-appearance: none;')
 l('  -webkit-appearance: none;')
 l('}')
 // Active (while held down) button style
-l('#symboltheme:active, .loadButtonWrapper:active, button:active {background-color: var(--active);}')
+l('#symboltheme:active, .loadButtonWrapper:active, button:active {filter: brightness(0.8);}')
 // Disabled button style
 l('#symboltheme:disabled, .loadButtonWrapper:disabled, button:disabled {opacity: 0.5;}')
 // Selected button style (see https://stackoverflow.com/a/63108630)
@@ -172,11 +172,7 @@ window.setLogLevel = function(level) {
   console.groupEnd = consoleGroupEnd
   if (level === 'spam') return
 }
-setLogLevel('info') //! CHANGE THIS IN DEV
-
-window.setTheme = function(theme) {
-  document.getElementById('theme').href = './theme/' + theme + '.css'
-}
+setLogLevel('warn') //! CHANGE THIS IN DEV
 
 window.deleteElementsByClassName = function(rootElem, className) {
   var elems = []
@@ -274,7 +270,7 @@ function createCheckbox() {
   checkbox.style.marginRight = '6px'
   checkbox.style.borderWidth = '1.5px'
   checkbox.style.borderStyle = 'solid'
-  checkbox.style.borderColor = 'var(--border)'
+  checkbox.style.borderColor = 'var(--text)'
   checkbox.style.background = 'var(--background)'
   checkbox.style.color = 'var(--text)'
   return checkbox
@@ -293,7 +289,7 @@ window.addSolveButtons = function() {
 
   solveMode.onpointerdown = function() {
     this.checked = !this.checked
-    this.style.background = (this.checked ? 'var(--border)' : 'var(--background)')
+    this.style.background = (this.checked ? 'var(--text)' : 'var(--background)')
     if (window.setSolveMode) window.setSolveMode(this.checked)
   }
 
@@ -350,6 +346,29 @@ window.addSolveButtons = function() {
   solutionViewer.appendChild(nextSolution)
   nextSolution.id = 'nextSolution'
   nextSolution.innerHTML = '&rarr;'
+}
+
+window.themeArgs = ['background', 'outer', 'inner', 'text', 'line-undone', 'line-default', 'line-success', 'line-primary', 'line-secondary'];
+
+window.copyTheme = function(puzzle) {
+  puzzle.theme = {};
+  for (entry of themeArgs) {
+    puzzle.theme[entry] = hexToInt(getComputedStyle(document.documentElement).getPropertyValue('--' + entry));
+  }
+}
+
+window.applyTheme = function(puzzle) {
+  for (entry of Object.entries(puzzle.theme)) {
+    document.documentElement.style.setProperty('--' + entry[0], intToHex(entry[1]));
+  }
+}
+
+window.hexToInt = function(hex) {
+  return parseInt(hex.slice(1), 16);
+}
+
+window.intToHex = function(int) {
+  return '#' + Number(int).toString(16).padStart(6, '0');
 }
 
 })

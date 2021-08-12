@@ -6,7 +6,6 @@
     <meta name="robots" content="nosnippet"/>
     <link rel="stylesheet" type="text/css" href="./data/reset.css" id="stylesheet">
     <link rel="stylesheet" type="text/css" href="./data/style.css" id="stylesheet">
-    <link rel="stylesheet" type="text/css" href="./theme/introduction.css" id="theme">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css" ie-ignore>
     <link rel="icon" type="image/png" href="./data/favicon.png">
     <script type="text/javascript" src="./engine/utilities.js"></script>
@@ -17,7 +16,7 @@
     <script async type="text/javascript" src="./engine/polyominos.js"></script>
     <script async type="text/javascript" src="./engine/display2.js"></script>
     <script async type="text/javascript" src="./engine/trace2.js"></script>
-    <script async type="text/javascript" src="editor.js"></script>
+    <script async type="text/javascript" src="./editor.js"></script>
     <title>Create a puzzle</title>
   </head>
   <body>
@@ -45,11 +44,6 @@
       </header>
       <!-- <script>loadHeader('Creating puzzle')</script> -->
       <div class="main-wrapper">
-        <span class="title">
-          <p>Theme: </p>
-          <label id="puzzleTheme" contentEditable=true>(Insert Theme Name Here)</label>
-          <p>.css</p>
-        </span>
         <div class="main">
           <div class="vlist" id="meta" class="noselect">
             <div class="hlist metaButton-wrapper">
@@ -194,6 +188,48 @@
                   <td><button id="#ff07ff"></button></td>
                 </tr>
               </table>
+            </div>
+            <div class="theme">
+              <h1>Theme Setting</h1>
+              <hr>
+              <ul>
+                <li>
+                  <h2>Background</h2>
+                  <input onchange="changeColor(this.id, this.value)" type="color" id="background-color" value="#ffffff"/>
+                </li>
+                <li>
+                  <h2>Puzzle Background</h2>
+                  <input onchange="changeColor(this.id, this.value)" type="color" id="outer-color" value="#eeeeee"/>
+                </li>
+                <li>
+                  <h2>Puzzle Line</h2>
+                  <input onchange="changeColor(this.id, this.value)" type="color" id="line-undone-color" value="#333333" />
+                </li>
+                <li>
+                  <h2>Puzzle Cell</h2>
+                  <input onchange="changeColor(this.id, this.value)" type="color" id="inner-color" value="#aaaaaa" />
+                </li>
+                <li>
+                  <h2>Text</h2>
+                  <input onchange="changeColor(this.id, this.value)" type="color" id="text-color" value="#000000" />
+                </li>
+                <li>
+                  <h2>Line (Drawn)</h2>
+                  <input onchange="changeColor(this.id, this.value)" type="color" id="line-default-color" value="#cccccc" />
+                </li>
+                <li>
+                  <h2>Line (Primary Symmetry)</h2>
+                  <input onchange="changeColor(this.id, this.value)" type="color" id="line-primary-color" value="#88ffff" />
+                </li>
+                <li>
+                  <h2>Line (Secondary Symmetry)</h2>
+                  <input onchange="changeColor(this.id, this.value)" type="color" id="line-secondary-color" value="#ffff22" />
+                </li>
+                <li>
+                  <h2>Line (Success)</h2>
+                  <input onchange="changeColor(this.id, this.value)" type="color" id="line-success-color" value="#ffffff" />
+                </li>
+                </ul>
             </div>
             <div>
               <script>addSolveButtons()</script>

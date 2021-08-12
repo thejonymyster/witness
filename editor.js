@@ -15,11 +15,8 @@ function writePuzzle() {
 // Delete the active puzzle then read the next one.
 window.deletePuzzle = function() {
   // since publish is gone, this is a reset button
-  var theme = puzzle.theme
-  createEmptyPuzzle(Math.floor(puzzle.width / 2), Math.floor(puzzle.height / 2))
-  puzzle.theme = theme
-  window.setTheme(theme)
-  document.getElementById('puzzleTheme').innerHTML = theme
+  if (!puzzle?.width) createEmptyPuzzle(4, 4);
+  else createEmptyPuzzle(Math.floor(puzzle.width / 2), Math.floor(puzzle.height / 2))
 }
 
 // Clear animations from the puzzle, redraw it, and add editor hooks.
@@ -70,26 +67,11 @@ function reloadPuzzle() {
   // Disable the Solve (manually) button, clear lines, and redraw the puzzle
   document.getElementById('solveMode').checked = true
   document.getElementById('solveMode').onpointerdown()
-  if (puzzle.theme === undefined) puzzle.theme = "(Insert Theme Name Here)"
-  document.getElementById('puzzleTheme').innerText = puzzle.theme
   document.getElementById('solutionViewer').style.display = 'none'
 
   document.getElementById('solveAuto').disabled = false
-  if (puzzle.symmetry != null) {
-    // 6x6 is the max for symmetry puzzles
-    if (puzzle.width > 13 || puzzle.height > 13) {
-      document.getElementById('solveAuto').disabled = true
-    }
-  } else if (puzzle.pillar === true) {
-    // 5x6 is the max for non-symmetry, pillar puzzles
-    if (puzzle.width > 13 || puzzle.height > 11) {
-      document.getElementById('solveAuto').disabled = true
-    }
-  } else {
-    // 6x6 is the max for non-symmetry, non-pillar puzzles
-    if (puzzle.width > 13 || puzzle.height > 13) {
-      document.getElementById('solveAuto').disabled = true
-    }
+  if (puzzle.width * puzzle.height > 150) {
+    document.getElementById('solveAuto').disabled = true
   }
 
   var save = document.getElementById('save')
@@ -221,7 +203,7 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
     newPuzzle.grid[x][0].end = 'top';
     break;
   }
-  newPuzzle.name = 'e'
+  copyTheme(newPuzzle);
 
   if (document.getElementById('deleteButton').disabled === true) {
     // Previous puzzle was unmodified, overwrite it
@@ -242,8 +224,7 @@ fileInput.addEventListener("change", function() {
     let fileData = reader.readAsText(file)
     reader.onload = function(res) {
       window.puzzle = Puzzle.deserialize(res.currentTarget.result) // Will throw for most invalid puzzles
-      window.setTheme(puzzle.theme)
-      document.getElementById('puzzleTheme').innerHTML = puzzle.theme
+      applyButton()
       puzzleModified()
       writePuzzle()
       reloadPuzzle()
@@ -262,6 +243,7 @@ window.importPuzzle = function(serialized) {
   try {
     var newPuzzle = Puzzle.deserialize(serialized) // Will throw for most invalid puzzles
     window.puzzle = newPuzzle
+    applyButton()
     writePuzzle()
     reloadPuzzle()
   } catch (e) {
@@ -298,67 +280,16 @@ window.reloadSymbolTheme = function() {
 window.onload = function() {
   drawSymbolButtons()
   drawColorButtons()
-  if (localStorage.puzzle !== undefined) window.puzzle = Puzzle.deserialize(localStorage.puzzle);
+  if (localStorage.puzzle !== undefined) {
+    window.puzzle = Puzzle.deserialize(localStorage.puzzle);
+    applyButton()
+  }
   else createEmptyPuzzle()
   reloadPuzzle()
   // Add theme-appropriate coloring to the style dropdown
   var puzzleStyle = document.getElementById('puzzleStyle')
   puzzleStyle.style.background = 'var(--background)'
   puzzleStyle.style.color = 'var(--text)'
-
-  var puzzleTheme = document.getElementById('puzzleTheme')
-
-  puzzleTheme.onfocus = function(event) {
-    // On initial focus, select all text within the box
-    window.getSelection().removeAllRanges()
-    var range = document.createRange()
-    range.selectNodeContents(this)
-    window.getSelection().addRange(range)
-  }
-
-  // Both oninput and onkeypress fire for every text modification.
-
-  // Use onkeypress when you need to prevent an action
-  puzzleTheme.onkeypress = function(event) {
-    // If the user tries to type past 50 characters
-    if (this.innerText.length >= 50) event.preventDefault()
-
-    // Allow using the enter key to confirm the puzzle name
-    if (event.key == 'Enter') {
-      event.preventDefault()
-      this.blur()
-    }
-  }
-
-  // Use oninput for backup processing
-  // You should always use a conditional here, because every time you modify the text,
-  // the cursor resets to the start of the string.
-  puzzleTheme.oninput = function(event) {
-    // Prevent newlines in titles
-    if (this.innerText.includes('\n')) this.innerText = this.innerText.replace('\n', '')
-    if (this.innerText.includes('\r')) this.innerText = this.innerText.replace('\r', '')
-    // Prevent the input box from disappearing
-    if (this.innerText.length === 0) this.innerText = '\u200B' // Zero-width space
-    // Prevent too-long titles
-    if (this.innerText.length >= 50) this.innerText = this.innerText.substring(0, 50)
-  }
-
-  // Use onblur for final name confirmation.
-  puzzleTheme.onblur = function(event) {
-    // Remove leading/trailing whitespace
-    this.innerText = this.innerText.trim()
-    this.innerText = this.innerText.replace('\u200B', '')
-    // Cap the puzzle name length one last time
-    if (this.innerText.length >= 50) this.innerText = this.innerText.substring(0, 50)
-    // Ensure that puzzle names are non-empty
-    if (this.innerText.length === 0) this.innerText = '(Insert Theme Name Here)'
-    // Update the puzzle with the new name
-    puzzle.theme = this.innerText
-    window.setTheme(this.innerText)
-    document.getElementById('puzzleTheme').innerHTML = this.innerText
-    puzzle.name = "e"
-    writePuzzle()
-  }
 
   for (var resize of document.getElementsByClassName('resize')) {
     resize.onpointerdown = function(event) {
@@ -405,7 +336,6 @@ function download(filename, text) {
 
 window.savePuzzle = function() {
   // instead of publish, we save this puzzle
-  puzzle.theme = document.getElementById('puzzleTheme').innerHTML
   puzzle.clearLines()
   download("puzzle.json", puzzle.serialize())
 }
@@ -1333,6 +1263,19 @@ function dragMove(event, elem) {
 
 function puzzleModified() {
   document.getElementById('deleteButton').disabled = false
+}
+
+window.changeColor = function (id, value) {
+  if ((id.indexOf('line') + 1) && value == getComputedStyle(document.documentElement).getPropertyValue('--line-undone')) value += '00';
+  document.documentElement.style.setProperty('--' + id.slice(0, -6), value);
+  copyTheme(puzzle);
+  writePuzzle();
+}
+
+function applyButton() {
+  for (const entry of themeArgs) {
+    document.getElementById(entry+'-color').value = getComputedStyle(document.documentElement).getPropertyValue('--' + entry);
+  }
 }
 
 });

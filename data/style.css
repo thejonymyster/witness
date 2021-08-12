@@ -5,11 +5,17 @@
        url("Constantia.ttf")   format("truetype"),
        url("Constantia.woff2") format("woff2");
 }
-label, select, option, input, a, button, #symboltheme {
+label, select, option, input, a, button, h1, h2 {
   font-family: "Constantia-Bold";
   font-variant: small-caps;
   font-size: 28px;
   border-radius: 0.5vw;
+}
+
+h2 {
+  font-size: 18px;
+  display: inline-block;
+  min-width: 250px;
 }
 
 * {
@@ -39,7 +45,7 @@ line, circle, polygon {
 }
 
 header {
-  border: 2px black solid;
+  border: 1px #767676 solid;
   border-radius: 5px;
   align-self: center;
   display: block;
@@ -88,8 +94,7 @@ table {
   position: relative;
   width: 52px;
   padding: 0;
-  border: 1px black solid;
-  background-color: var(--alt-background);
+  background-color: var(--outer);
   border-radius: 0.5vw;
   display: block;
   width: 60px;
@@ -201,8 +206,16 @@ body {
   .navbar { height: 90px; }
   .navbar-padding { margin-top: 90px; }
   .navbar-content { padding-top: 40px; }
+  footer {
+    height: 45px;
+    overflow: hidden;
+    transition: 0.25s;
+  }
+  footer:hover {
+    padding: 16px;
+    height: 540px;
+  }
 }
-
 /* https://stackoverflow.com/a/4407335 */
 .noselect {
   -webkit-touch-callout: none; /* iOS Safari */
@@ -262,4 +275,33 @@ input[type="range"]::-ms-thumb {
 .flashing {
   animation: 1s 1 forwards line-fail !important;
   animation: 0.4s 20 alternate-reverse error;
+}
+
+:root {
+  --background:#ffffff; /* used to be PAGE_BACKGROUND*/
+  --outer:#eeeeee; /* used to be OUTER_BACKGROUND*/
+  --inner:#aaaaaa; /* used to be BACKGROUND*/
+  --text:#000000;
+  --line-undone:#333333; /* used to be FOREGROUND*/
+  --line-default:#cccccc;
+  --line-success:#ffffff;
+  --line-primary:#88ffff;
+  --line-secondary:#ffff22;
+  /* CANNOT (SHOULD NOT) MODIFY */
+  --line-failure: transparent;
+  --border: transparent;
+}
+
+.theme {
+  border-radius: 0.5vw;
+  border: 1px #767676 solid;
+  margin: 4px;
+  padding: 8px;
+  height: 32px;
+  overflow: hidden;
+  transition: height 0.5s;
+}
+
+.theme:hover {
+  height: 265px;
 }
