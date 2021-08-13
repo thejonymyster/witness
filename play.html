@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+<html xmlns="http://www.w3.org/2000/xhtml">
   <head>
     <meta charset="utf-8">
-    <meta name="description" content="Looksy - Modded Witness">
+    <meta name="description" content="Looksy - Modded Witness Player">
     <meta name="author" content="prod">
     <meta name="robots" content="nosnippet"/>
     <link rel="stylesheet" type="text/css" href="./data/reset.css" id="stylesheet">
@@ -16,8 +16,8 @@
     <script async type="text/javascript" src="./engine/polyominos.js"></script>
     <script async type="text/javascript" src="./engine/display2.js"></script>
     <script async type="text/javascript" src="./engine/trace2.js"></script>
-    <script async type="text/javascript" src="./index.js"></script>
-    <title>Looksy</title>
+    <script async type="text/javascript" src="./play.js"></script>
+    <title>Looksy v2.1.0</title>
   </head>
   <body>
     <div class="wrapper">
@@ -46,11 +46,13 @@
         <div class="main vlist">
             <div class="spacer"></div>
             <div class="hlist">
+              <button class="nav" onclick="getPrev()" id="prev"><i class="xi-angle-left"></i></button>
               <div class="puzzlebox-wrapper">
                 <div id="puzzleBox" style="position: relative">
                   <svg id="puzzle"></svg>
                 </div>
               </div>
+              <button class="nav" onclick="getNext()" id="next"><i class="xi-angle-right"></i></button>
             </div>
             <div class="spacer"></div>
         </div>

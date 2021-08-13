@@ -524,7 +524,7 @@ window.serializePuzzle = function(puzzle) {
   ints = [];
   for (const entry of themeArgs) ints.push(puzzle.theme[entry]);
   raw += intToByte(...ints).join('');
-  raw += (puzzle.image['background-image'] ?? '') + '\u0000' + (puzzle.image['foreground-image'] ?? '');
+  raw += (puzzle.image['background-image'] ?? '') + '\u00ff' + (puzzle.image['foreground-image'] ?? '');
   return 'v2_' + runLength(btoa(raw).replace(/\+/g, '.').replace(/\//g, '-').replace(/=/g, '_'));
 }
 
@@ -603,11 +603,10 @@ function deserializePuzzleV2(string) {
     i += 4;
   }
   i++;
-  for (const entry of raw.slice(i).split('\u0000')) {
-    puzzle.image = {};
-    puzzle.image['background-image'] = (entry[0]?.length ? entry[0] : null);
-    puzzle.image['foreground-image'] = (entry[1]?.length ? entry[1] : null);
-  }
+  let entry = raw.slice(i).split('\u00ff')
+  puzzle.image = {};
+  puzzle.image['background-image'] = (entry[0]?.length ? entry[0] : null);
+  puzzle.image['foreground-image'] = (entry[1]?.length ? entry[1] : null);
   window.puzzle = puzzle;
   applyTheme(puzzle);
   applyImage(puzzle);

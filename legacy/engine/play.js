@@ -5,11 +5,10 @@ window.updatePuzzle = function() {
     request.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
             let puzzle = Puzzle.deserialize(this.responseText);
-            window.setTheme(puzzle.theme)
             draw(puzzle)
         }
     }
-    request.open("GET", "./" + window.puzzleSet + "/" + window.currentPanel + '.json', true)
+    request.open("GET", "./puzzles/" + window.puzzleSet + "/" + window.currentPanel + '.json', true)
     request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded')
     request.send()
 }
@@ -33,12 +32,14 @@ function getNext() {
     if (window.currentPanel == window.maxPanel) return;
     window.currentPanel++;
     window[window.puzzleSet]++;
-    window.updatePuzzle()
+    window.updatePuzzle();
+    window.clearAnimations();
 }
 
 function getPrev() {
     if (window.currentPanel == 0) return;
     window.currentPanel--;
     window[window.puzzleSet]--;
-    window.updatePuzzle()
+    window.updatePuzzle();
+    window.clearAnimations();
 }

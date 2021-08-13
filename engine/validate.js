@@ -212,7 +212,7 @@ window.validate = function(puzzle, quick) {
     }
     for (r of global.regionData) puzzle.invalidElements = puzzle.invalidElements.concat(r.invalids);
     if (global.invalidXs) puzzle.invalidElements = puzzle.invalidElements.concat(global.invalidXs);
-    // console.info(puzzle.invalidElements)
+    console.info(puzzle, global, puzzle.invalidElements);
     for (let i = 0; i < puzzle.invalidElements.length; i++) {
         let c = puzzle.invalidElements[i];
         let [x, y] = xy(c);
@@ -220,7 +220,7 @@ window.validate = function(puzzle, quick) {
     }
     puzzle.grid = window.savedGrid;
     delete window.savedGrid;
-    puzzle.valid = puzzle.invalidElements.length == 0;
+    puzzle.valid = (puzzle.invalidElements.length == 0);
     // console.info(puzzle, global);
 }
 
