@@ -107,7 +107,7 @@ window.solve = function(p, partialCallback, finalCallback) {
   solutionPaths = []
   // Some reasonable default data, which will avoid crashes during the solveLoop.
   var earlyExitData = [false, {'isEdge': false}, {'isEdge': false}]
-  if (window.MAX_SOLUTIONS === 0) window.MAX_SOLUTIONS = 10000
+  if (window.MAX_SOLUTIONS === 0) window.MAX_SOLUTIONS = 1000
 
   task = {
     'code': function() {
