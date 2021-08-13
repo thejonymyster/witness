@@ -69,13 +69,7 @@ function reloadPuzzle() {
   document.getElementById('solveMode').onpointerdown()
   document.getElementById('solutionViewer').style.display = 'none'
 
-  document.getElementById('solveAuto').disabled = false
-  if (puzzle.width * puzzle.height > 150) {
-    document.getElementById('solveAuto').disabled = true
-  }
-
   var save = document.getElementById('save')
-  save.disabled = true
   save.innerText = 'Get URL'
   save.onpointerdown = exportPuzzle
 
