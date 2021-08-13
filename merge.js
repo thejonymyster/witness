@@ -53,6 +53,7 @@ window.insertData = function(id) {
 
 window.importSequence2 = function() {
     navigator.clipboard.readText().then(clipText => {
+        clipText = clipText.replace(/https:.+?#/, '');
         let veri = clipText.indexOf('_');
         let version = clipText.slice(0, veri);
         clipText = clipText.slice(veri + 1);

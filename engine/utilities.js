@@ -416,7 +416,7 @@ window.byteToInt = function(...byte) {
   return byte.map(b => ((b.charCodeAt(0) << 24 >>> 0) + (b.charCodeAt(1) << 16 >>> 0) + (b.charCodeAt(2) << 8 >>> 0) + (b.charCodeAt(3) >>> 0)));
 }
 
-const _keyStr = ".123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.-0"
+const _keyStr = "`123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.-_0"
 
 window.runLength = function(str) {
   let res = "";
@@ -515,7 +515,6 @@ window.serializePuzzle = function(puzzle) {
         if (cell.type == 'scaler') raw += String.fromCharCode(!!cell.flip);
         if (count) raw += String.fromCharCode(count);
         if (['poly', 'ylop', 'polynt'].includes(cell.type)) {
-          console.warn(cell.polyshape, intToByte(cell.polyshape), intToByte(cell.polyshape)[0].length);
           raw += intToByte(cell.polyshape)[0];
         }
       }
@@ -526,7 +525,7 @@ window.serializePuzzle = function(puzzle) {
   for (const entry of themeArgs) ints.push(puzzle.theme[entry]);
   raw += intToByte(...ints).join('');
   raw += (puzzle.image['background-image'] ?? '') + '\u00ff' + (puzzle.image['foreground-image'] ?? '');
-  return 'v2_' + runLength(btoa(raw).replace(/\+/g, '.').replace(/\//g, '-').replace(/=/g, '_'));
+  return 'v2_' + runLength(btoa(raw).replace(/\+/g, '.').replace(/\//g, '-').replace(/\=/g, '_'));
 }
 
 window.deserializePuzzle = function(string) {
@@ -538,7 +537,7 @@ window.deserializePuzzle = function(string) {
 }
 
 function deserializePuzzleV2(string) {
-  let raw = atob(derunLength(string).replace(/\./g, '+').replace(/-/g, '/').replace(/_/g, '='));
+  let raw = atob(derunLength(string).replace(/\./g, '+').replace(/\-/g, '/').replace(/\_/g, '='));
   let i = 2;
   let char = readBitSwitch(raw.charCodeAt(i));
   let puzzle = new Puzzle(raw.charCodeAt(0), raw.charCodeAt(1), char[3]);
