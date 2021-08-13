@@ -16,11 +16,11 @@ things to do
 - [x] support legacy editor
 
 ## relatively low effort (i can do it in a day)
-- [ ] navigation / main page
+- [x] navigation / main page
 - [x] theme customization v2 - embed within puzzle (puzzle back/foreground) (in progress)
 - [x] puzzle load and export with URLSearchParams, after encoding puzzle data
 - [x] fix drag boy not working on less than 2x2s
-- [ ] play template so i dont have to copy code
+- [x] play template so i dont have to copy code
 - [ ] draw svg for multitriangles (for graph mode)
 
 ## important stuffs (h)
