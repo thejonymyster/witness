@@ -20,6 +20,8 @@ function reloadPanel() {
   while (svg.firstChild) svg.removeChild(svg.firstChild)
   draw(window.puzzle)
   window.clearAnimations();
+  applyTheme(puzzle);
+  applyImage(puzzle);
 }
 
 window.onload = function() {
