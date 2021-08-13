@@ -11,9 +11,6 @@ String.prototype.hashCode = function() {
     return hash;
 };
 
-let puzzles;
-let code;
-let currentPanel;
 function reloadPanel() {
     let svg = document.getElementById('puzzle')
     while (svg.firstChild) svg.removeChild(svg.firstChild)
