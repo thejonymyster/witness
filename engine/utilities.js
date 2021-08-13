@@ -515,7 +515,8 @@ window.serializePuzzle = function(puzzle) {
         if (cell.type == 'scaler') raw += String.fromCharCode(!!cell.flip);
         if (count) raw += String.fromCharCode(count);
         if (['poly', 'ylop', 'polynt'].includes(cell.type)) {
-          raw += intToByte(Number(cell.polyshape))[0];
+          console.warn(cell.polyshape, intToByte(cell.polyshape), intToByte(cell.polyshape)[0].length);
+          raw += intToByte(cell.polyshape)[0];
         }
       }
     }
