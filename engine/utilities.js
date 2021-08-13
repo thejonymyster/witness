@@ -456,19 +456,32 @@ window.derunLength = function(str) {
 window.serializeTheme = function(puzzle) {
   let ints = [];
   for (const entry of themeArgs) ints.push(puzzle.theme[entry]);
-  return runLength(btoa([intToByte(...ints).join(''), puzzle.image['background-image'], puzzle.image['foreground-image']].join("\u0080\u0080\u0080\u0080")).replace(/\+/g, '.').replace(/\//g, '-').replace(/=/g, '_'));
+  return 'vt1_' + runLength(btoa(intToByte(...ints).join('') + (puzzle.image['background-image'] ?? '') + '\u0000' + (puzzle.image['foreground-image'] ?? '')).replace(/\+/g, '.').replace(/\//g, '-').replace(/=/g, '_'));
 }
 
 window.deserializeTheme = function(puzzle, string) {
-  let raw = atob(derunLength(string).replace(/\./g, '+').replace(/-/g, '/').replace(/_/g, '=')).split('\u0080\u0080\u0080\u0080');
-  let theme = byteToInt(...raw[0].match(/.{1,4}/g));
-  console.warn(string, raw, theme);
-  for (let i = 0; i < themeArgs.length; i++) puzzle.theme[themeArgs[i]] = theme[i];
-  puzzle.image ??= {};
-  if (raw[1].length) puzzle.image['background-image'] = raw[1];
-  else puzzle.image['background-image'] = null;
-  if (raw[2].length) puzzle.image['foreground-image'] = raw[2];
-  else puzzle.image['foreground-image'] = null;
+  let veri = string.indexOf('_');
+  let version = string.slice(0, veri);
+  string = string.slice(veri + 1);
+  if (version == 'vt1') deserializeThemeV1(puzzle, string);
+  else throw Error('unknown theme format');
+}
+
+function deserializeThemeV1(puzzle, string) {
+  let raw = atob(derunLength(string).replace(/\./g, '+').replace(/-/g, '/').replace(/_/g, '='));
+  puzzle.theme = {};
+  let i = 0;
+  for (const entry of themeArgs) {
+    let char = byteToInt(raw.slice(i, i+4))[0];
+    puzzle.theme[entry] = char;
+    i += 4;
+  }
+  for (const entry of raw.slice(i).split('\u0000')) {
+    puzzle.image = {};
+    puzzle.image['background-image'] = (entry[0]?.length ? entry[0] : null);
+    puzzle.image['foreground-image'] = (entry[1]?.length ? entry[1] : null);
+  }
+  window.puzzle = puzzle;
   applyTheme(puzzle);
   applyImage(puzzle);
 }
@@ -520,6 +533,7 @@ window.deserializePuzzle = function(string) {
   let version = string.slice(0, veri);
   string = string.slice(veri + 1);
   if (version == 'v2') deserializePuzzleV2(string);
+  else throw Error('unknown puzzle format');
 }
 
 function deserializePuzzleV2 (string) {
