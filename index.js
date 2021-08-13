@@ -26,7 +26,7 @@ window.onload = function() {
     if (toLoad.startsWith('#vs')) window.location.replace('prodzpod.github.io/witness/play' + toLoad);
     else if (toLoad.startsWith('#v')) window.location.replace('prodzpod.github.io/witness/editor' + toLoad);
     else {
-        window.puzzle = deserializePuzzle("v2_CAgQ~QAYUAAYUAAYUAAYUAAYUAAYUAAYU~4ABhQiAQAGAQYUAAYUBgQ~4AiAgYUAAYU~4ABhQ~4AGFAAGF~5AYUAAYU~4ABhQGB~6AGF~5AYUBgEABgEGF~5AYUAAYU~7AGFAAGF~7ABhQAAAYCBhQ~4AGF~7ABhQ~9ABhQ~7AYUAAYU~4ABhQGAgYU~6AYFAAAGAQAABgIGF~5AYUAAYU~7AGFAAGF~7ABhQGAwAABhQABhQ~7AYUBgQGF~5AYU~7AGAgAGF~5AYU~4ABhQGAgYU~4ABhQABhQ~7AYU~7AGFAAGF~7ABhQ~7AYUBgM~7AYEBhQAAAYBBhQGBAYU~4ABhQABhQABhQABhQABhQABhQABhQ~DABgE~AAP8AAEQbAAApEAD-o6MA~4-ANRoaAD-1KMA-9uoAIj--wD--yL-aHR0cHNcOlwvXC9tZWRpYVwuZGlzY29yZGFwcFwubmV0XC9hdHRhY2htZW50c1wvNTE1Njc4OTE0MzE2ODYxNDUxXC84NzU2MjE3NjQ0MTQxODk1OThcL2ltYWdlXzRcLnBuZ1w-d2lkdGhcPTUwOFwmaGVpZ2h0XD01MDg_");
+        window.puzzle = deserializePuzzle("v2_CAgQ~BAGB~EAGFAAGFAAGFAAGFAAGFAAGFAAGF~5AYUIgEABgEGFAAGFAYE~4AIgIGFAAGF~5AYU~4ABhQABhQ~4AGFAAGF~5AYUBgQ~5ABhQ~4AGFAYBAAYBBhQ~4AGFAAGF~7ABhQABhQ~7AYUAAAGAgYU~4ABhQ~7AYU~AAYU~7AGFAAGF~5AYUBgIGF~6AGBQAABgEAAAYCBhQ~4AGFAAGF~7ABhQABhQ~7AYUBgMAAAYUAAYU~7AGFAYEBhQ~4AGF~7ABgIABhQ~4AGF~5AYUBgIGF~5AYUAAYU~7AGF~7ABhQABhQ~7AYU~7AGFAYD~8ABhQAAAYBBhQGBAYU~4ABhQABhQABhQ~4AGFAAGFAAGF~PAD-AAApEAAAKRAA-6OjAP---wDUaGgA-9SjAP-bqACI--8A--8i-2h0dHBzXDpcL1wvbWVkaWFcLmRpc2NvcmRhcHBcLm5ldFwvYXR0YWNobWVudHNcLzE1NTc3MzAzODkwODkzMjA5N1wvODc1NjMzODk1MjI2MzU1NzEyXC91bmtub3duXC5wbmdcP3dpZHRoXD02MzBcJmhlaWdodFw9NjMw");
         reloadPanel();
     }
 }
@@ -86,7 +86,7 @@ window.onSolvedPuzzle = function(paths) {
             break;
         case 'lllluulldd': // portals
             break;
-        case 'dddddd': // editor
+        default: // editor
             window.location.href = './editor.html';
             break;
     }
