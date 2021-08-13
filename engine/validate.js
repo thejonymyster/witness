@@ -221,7 +221,7 @@ window.validate = function(puzzle, quick) {
     puzzle.grid = window.savedGrid;
     delete window.savedGrid;
     puzzle.valid = (puzzle.invalidElements.length == 0);
-    // console.info(puzzle, global);
+    console.info(puzzle, global);
 }
 
 function init(puzzle) { // initialize globals
@@ -230,7 +230,7 @@ function init(puzzle) { // initialize globals
         'shapes': new Set(),
         'regionData': [],
         'regionNum': 0,
-        'regionMatrix': Array.from({ length: puzzle.height }, () => Array.from({ length: puzzle.width }, () => 0)),
+        'regionMatrix': Array.from({ length: puzzle.height }, () => Array.from({ length: puzzle.width }, () => -1)),
         'regions': {
             all: [[]],
             cell: [],
@@ -257,6 +257,10 @@ function init(puzzle) { // initialize globals
                 portalPosColor[ret(x, y)] = cell.color;
             }
         }
+    }
+    for (let x = 0; x < puzzle.width; x++) for (let y = 0; y < puzzle.height; y++) {
+        let cell = puzzle.grid[x][y];
+        if (cell?.line > 0) global.regionMatrix[y][x] = 0;
     }
     for (region of puzzle.getRegions()) {
         i++;
