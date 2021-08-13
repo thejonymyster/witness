@@ -532,11 +532,11 @@ window.deserializePuzzle = function(string) {
   let veri = string.indexOf('_');
   let version = string.slice(0, veri);
   string = string.slice(veri + 1);
-  if (version == 'v2') deserializePuzzleV2(string);
+  if (version == 'v2') return deserializePuzzleV2(string);
   else throw Error('unknown puzzle format');
 }
 
-function deserializePuzzleV2 (string) {
+function deserializePuzzleV2(string) {
   let raw = atob(derunLength(string).replace(/\./g, '+').replace(/-/g, '/').replace(/_/g, '='));
   let i = 2;
   let char = readBitSwitch(raw.charCodeAt(i));
@@ -611,6 +611,24 @@ function deserializePuzzleV2 (string) {
   window.puzzle = puzzle;
   applyTheme(puzzle);
   applyImage(puzzle);
+  return puzzle;
+}
+
+window.exportSequence = function(list) {
+    return 'vs1_' + list.join('~~');
+}
+
+window.importSequence = function(string) {
+  let veri = string.indexOf('_');
+  let version = string.slice(0, veri);
+  string = string.slice(veri + 1);
+  if (version == 'vs1') return importSequenceV1(string);
+  else throw Error('unknown puzzle format');
+}
+
+function importSequenceV1(string) {
+  let res = string.split('~~').map(e => window.deserializePuzzle(e));
+  return res;
 }
 
 })

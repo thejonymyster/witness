@@ -10,15 +10,15 @@ things to do
 - - [ ] copy artless' homework
 - - [ ] vtriangle
 - - [ ] ask shaun to introduce other shapes too (smh)
-- [ ] now that there's more than crosses and diamonds, change your site description maybe
+- [x] now that there's more than crosses and diamonds, change your site description maybe
 - [x] relocate all puzzles in 1 folder
-- [ ] hide symmetry lines toggle
+- [x] hide symmetry lines toggle
 - [x] support legacy editor
 
 ## relatively low effort (i can do it in a day)
 - [ ] navigation / main page
 - [x] theme customization v2 - embed within puzzle (puzzle back/foreground) (in progress)
-- [ ] puzzle load and export with URLSearchParams, after encoding puzzle data
+- [x] puzzle load and export with URLSearchParams, after encoding puzzle data
 - [x] fix drag boy not working on less than 2x2s
 - [ ] play template so i dont have to copy code
 - [ ] draw svg for multitriangles (for graph mode)
@@ -32,12 +32,10 @@ things to do
 
 ## low priority
 - [ ] graph editor mode (alternative validation)
-- [ ] dualsquare implementation
-- [ ] cornernegator implementation
 - [ ] alternate symmetry style
 - [ ] vertical pillar, torus even
-- [ ] multipuzzle
-- [ ] panel sequence export + panel custom play mode
+- [x] multipuzzle
+- [x] panel sequence export + panel custom play mode
 
 # progress
 

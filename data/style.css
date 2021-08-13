@@ -329,3 +329,41 @@ li button {
   display: inline-block;
   font-size: 18px;
 }
+
+.list-wrapper {
+  background-color: var(--outer);
+  margin: 1rem;
+  padding: 1rem;
+  border-radius: 1vw;
+  min-width: 80%;
+  border: 2px black solid;
+}
+
+.list-wrapper button {
+  background-color: var(--inner);
+}
+
+.elem-wrapper {
+  margin: 1rem;
+}
+
+.elem {
+  max-width: 80%;
+  flex: 999 1 auto;
+}
+
+.elem-wrapper i {
+  font-size: 32px;
+  vertical-align: middle;
+}
+
+.elem-delete, .elem-insert {
+  float: right;
+}
+
+.elem-wrapper h2 {
+  min-width: unset;
+  font-size: 32px;
+  vertical-align: middle;
+  margin-left: -16px;
+}

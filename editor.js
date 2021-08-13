@@ -1303,7 +1303,7 @@ window.exportPuzzle = function() {
 
 window.importPuzzle = function() {
   navigator.clipboard.readText().then(clipText => {
-    deserializePuzzle(clipText.replace('https://prodzpod.github.io/witness/editor.html#', ''));
+    deserializePuzzle(clipText.replace(/https:.+?#/, ''));
     applyThemeButton();
     applyImageButton();
     reloadPuzzle();
