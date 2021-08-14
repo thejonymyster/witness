@@ -322,6 +322,7 @@ function getNextValue(list, value) {
 // This function also ensures that the resulting puzzle is still sane, and will modify
 // the puzzle to add symmetrical elements, remove newly invalidated elements, etc.
 function onElementClicked(event, x, y) {
+  puzzle.grid[x][y] ??= {};
   if (event.isRightClick()) {
     // Clear the associated cell
     if (x%2 === 1 && y%2 === 1) {
@@ -339,7 +340,6 @@ function onElementClicked(event, x, y) {
     }
   } else if (activeParams.type == 'start') {
     if (x%2 === 1 && y%2 === 1) return
-    puzzle.grid[x][y] ??= {};
     if (puzzle.grid[x][y].gap != null) return
 
     if (puzzle.grid[x][y].start !== true) {
