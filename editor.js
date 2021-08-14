@@ -1278,8 +1278,11 @@ window.importTheme = function () {
 }
 
 window.exportPuzzle = function() {
-  let res = serializePuzzle(puzzle);
-  navigator.clipboard.writeText('https://prodzpod.github.io/witness/editor.html#' + res).then();
+  solve(puzzle, () => {}, sols => {
+    puzzle.sols = sols.length
+    let res = serializePuzzle(puzzle);
+    navigator.clipboard.writeText('https://prodzpod.github.io/witness/editor.html#' + res).then();
+  })
 }
 
 window.importPuzzle = function() {

@@ -411,7 +411,7 @@ window.endEnum = ['top', 'right', 'left', 'bottom'];
 window.serializePuzzle = function(puzzle) {
   // scary task!
   let raw = "";
-  if (puzzle.perfect) raw += String.fromCharCode(Math.min(0xff, solve(puzzle, () => {}, () => {}).length));
+  if (puzzle.perfect) raw += String.fromCharCode(Math.min(0xff, puzzle.sols));
   else raw += '\u0001';
   raw += String.fromCharCode(Math.floor(puzzle.width / 2));
   raw += String.fromCharCode(Math.floor(puzzle.height / 2));
