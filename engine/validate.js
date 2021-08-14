@@ -212,7 +212,6 @@ window.validate = function(puzzle, quick) {
     }
     for (r of global.regionData) puzzle.invalidElements = puzzle.invalidElements.concat(r.invalids);
     if (global.invalidXs) puzzle.invalidElements = puzzle.invalidElements.concat(global.invalidXs);
-    console.info(puzzle, global, puzzle.invalidElements);
     for (let i = 0; i < puzzle.invalidElements.length; i++) {
         let c = puzzle.invalidElements[i];
         let [x, y] = xy(c);
@@ -221,7 +220,7 @@ window.validate = function(puzzle, quick) {
     puzzle.grid = window.savedGrid;
     delete window.savedGrid;
     puzzle.valid = (puzzle.invalidElements.length == 0);
-    console.info(puzzle, global);
+    console.warn(puzzle, global);
 }
 
 function init(puzzle) { // initialize globals
@@ -271,6 +270,20 @@ function init(puzzle) { // initialize globals
             global.regions.all[i].push(ret(pos.x, pos.y));
         }
         global.regionNum = i + 1;
+    }
+    for (let x = 0; x < puzzle.width; x+=2) for (let y = 0; y < puzzle.height; y+=2) {
+        let count = 0;
+        let region = 0;
+        for (const e of [[x-1, y], [x+1, y], [x, y-1], [x, y+1]]) {
+            if ((region && matrix(global, e[0], e[1]) == region) || (!region && !([undefined, -1, 0].includes(matrix(global, e[0], e[1]))))) {
+                region = global.regionMatrix[e[1]][[e[0]]];
+                count++;
+            }
+        }
+        if (count >= 2) {
+            global.regions.all[i].push(ret(x, y));
+            global.regionMatrix[y][x] = region;
+        }
     }
     if (global.shapes.has('portal')) { // certified portal business
         for (const color in portalColorPos) for (const c of portalColorPos[color]) {
@@ -687,21 +700,24 @@ const lineValidate = [
         '_name': 'CROSS N CURVES',
         'or': ['cross', 'curve'],
         'exec': function(puzzle, global, quick) {
-            const isCross = function(x, y) {
+            const isCross = function(x, y, end, n) {
                 if (puzzle.pillar) x = (x + puzzle.width) % puzzle.width; // pillary boys, i hate pillary boys
+                if (end == n && puzzle.endPoint.x == x + (n==2?1:(n==1?-1:0)) && puzzle.endPoint.y == y + (n==0?1:(n==3?-1:0))) return true;
                 return matrix(global, x, y) === 0;
             }
             for (let c of global.regionCells.corner[0]) {
                 let [x, y] = xy(c);
                 let cell = puzzle.getCell(x, y);
+                let end = endEnum.indexOf(cell?.end);
                 if (!cell.dot || cell.dot >= window.DOT_NONE) continue;
                 if ((cell.dot > window.CUSTOM_CURVE) // CROSS;
-                ? (!(isCross(x-1,y) && isCross(x+1,y)) && !(isCross(x,y-1) && isCross(x,y+1)))
-                : ( (isCross(x-1,y) && isCross(x+1,y)) ||  (isCross(x,y-1) && isCross(x,y+1)))) { // thats a long list... 2!
+                ? (!(isCross(x-1,y,end,2) && isCross(x+1,y,end,1)) && !(isCross(x,y-1,end,0) && isCross(x,y+1,end,3)))
+                : ( (isCross(x-1,y,end,2) && isCross(x+1,y,end,1)) ||  (isCross(x,y-1,end,0) && isCross(x,y+1,end,3)))) { // thats a long list... 2!
                     console.info('[line][!] Wrongly Crossed... well, Cross: ', x, y);
                     global.regionData[0].addInvalid(puzzle, c);
                     if (!puzzle.valid && quick) return;
                 }
+                console.warn(end);
             }
         }
     }, {
@@ -731,11 +747,11 @@ const validate = [
         '_name': 'DOT CHECK',
         'or': ['dot', 'cross', 'curve'],
         'exec': function(puzzle, regionNum, global, quick) {
-            const DOT_BLACK  = [window.DOT_BLACK, window.DOT_BLUE, window.DOT_YELLOW, window.DOT_INVISIBLE, window.CUSTOM_CROSS_FILLED, window.CUSTOM_CROSS_BLUE_FILLED, window.CUSTOM_CROSS_YELLOW_FILLED, window.CUSTOM_CURVE_FILLED];
+            const dots = [window.DOT_BLACK, window.DOT_BLUE, window.DOT_YELLOW, window.DOT_INVISIBLE, window.CUSTOM_CROSS_FILLED, window.CUSTOM_CROSS_BLUE_FILLED, window.CUSTOM_CROSS_YELLOW_FILLED, window.CUSTOM_CURVE_FILLED, window.CUSTOM_CURVE_BLUE_FILLED, window.CUSTOM_CURVE_YELLOW_FILLED];
             for (let c of global.regionCells.line[regionNum]) {
                 let [x, y] = xy(c);
                 let cell = puzzle.getCell(x, y);
-                if (DOT_BLACK.includes(cell.dot)) { // bonk
+                if (dots.includes(cell.dot)) { // bonk
                     console.info('[!] Uncovered Dot: ', x, y);
                     global.regionData[regionNum].addInvalid(puzzle, c);
                     if (!puzzle.valid && quick) return;

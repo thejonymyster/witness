@@ -1039,7 +1039,6 @@ function resizePuzzle(dx, dy, id) {
   // We don't call new Puzzle here so that we can persist extended puzzle attributes (pillar, symmetry, etc)
   var oldPuzzle = new Puzzle(JSON.parse(JSON.stringify(puzzle)));
   puzzle.newGrid(newWidth, newHeight)
-  console.warn(oldPuzzle.grid, puzzle.grid, oldPuzzle.width, oldPuzzle.height);
   var debugGrid = []
   for (var y=0; y<puzzle.height; y++) debugGrid[y] = ''
 
@@ -1278,11 +1277,16 @@ window.importTheme = function () {
 }
 
 window.exportPuzzle = function() {
-  solve(puzzle, () => {}, function (paths) {
-    puzzle.sols = paths.length
+  if (puzzle.perfect)
+    solve(puzzle, () => {}, function (paths) {
+      puzzle.sols = paths.length
+      let res = serializePuzzle(puzzle);
+      navigator.clipboard.writeText('https://prodzpod.github.io/witness#' + res).then();
+    })
+  else {
     let res = serializePuzzle(puzzle);
     navigator.clipboard.writeText('https://prodzpod.github.io/witness#' + res).then();
-  })
+  }
 }
 
 window.importPuzzle = function() {
