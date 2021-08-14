@@ -300,11 +300,11 @@ window.Puzzle = class {
         }
 
         var cell = savedRow[y]
-        if (cell.line > window.LINE_NONE) {
+        if (cell?.line > window.LINE_NONE) {
           row.push(MASKED_PROCESSED) // Traced lines should not be a part of the region
-        } else if (cell.gap === window.GAP_FULL) {
+        } else if (cell?.gap === window.GAP_FULL) {
           row.push(MASKED_GAP2)
-        } else if (cell.dot > window.DOT_NONE) {
+        } else if (cell?.dot > window.DOT_NONE) {
           row.push(MASKED_DOT)
         } else {
           row.push(MASKED_INB_COUNT)

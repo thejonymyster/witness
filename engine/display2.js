@@ -125,8 +125,8 @@ function drawGrid(puzzle, svg, target) {
   for (var x=0; x<puzzle.width; x++) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
-      if (cell != null && cell.gap === window.GAP_FULL) continue;
-      if (cell != null && cell.gap === window.GAP_BREAK) {
+      if (cell?.gap === window.GAP_FULL) continue;
+      if (cell?.gap === window.GAP_BREAK) {
         var params = {
           'width':58,
           'height':58,
@@ -145,7 +145,7 @@ function drawGrid(puzzle, svg, target) {
       line.setAttribute('stroke-linecap', 'round')
       line.setAttribute('stroke', 'var(--line-undone)')
       if (x%2 === 1 && y%2 === 0) { // Horizontal
-        if (cell.gap === window.GAP_BREAK) continue;
+        if (cell?.gap === window.GAP_BREAK) continue;
         line.setAttribute('x1', (x-1)*41 + 52)
         // Adjust the length if it's a pillar -- the grid is not as wide!
         if (puzzle.pillar === true && x === puzzle.width - 1) {
@@ -157,7 +157,7 @@ function drawGrid(puzzle, svg, target) {
         line.setAttribute('y2', y*41 + 52)
         svg.appendChild(line)
       } else if (x%2 === 0 && y%2 === 1) { // Vertical
-        if (cell.gap === window.GAP_BREAK) continue;
+        if (cell?.gap === window.GAP_BREAK) continue;
         line.setAttribute('x1', x*41 + 52)
         line.setAttribute('x2', x*41 + 52)
         line.setAttribute('y1', (y-1)*41 + 52)
@@ -165,7 +165,7 @@ function drawGrid(puzzle, svg, target) {
         svg.appendChild(line)
       } else if (x%2 === 0 && y%2 === 0) { // Intersection
         var surroundingLines = 0
-        if (cell.end != null) surroundingLines++
+        if (cell?.end != null) surroundingLines++
         var leftCell = puzzle.getCell(x - 1, y)
         if (leftCell != null && leftCell.gap !== window.GAP_FULL) surroundingLines++
         var rightCell = puzzle.getCell(x + 1, y)
