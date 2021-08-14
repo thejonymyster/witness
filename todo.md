@@ -7,6 +7,8 @@ Now that looksyv2 is out mroe things must be done
 
 ## Things to do now
 - [ ] screw current perfect system, just have users pick number of solns
+- [ ] tent perfects
+- [ ] doesnt work on firefox
 - [ ] reset / "randomize" for theme
 - [ ] clean up editor.js
 - [ ] optimize verification algorithm

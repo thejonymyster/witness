@@ -339,6 +339,7 @@ function onElementClicked(event, x, y) {
     }
   } else if (activeParams.type == 'start') {
     if (x%2 === 1 && y%2 === 1) return
+    puzzle.grid[x][y] ??= {};
     if (puzzle.grid[x][y].gap != null) return
 
     if (puzzle.grid[x][y].start !== true) {
