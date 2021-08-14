@@ -45,7 +45,7 @@ window.onload = function() {
     localStorage[`puzzleProgress_${code}`] ??= 0;
     currentPanel = localStorage[`puzzleProgress_${code}`];
     reloadPanel();
-  }
+  } else window.location.replace('prodzpod.github.io/witness');
 }
 
 window.reloadSymbolTheme = function() {

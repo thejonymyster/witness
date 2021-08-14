@@ -73,7 +73,7 @@ window.importSequence2 = function() {
 }
 
 window.exportSequence2 = function() {
-    navigator.clipboard.writeText('https://prodzpod.github.io/witness/play#' + exportSequence(list));
+    navigator.clipboard.writeText('https://prodzpod.github.io/witness#' + exportSequence(list));
 }
 
 });

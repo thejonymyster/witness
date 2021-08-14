@@ -1282,7 +1282,7 @@ window.exportPuzzle = function() {
   solve(puzzle, () => {}, function (paths) {
     puzzle.sols = paths.length
     let res = serializePuzzle(puzzle);
-    navigator.clipboard.writeText('https://prodzpod.github.io/witness/editor.html#' + res).then();
+    navigator.clipboard.writeText('https://prodzpod.github.io/witness#' + res).then();
   })
 }
 
