@@ -36,7 +36,7 @@ window.Puzzle = class {
     if (!height) {
       json = width;
       width = Math.floor(json.width / 2);
-      height = Math.floor(json.height);
+      height = Math.floor(json.height / 2);
       pillar = json.pillar;
     }
     if (pillar === true) {

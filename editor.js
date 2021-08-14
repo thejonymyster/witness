@@ -322,7 +322,6 @@ function getNextValue(list, value) {
 // This function also ensures that the resulting puzzle is still sane, and will modify
 // the puzzle to add symmetrical elements, remove newly invalidated elements, etc.
 function onElementClicked(event, x, y) {
-  puzzle.grid[x][y] ??= {};
   if (event.isRightClick()) {
     // Clear the associated cell
     if (x%2 === 1 && y%2 === 1) {
@@ -1040,7 +1039,7 @@ function resizePuzzle(dx, dy, id) {
   // We don't call new Puzzle here so that we can persist extended puzzle attributes (pillar, symmetry, etc)
   var oldPuzzle = new Puzzle(JSON.parse(JSON.stringify(puzzle)));
   puzzle.newGrid(newWidth, newHeight)
-
+  console.warn(oldPuzzle.grid, puzzle.grid, oldPuzzle.width, oldPuzzle.height);
   var debugGrid = []
   for (var y=0; y<puzzle.height; y++) debugGrid[y] = ''
 
