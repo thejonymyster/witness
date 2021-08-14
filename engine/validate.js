@@ -220,7 +220,7 @@ window.validate = function(puzzle, quick) {
     puzzle.grid = window.savedGrid;
     delete window.savedGrid;
     puzzle.valid = (puzzle.invalidElements.length == 0);
-    // console.warn(puzzle, global);
+    console.warn(puzzle, global);
 }
 
 function init(puzzle) { // initialize globals
@@ -274,7 +274,11 @@ function init(puzzle) { // initialize globals
     for (let x = 0; x < puzzle.width; x+=2) for (let y = 0; y < puzzle.height; y+=2) {
         let count = 0;
         let region = 0;
-        for (const e of [[x-1, y], [x+1, y], [x, y-1], [x, y+1]]) {
+        for (const e of [[x-1, y-1], [x+1, y+1], [x+1, y-1], [x-1, y+1]]) {
+            if (region && matrix(global, e[0], e[1]) != region) {
+                count = 0;
+                break;
+            }
             if ((region && matrix(global, e[0], e[1]) == region) || (!region && !([undefined, -1, 0].includes(matrix(global, e[0], e[1]))))) {
                 region = global.regionMatrix[e[1]][[e[0]]];
                 count++;
