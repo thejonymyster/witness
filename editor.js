@@ -1037,7 +1037,7 @@ function resizePuzzle(dx, dy, id) {
   }
 
   // We don't call new Puzzle here so that we can persist extended puzzle attributes (pillar, symmetry, etc)
-  var oldPuzzle = puzzle;
+  var oldPuzzle = new Puzzle(JSON.parse(JSON.stringify(puzzle)));
   puzzle.newGrid(newWidth, newHeight)
 
   var debugGrid = []

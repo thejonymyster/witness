@@ -30,7 +30,15 @@ window.Region = class {
 // Corners and edges will have a value of true if the line passes through them
 // Cells will contain an object if there is an element in them
 window.Puzzle = class {
+
   constructor(width, height, pillar=false) {
+    let json;
+    if (!height) {
+      json = width;
+      width = Math.floor(json.width / 2);
+      height = Math.floor(json.height);
+      pillar = json.pillar;
+    }
     if (pillar === true) {
       this.newGrid(2 * width, 2 * height + 1)
     } else {
@@ -38,22 +46,12 @@ window.Puzzle = class {
     }
     this.pillar = pillar
     this.perfect = false;
-    // this.settings = {
-    //   // If true, negation symbols are allowed to cancel other negation symbols.
-    //   NEGATIONS_CANCEL_NEGATIONS: true,
-
-    //   // If true, and the count of polyominos and onimoylops is zero, they cancel regardless of shape.
-    //   SHAPELESS_ZERO_POLY: false,
-
-    //   // If true, the traced line cannot go through the placement of a polyomino.
-    //   PRECISE_POLYOMINOS: true,
-
-    //   // If false, incorrect elements will not flash when failing the puzzle.
-    //   FLASH_FOR_ERRORS: true,
-
-    //   // If true, mid-segment startpoints will constitute solid lines, and form boundaries for the region.
-    //   FAT_STARTPOINTS: false,
-    // }
+    if (json) {
+      this.perfect = json.perfect;
+      this.grid = json.grid;
+      this.theme = json.theme;
+      this.image = json.image;
+    }
   }
 
   // This is explicitly *not* just clearing the grid, so that external references
