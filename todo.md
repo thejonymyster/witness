@@ -1,64 +1,34 @@
-# todo
-wow i have a lot of   
-things to do
+# TODO v2
+Now that looksyv2 is out mroe things must be done
+## Long-term projects
+- [ ] Graph Editor (similar to one from artless)
+- [ ] Implement negator / copier (without killing perf completely)
 
-## low effort (i can do it within hour)
-- [ ] tutorials for:
-- - [ ] darts
-- - [ ] arrows
-- - [ ] ask unsus for antimino tutorial
-- - [ ] copy artless' homework
-- - [ ] vtriangle
-- - [ ] ask shaun to introduce other shapes too (smh)
-- [x] now that there's more than crosses and diamonds, change your site description maybe
-- [x] relocate all puzzles in 1 folder
-- [x] hide symmetry lines toggle
-- [x] support legacy editor
+## Things to do now
+- [ ] reset / "randomize" for theme
+- [ ] clean up editor.js
+- [ ] optimize verification algorithm
+- [ ] main page progression
+- [ ] challenge packs
+### Tutorials for...
+- [ ] curve
+- [ ] xs
+- [ ] arrow
+- [ ] dart
+- [ ] antitriangle
+- [ ] tent (in progress by sus)
+- [ ] the holes
+- [ ] div diamond
+- [ ] chips (in progress by mak i think??)
+- [ ] incomplete pentagon (steal from seren)
+- [ ] scaler
+- [ ] sizer
+- [ ] twobytwo
+- [ ] portal
+- [ ] celledhex
 
-## relatively low effort (i can do it in a day)
-- [x] navigation / main page
-- [x] theme customization v2 - embed within puzzle (puzzle back/foreground) (in progress)
-- [x] puzzle load and export with URLSearchParams, after encoding puzzle data
-- [x] fix drag boy not working on less than 2x2s
-- [x] play template so i dont have to copy code
-- [ ] draw svg for multitriangles (for graph mode)
-
-## important stuffs (h)
-- [x] validate.js revamp cuz i feel like im tacking on things
-- [x] finally tackle seren's code
-- [ ] optimize solver to prune bad regions (all my homies hate negators)
-- [x] fix android being h to play with
-- [ ] optimize editor.js and stuff
-
-## low priority
-- [ ] graph editor mode (alternative validation)
-- [ ] alternate symmetry style
-- [ ] vertical pillar, torus even
-- [x] multipuzzle
-- [x] panel sequence export + panel custom play mode
-
-# progress
-
-Currently working on: validation v2  
-made work:
-- [x] Base Infrastructure
-- [x] Dots, Crosses, Diamonds
-- [x] Squares, Pentagons, Stars
-- [x] Triangles, Arrows, Darts
-- [x] Divided Diamonds
-- [x] Two-By-Twos
-- [x] Celled Hexes
-- [x] Polyominos, Scalers
-- [x] Antipolyominos
-- [x] Tenuous Triangles
-- [x] Xs
-- [x] Bridges
-- [x] Sizers
-- [ ] Negators, Copiers
-- [x] Portals
-- [x] Black, Whiteholes
-- [x] Antitriangle
+### New Symbols...
 - [ ] scratches
-- [ ] crystals
 - [ ] dice
 - [ ] xv mino
+- [ ] crystals
