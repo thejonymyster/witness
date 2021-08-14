@@ -220,7 +220,7 @@ window.validate = function(puzzle, quick) {
     puzzle.grid = window.savedGrid;
     delete window.savedGrid;
     puzzle.valid = (puzzle.invalidElements.length == 0);
-    console.warn(puzzle, global);
+    // console.warn(puzzle, global);
 }
 
 function init(puzzle) { // initialize globals
