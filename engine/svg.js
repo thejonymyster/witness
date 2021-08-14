@@ -606,10 +606,10 @@ window.drawSymbolWithSvg = function(svg, params) {
         temp.setAttribute('r', '25px');
         temp.setAttribute('opacity', '0.5');
       } else {
-        // for (a of [0, 72, 144, 216, 288]) {
-        //   simplePath(svg, params, 'M 0 2 A 1 1 0 0 0 0 -14 A 1 1 0 0 0 0 -10 A 1 1 0 0 1 0 -2 A 1 1 0 0 0 0 2').setAttribute('transform', rotate(a) + ' translate(' + midx + ', ' + midy + ')' );
-        // }
-        simplePath(svg, params, 'M 0 -2 C 0 -4 5 -9 12 -5 C 12.9 -4.5 12.6 -4.1 12 -4.3 C 7 -6 4 0 2 0 C 4 0 9 5 5 12 C 4.5 12.8 4.1 12.6 4.3 12 C 6 7 0 4 0 2 C 0 4 -5 9 -12 5 C -12.7 4.6 -12.5 4.1 -12 4.3 C -7 6 -4 0 -2 0 C -4 0 -9 -5 -5 -12 C -4.6 -12.7 -4.1 -12.6 -4.3 -12 C -6 -7 0 -4 0 -2');
+        for (a of [0, 72, 144, 216, 288]) {
+          simplePath(svg, params, 'M 0 2 A 1 1 0 0 0 0 -14 A 1 1 0 0 0 0 -10 A 1 1 0 0 1 0 -2 A 1 1 0 0 0 0 2').setAttribute('transform', rotate(a) + ' translate(' + midx + ', ' + midy + ')' );
+        }
+        // simplePath(svg, params, 'M 0 -2 C 0 -4 5 -9 12 -5 C 12.9 -4.5 12.6 -4.1 12 -4.3 C 7 -6 4 0 2 0 C 4 0 9 5 5 12 C 4.5 12.8 4.1 12.6 4.3 12 C 6 7 0 4 0 2 C 0 4 -5 9 -12 5 C -12.7 4.6 -12.5 4.1 -12 4.3 C -7 6 -4 0 -2 0 C -4 0 -9 -5 -5 -12 C -4.6 -12.7 -4.1 -12.6 -4.3 -12 C -6 -7 0 -4 0 -2');
       }
       break;
     case 'whitehole':
