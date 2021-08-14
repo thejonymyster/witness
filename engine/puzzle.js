@@ -37,6 +37,7 @@ window.Puzzle = class {
       this.newGrid(2 * width + 1, 2 * height + 1)
     }
     this.pillar = pillar
+    this.perfect = false;
     // this.settings = {
     //   // If true, negation symbols are allowed to cancel other negation symbols.
     //   NEGATIONS_CANCEL_NEGATIONS: true,
@@ -53,101 +54,6 @@ window.Puzzle = class {
     //   // If true, mid-segment startpoints will constitute solid lines, and form boundaries for the region.
     //   FAT_STARTPOINTS: false,
     // }
-  }
-
-  static deserialize(json) {
-    var parsed = JSON.parse(json)
-    // Claim that it's not a pillar (for consistent grid sizing), then double-check ourselves later.
-    var puzzle = new Puzzle((parsed.grid.length - 1)/2, (parsed.grid[0].length - 1)/2)
-    puzzle.autoSolved = parsed.autoSolved;
-    puzzle.grid = parsed.grid;
-    puzzle.theme = parsed.theme;
-    puzzle.image = parsed.image;
-    if (puzzle.theme) applyTheme(puzzle);
-    else copyTheme(puzzle);
-    if (puzzle.image) applyImage(puzzle);
-    else copyImage(puzzle);
-    // Legacy: Grid squares used to use 'false' to indicate emptiness.
-    // Legacy: Cells may use {} to represent emptiness
-    // Now, we use:
-    // Cells default to null
-    // Lines default to {'type':'line', 'line':0}
-    for (var x=0; x<puzzle.width; x++) {
-      for (var y=0; y<puzzle.height; y++) {
-        var cell = puzzle.grid[x][y]
-        if (cell === false || cell == null || cell.type == null) {
-          if (x%2 === 1 && y%2 === 1) puzzle.grid[x][y] = null
-          else puzzle.grid[x][y] = {'type':'line', 'line':window.LINE_NONE}
-        } else {
-          if (cell.type === 'poly' || cell.type === 'ylop' || cell.type === 'polynt') {
-            if (cell.rot === 'all') {
-              // Legacy: Polys and ylops used to have a rot value (before I started using polyshape).
-              // rot=all is a holdover that was used to represent rotation polyominos.
-              puzzle.grid[x][y].polyshape |= window.ROTATION_BIT
-              delete puzzle.grid[x][y].rot
-            }
-            // Fixup: Sometimes we have a polyshape which is empty. Just ignore these objects.
-            if (puzzle.grid[x][y].polyshape & ~window.ROTATION_BIT === 0) puzzle.grid[x][y] = null
-          } else if ((x%2 !== 1 || y%2 !== 1) && cell.color != null) {
-            // Legacy: Lines used to use 'line' instead of 'color'
-            cell.line = cell.color
-            delete cell.color
-          } else if (cell.gap === true) {
-            // Legacy: Gaps used to be null/true, are now null/1/2
-            puzzle.grid[x][y].gap = window.GAP_BREAK
-          }
-        }
-      }
-    }
-    // Legacy: Startpoints used to be only parsed.start
-    if (parsed.start) {
-      parsed.startPoints = [parsed.start]
-    }
-    // Legacy: Startpoints used to be a separate array, now they are flags
-    if (parsed.startPoints) {
-      for (var startPoint of parsed.startPoints) {
-        puzzle.grid[startPoint.x][startPoint.y].start = true
-      }
-    }
-    // Legacy: Endpoints used to be only parsed.end
-    if (parsed.end) {
-      parsed.endPoints = [parsed.end]
-    }
-    // Legacy: Endpoints used to be a separate array, now they are flags
-    if (parsed.endPoints) {
-      for (var endPoint of parsed.endPoints) {
-        puzzle.grid[endPoint.x][endPoint.y].end = endPoint.dir
-      }
-    }
-    // Legacy: Dots and gaps used to be separate arrays
-    // Now, they are flags on the individual lines.
-    if (parsed.dots) {
-      for (var dot of parsed.dots) {
-        puzzle.grid[dot.x][dot.y].dot = window.DOT_BLACK
-      }
-    }
-    if (parsed.gaps) {
-      for (var gap of parsed.gaps) {
-        puzzle.grid[gap.x][gap.y].gap = window.GAP_BREAK
-      }
-    }
-    // if (parsed.settings) {
-    //   for (var key of Object.keys(parsed.settings)) {
-    //     puzzle.settings[key] = parsed.settings[key]
-    //   }
-    // }
-    puzzle.pillar = parsed.pillar
-    puzzle.symmetry = parsed.symmetry
-    puzzle.largezero = puzzle.width * puzzle.height
-    return puzzle
-  }
-
-  serialize() {
-    return JSON.stringify(this)
-  }
-
-  clone() {
-    return Puzzle.deserialize(this.serialize())
   }
 
   // This is explicitly *not* just clearing the grid, so that external references

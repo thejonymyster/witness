@@ -367,3 +367,41 @@ li button {
   vertical-align: middle;
   margin-left: -16px;
 }
+
+#progress {
+  z-index: -1;
+  height: 38px;
+  width: 0%;
+  background-color: #390;
+}
+
+#progressBox {
+  display: none;
+  width: 220px;
+  border: 1px solid black;
+  margin-top: 2px;
+}
+
+.checkbox {
+  width: 22px;
+  height: 22px;
+  display: inline-block;
+  vertical-align: text-bottom;
+  margin-right: 6px;
+  border: 1.5px var(--text) solid;
+  background: var(--background);
+  color: var(--text);
+}
+
+.sols {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: var(--line-undone);
+  margin: 0 1px;
+  transition: background-color 1s;
+}
+
+.sols.active {
+  background-color: var(--line-default);
+}

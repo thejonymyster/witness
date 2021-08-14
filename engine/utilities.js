@@ -261,91 +261,11 @@ function showSolution(puzzle, paths, num) {
   }
 }
 
-function createCheckbox() {
-  var checkbox = document.createElement('div')
-  checkbox.style.width = '22px'
-  checkbox.style.height = '22px'
-  checkbox.style.display = 'inline-block'
-  checkbox.style.verticalAlign = 'text-bottom'
-  checkbox.style.marginRight = '6px'
-  checkbox.style.borderWidth = '1.5px'
-  checkbox.style.borderStyle = 'solid'
-  checkbox.style.borderColor = 'var(--text)'
-  checkbox.style.background = 'var(--background)'
-  checkbox.style.color = 'var(--text)'
-  return checkbox
-}
-
-// Required global variables/functions:
-// window.puzzle
-// window.onSolvedPuzzle()
-// window.MAX_SOLUTIONS // defined by solve.js
-window.addSolveButtons = function() {
-  var parent = document.currentScript.parentElement
-
-  var solveMode = createCheckbox()
-  solveMode.id = 'solveMode'
-  parent.appendChild(solveMode)
-
-  solveMode.onpointerdown = function() {
-    this.checked = !this.checked
-    this.style.background = (this.checked ? 'var(--text)' : 'var(--background)')
-    if (window.setSolveMode) window.setSolveMode(this.checked)
-  }
-
-  var solveManual = document.createElement('label')
-  parent.appendChild(solveManual)
-  solveManual.id = 'solveManual'
-  solveManual.onpointerdown = function() {solveMode.onpointerdown()}
-  solveManual.innerText = 'Solve (manually)'
-  solveManual.style = 'margin-right: 8px'
-
-  var solveAuto = document.createElement('button')
-  parent.appendChild(solveAuto)
-  solveAuto.id = 'solveAuto'
-  solveAuto.innerText = 'Solve (automatically)'
-  solveAuto.onpointerdown = solvePuzzle
-  solveAuto.style = 'margin-right: 8px'
-
-  var div = document.createElement('div')
-  parent.appendChild(div)
-  div.style = 'display: inline-block; vertical-align:top'
-
-  var progressBox = document.createElement('div')
-  div.appendChild(progressBox)
-  progressBox.id = 'progressBox'
-  progressBox.style = 'display: none; width: 220px; border: 1px solid black; margin-top: 2px'
-
-  var progressPercent = document.createElement('label')
-  progressBox.appendChild(progressPercent)
-  progressPercent.id = 'progressPercent'
-  progressPercent.style = 'float: left; margin-left: 4px'
-  progressPercent.innerText = '0%'
-
-  var progress = document.createElement('div')
-  progressBox.appendChild(progress)
-  progress.id = 'progress'
-  progress.style = 'z-index: -1; height: 38px; width: 0%; background-color: #390'
-
-  var solutionViewer = document.createElement('div')
-  div.appendChild(solutionViewer)
-  solutionViewer.id = 'solutionViewer'
-  solutionViewer.style = 'display: none'
-
-  var previousSolution = document.createElement('button')
-  solutionViewer.appendChild(previousSolution)
-  previousSolution.id = 'previousSolution'
-  previousSolution.innerHTML = '&larr;'
-
-  var solutionCount = document.createElement('label')
-  solutionViewer.appendChild(solutionCount)
-  solutionCount.id = 'solutionCount'
-  solutionCount.style = 'padding: 6px'
-
-  var nextSolution = document.createElement('button')
-  solutionViewer.appendChild(nextSolution)
-  nextSolution.id = 'nextSolution'
-  nextSolution.innerHTML = '&rarr;'
+window.checkboxToggle = function(id, fn) {
+  let checkbox = document.getElementById(id);
+  checkbox.checked = !checkbox.checked
+  checkbox.style.background = (checkbox.checked ? 'var(--text)' : 'var(--background)')
+  if (fn) fn(checkbox.checked)
 }
 
 window.themeArgs = ['background', 'outer', 'inner', 'text', 'line-undone', 'line-default', 'line-success', 'line-primary', 'line-secondary'];
@@ -416,7 +336,7 @@ window.byteToInt = function(...byte) {
   return byte.map(b => ((b.charCodeAt(0) << 24 >>> 0) + (b.charCodeAt(1) << 16 >>> 0) + (b.charCodeAt(2) << 8 >>> 0) + (b.charCodeAt(3) >>> 0)));
 }
 
-const _keyStr = "`123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.-_0"
+const _keyStr = "`123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.-0"
 
 window.runLength = function(str) {
   let res = "";
@@ -491,6 +411,8 @@ window.endEnum = ['top', 'right', 'left', 'bottom'];
 window.serializePuzzle = function(puzzle) {
   // scary task!
   let raw = "";
+  if (puzzle.perfect) raw += String.fromCharCode(puzzle.sols);
+  else raw += '\u0001';
   raw += String.fromCharCode(Math.floor(puzzle.width / 2));
   raw += String.fromCharCode(Math.floor(puzzle.height / 2));
   raw += String.fromCharCode(makeBitSwitch(puzzle.symmetry, puzzle.symmetry?.x, puzzle.symmetry?.y, puzzle.pillar)); // start
@@ -525,22 +447,34 @@ window.serializePuzzle = function(puzzle) {
   for (const entry of themeArgs) ints.push(puzzle.theme[entry]);
   raw += intToByte(...ints).join('');
   raw += (puzzle.image['background-image'] ?? '') + '\u00ff' + (puzzle.image['foreground-image'] ?? '');
-  return 'v2_' + runLength(btoa(raw).replace(/\+/g, '.').replace(/\//g, '-').replace(/\=/g, '_'));
+  return 'v3_' + runLength(btoa(raw).replace(/\+/g, '.').replace(/\//g, '-').replace(/\=/g, '_'));
 }
 
 window.deserializePuzzle = function(string) {
   let veri = string.indexOf('_');
   let version = string.slice(0, veri);
   string = string.slice(veri + 1);
-  if (version == 'v2') return deserializePuzzleV2(string);
+  if (version == 'v2') return deserializePuzzleV2(deserializePuzzlePre(string));
+  if (version == 'v3') return deserializePuzzleV3(deserializePuzzlePre(string));
   else throw Error('unknown puzzle format');
 }
 
-function deserializePuzzleV2(string) {
-  let raw = atob(derunLength(string).replace(/\./g, '+').replace(/\-/g, '/').replace(/\_/g, '='));
+function deserializePuzzlePre(string) {
+  return atob(derunLength(string).replace(/\./g, '+').replace(/\-/g, '/').replace(/\_/g, '='));
+}
+
+function deserializePuzzleV3(raw) {
+  return deserializePuzzleV2(raw.slice(1), raw.charCodeAt(0));
+}
+
+function deserializePuzzleV2(raw, sols=1) {
   let i = 2;
   let char = readBitSwitch(raw.charCodeAt(i));
   let puzzle = new Puzzle(raw.charCodeAt(0), raw.charCodeAt(1), char[3]);
+  if (sols > 1) {
+    puzzle.perfect = true;
+    puzzle.sols = sols;
+  } else puzzle.perfect = false;
   if (char[0]) puzzle.symmetry = {'x': char[1], 'y': char[2]};
   let x = -1; y = 0;
   while (true) {
@@ -628,6 +562,23 @@ window.importSequence = function(string) {
 function importSequenceV1(string) {
   let res = string.split('~~').map(e => window.deserializePuzzle(e));
   return res;
+}
+
+window.pathsToDir = function(paths) {  
+  let avgs = paths.map(segment => (
+    {'x': (segment.poly1.animatedPoints[0].x + segment.poly1.animatedPoints[1].x + segment.poly1.animatedPoints[2].x + segment.poly1.animatedPoints[3].x), 
+    'y': segment.poly1.animatedPoints[0].y + segment.poly1.animatedPoints[1].y + segment.poly1.animatedPoints[2].y + segment.poly1.animatedPoints[3].y}));
+  let dir = "";
+  for (let i = 1; i < avgs.length; i++) {
+    if (Math.abs(avgs[i].x - avgs[i-1].x) > Math.abs(avgs[i].y - avgs[i-1].y)) {
+        if (avgs[i].x > avgs[i-1].x) dir += 'r';
+        else dir += 'l';
+    } else {
+        if (avgs[i].y > avgs[i-1].y) dir += 'd';
+        else dir += 'u';
+    }
+  }
+  return dir;
 }
 
 })

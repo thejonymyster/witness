@@ -11,11 +11,23 @@ String.prototype.hashCode = function() {
     return hash;
 };
 
+function sol(id) {
+  return document.createRange().createContextualFragment(
+    `<div class='sols' id='sols-${id+1}'></div>`);
+}
+
 let puzzles;
 let code;
 let currentPanel;
+let solsWrapper;
+let sols;
 function reloadPanel() {
+  while (solsWrapper.firstChild) solsWrapper.removeChild(solsWrapper.firstChild);
   window.puzzle = puzzles[currentPanel];
+  if (puzzle.perfect) {
+    sols = new Set();
+    for (let i = 0; i < puzzle.sols; i++) solsWrapper.appendChild(sol(i));
+  }
   let svg = document.getElementById('puzzle')
   while (svg.firstChild) svg.removeChild(svg.firstChild)
   draw(window.puzzle)
@@ -25,6 +37,7 @@ function reloadPanel() {
 }
 
 window.onload = function() {
+  solsWrapper = document.getElementById('solsWrapper')
   let toLoad = (new URL(window.location.href).hash);
   code = toLoad.hashCode();
   if (toLoad) {
@@ -40,7 +53,17 @@ window.reloadSymbolTheme = function() {
 }
 
 window.onSolvedPuzzle = function(paths) {
-    if ((currentPanel == localStorage[`puzzleProgress_${code}`]) && (currentPanel < (puzzles.length - 1))) localStorage[`puzzleProgress_${code}`]++;
+  if (puzzle.perfect) {
+    let dir = pathsToDir(paths);
+    sols.add(dir);
+    document.getElementById('sols-' + sols.size).classList.add('active');
+    if (sols.size == puzzle.sols) levelUp();
+  }
+  else levelUp();
+}
+
+function levelUp() {
+  if ((currentPanel == localStorage[`puzzleProgress_${code}`]) && (currentPanel < (puzzles.length - 1))) localStorage[`puzzleProgress_${code}`]++;
 }
 
 window.getNext = function() {

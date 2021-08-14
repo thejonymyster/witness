@@ -65,6 +65,10 @@
                 <option>Pillar (Two Lines)</option>
               </select>
             </div>
+            <div>
+              <div onpointerdown="checkboxToggle('makePerfect', makePerfect)" class="checkbox" id="makePerfect"></div>
+              <label onpointerdown="checkboxToggle('makePerfect', makePerfect)" style="margin-right: 8px">Make Perfect</label>
+            </div>
             <div class="hlist editor-screen">
               <table id="symbolButtons" style="padding: 5px; display:none" cellpadding="4" cellspacing="0">
                 <tr>
@@ -189,7 +193,20 @@
               </table>
             </div>
             <div>
-              <script>addSolveButtons()</script>
+              <div onpointerdown="checkboxToggle('solveMode', setSolveMode)" class="checkbox" id="solveMode"></div>
+              <label onpointerdown="checkboxToggle('solveMode', setSolveMode)" id="solveManual" style="margin-right: 8px">Solve (manually)</label>
+              <button onpointerdown="solvePuzzle()" id="solveAuto" style="margin-right: 8px">Solve (automatically)</button>
+              <div style="display: inline-block; vertical-align:top">
+                <div id="progressBox">
+                  <label id="progressPercent" style="float: left; margin-left: 4px">0%</label>
+                  <div id="progress"></div>
+                </div>
+                <div id="solutionViewer" style="display: none">
+                  <button id="previousSolution">&larr;</button>
+                  <label id="solutionCount" style="padding: 6px"></label>
+                  <button id="nextSolution">&rarr;</button>
+                </div>
+              </div>
               <button id="save" onpointerdown="exportPuzzle()">Get URL</button>
               <a href="https://prodzpod.github.io/witness/merge.html"><button>Merge Levels</button></a>
             </div>

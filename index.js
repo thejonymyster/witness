@@ -33,19 +33,7 @@ window.reloadSymbolTheme = function() {
 }
 
 window.onSolvedPuzzle = function(paths) {
-    let avgs = paths.map(segment => (
-        {'x': (segment.poly1.animatedPoints[0].x + segment.poly1.animatedPoints[1].x + segment.poly1.animatedPoints[2].x + segment.poly1.animatedPoints[3].x), 
-        'y': segment.poly1.animatedPoints[0].y + segment.poly1.animatedPoints[1].y + segment.poly1.animatedPoints[2].y + segment.poly1.animatedPoints[3].y}));
-    let dir = "";
-    for (let i = 1; i < avgs.length; i++) {
-        if (Math.abs(avgs[i].x - avgs[i-1].x) > Math.abs(avgs[i].y - avgs[i-1].y)) {
-            if (avgs[i].x > avgs[i-1].x) dir += 'r';
-            else dir += 'l';
-        } else {
-            if (avgs[i].y > avgs[i-1].y) dir += 'd';
-            else dir += 'u';
-        }
-    }
+    let dir = pathsToDir(paths);
     switch (dir) {
         case 'uulluullll': // crosses
             window.location.href = "https://prodzpod.github.io/witness/play#vs1_v2_AQIQBgU~7AcAAAc~8AGAv8A4--.AFugsQBboLE~6AEhGYwBGkP8Aoez-AIj--wD--yL-~~v2_AgIQBgUABw~AABw~5AH~BAHAAAGAv8A4--.AFugsQBboLE~6AEhGYwBGkP8Aoez-AIj--wD--yL-~~v2_AgIQ~4ABhQ~7AYUBgUABwAABgI~5ABhQ~4AGFAD-AOP--gBboLEAW6Cx~6ABIRmMARpD-AKHs-wCI--8A--8i-w__~~v2_AgIQBgUABw~GAc~8AF~6AYC-wDj--4AW6CxAFugsQ~6ASEZjAEaQ-wCh7P8AiP--AP--Iv8_~~v2_AwMQBgUAAAYK~CABQAABQAH~MAc~KAGCgYC-wDj--4AW6CxAFugsQ~6ASEZjAEaQ-wCh7P8AiP--AP--Iv8_~~v2_AwMQBgUAAAYK~GABw~LAH~FAFAAAGCgAABgL-AOP--gBboLEAW6Cx~6ABIRmMARpD-AKHs-wCI--8A--8i-w__~~v2_AwMQBgUABw~4AYK~6AEAAAD-~CABwAAAQAAAP8AAf~4-8AAf~4-8ABw~DAB~5-w~9AHAAAGAv8A4--.AFugsQBboLE~6AEhGYwBGkP8Aoez-AIj--wD--yL-~~v2_AwMQBgU~CAB~5-w~9AH~GABw~8AH~5-AAEAAAD-AAH~5-~AAYC-wDj--4AW6CxAFugsQ~6ASEZjAEaQ-wCh7P8AiP--AP--Iv8_~~v2_AwMQBgU~FAH~5-~DAQAAAP8AAf~4-8AAQAAAP8~CAB~5-w~CAcAAAYC-wDj--4AW6CxAFugsQ~6ASEZjAEaQ-wCh7P8AiP--AP--Iv8_~~v2_AwMQBw~5AGAQYU~6AH~5-AAAGFAAABw~8AEAAAD-~5AQAAAP8~7Ac~6Af~4-8~7AYF~7AHAP8A4--uAClVMABbsWY~6AEZjVABG-08A3v.hAIj--wD--yL-~~v2_BAQQBgUABw~DAB~4A-w~4AH~5-~AAc~6Af~4-8~4AB~4A-w~GAYKAAAB~4A-w~4AH~5-~FAB~5-w~4AEAAAD-~CABwAABgL-AOP--gBboLEAW6Cx~6ABIRmMARpD-AKHs-wCI--8A--8i-w__~~v2_BAQQ~6AYB~7AB~4A-wAB~5-w~4AH~5-~FAC--8A-w~4AEAAAD-AAL--wD-AAc~5ABgU~4AH~6AH~5-AAH~5-~AAc~8AB~4A-w~7AQAAAP8~7AYF~5AP8A4--uAClVMABbsWY~6AEZjVABG-08A3v.hAIj--wD--yL-~~v2_BAQQAAAH~6AcAAAYBAAIAAAD-~NAB~4A-w~7AQAAAP8AAAYKBgU~4AGBQ~4AIAAAD-~7AB~4A-w~DAGF~9AIAAAD-AAAGFAAABw~6A-wDj-.4AKVUwAFuxZg~6ARmNUAEb-TwDe-6EAiP--AP--Iv8_~~v2_BAQQ~4ABhQABhQ~6AgAAAP8AAAYUAAAB~4A-wAF~EAL~5-AAAGFAH~5-~4ABw~GAH~5-~LAQAAAP8~4AC~4A-wU~4AGBQ~4Ac~5ABgT-AOP-7gApVTAAW7Fm~6ABGY1QARv9PAN7-oQCI--8A--8i-w__~~v2_AwMQ~8ABgEAEf--AP8~4AB~KAEf--AP8~4AD~KAEf--AP8~4ADAAYF~8A-wD5-.MAS1UpALGhWw~6AY1VGAP-ORgD--aEAiP--AP--Iv8_~~v2_AwMQBw~8AYB~7AR--8A-wAQABE~4AF~8AEf--AP8AEAAx~CABQ~AAEf--AP8AEAARAAYF~7AHAP8A.f-jAEtVKQCxoVs~6AGNVRgD-zkYA--2hAIj--wD--yL-~~v2_BAQQBw~AABgE~KAH~8AEf--AP8AEABH~PABH--wD-ABAARw~6ABw~EABgo~5ABgU~9ABwD-APn-4wBLVSkAsaFb~6ABjVUYA-85GAP-9oQCI--8A--8i-w__~~v2_AQIQAAAGAg~4Ag~8AGBQAA-wD7-.MAUVUpALGoWw~6AYWNGAP-jRgD-4aEAiP--AP--Iv8_~~v2_AQIQAAAGAg~4AcAAAg~5ABgUAAP8A.--jAFFVKQCxqFs~6AGFjRgD-40YA-.GhAIj--wD--yL-~~v2_AgIQAAAFAAAGAQ~9AI~BAGBQAH~4A-wD7-.MAUVUpALGoWw~6AYWNGAP-jRgD-4aEAiP--AP--Iv8_~~v2_AwMQ~8ABgIAAf~4-8~7Ag~EAf~4-8~CAI~9AQAAAP8ABgUAC~7A-wD7-.MAUVUpALGoWw~6AYWNGAP-jRgD-4aEAiP--AP--Iv8_~~v2_AwMQ~6AgAAAYC~AAc~BAEAAAD-AAH~5-AAEAAAD-~AAc~BAYFAAg~6AP8A.--jAFFVKQCxqFs~6AGFjRgD-40YA-.GhAIj--wD--yL-~~v2_BAQQBw~5AI~6AcAABH--wD-ABAAAw~cABgU~4AI~NAF~7AR--8A-wAQAAM~HABgL-APv-4wBRVSkAsahb~6ABhY0YA-.NGAP-hoQCI--8A--8i-w__~~v2_CgoQAAAI~AAYU~8AC~6AGAg~QABgoAAAc~5ACAAGCgAGFAAGFAc~8AI~7AGCg~QABwAAC~9Ac~5ABwAACAAACAAABw~WAc~9ABhQABhQI~6Ac~ZAc~5ACAAABw~6ABhQAAAg~5ABw~HAGF~7ABhQ~8AH~6Ac~4AGFAYFBhQ~CAGF~5AYU~4ABhQ~4AGFAAGF~5AYUAAYU~AAYKAAYUAAYUAAYK~aABgo~8AI~4ABhQ~8AI~KABhQ~DABw~5AH~AAYUBwAAC~9Ag~WAH~BAHAAYU~6Ac~FAYK~JAGAwYKAAAI~6Ac~4AGFAAGCg~5AI~4A-wBFRUUAwsLCAMLCwg~6Abm5uAP---wD---8AiP--AP--Iv8_"

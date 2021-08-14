@@ -7,9 +7,7 @@ var dragging = null
 // write a singular puzzle for reload purposes
 function writePuzzle() {
   console.log('Writing puzzle', puzzle)
-  var puzzleToSave = puzzle.clone()
-  puzzleToSave.clearLines()
-  localStorage.puzzle = puzzleToSave.serialize();
+  localStorage.puzzle = serializePuzzle(puzzle);
 }
 
 // Delete the active puzzle then read the next one.
@@ -197,6 +195,11 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
     newPuzzle.grid[x][0].end = 'top';
     break;
   }
+
+  if (document.getElementById('makePerfect').checked) {
+    newPuzzle.perfect = true;
+    newPuzzle.sols = solve(newPuzzle, () => {}, () => {}).length;
+  }
   copyTheme(newPuzzle);
   copyImage(newPuzzle);
 
@@ -210,27 +213,6 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
     writePuzzle()
   }
   reloadPuzzle()
-}
-
-window.importPuzzle = function(serialized) {
-  if (!serialized) {
-    serialized = prompt('Paste your puzzle here:')
-  }
-
-  console.log('Creating puzzle from serialized', serialized)
-  try {
-    var newPuzzle = Puzzle.deserialize(serialized) // Will throw for most invalid puzzles
-    window.puzzle = newPuzzle
-    applyThemeButton();
-    applyImageButton();
-    writePuzzle()
-    reloadPuzzle()
-  } catch (e) {
-    console.error('Failed to load serialized puzzle', e)
-
-    // Only alert if user tried to enter data
-    if (serialized) alert('Not a valid puzzle!')
-  }
 }
 
 window.setSolveMode = function(value) {
@@ -249,6 +231,16 @@ window.setSolveMode = function(value) {
     drawPuzzle()
   }
 }
+
+window.makePerfect = function(value) {
+  document.getElementById('makePerfect').checked = value
+  if (value) {
+    let sols = solve(puzzle, () => {}, () => {});
+    puzzle.sols = Math.min(sols.length, 0xFF);
+  } else delete puzzle.sols;
+  puzzle.perfect = value;
+}
+
 //** End of user interaction points
 
 window.reloadSymbolTheme = function() {
@@ -268,7 +260,7 @@ window.onload = function() {
     writePuzzle();
     document.getElementById('deleteButton').disabled = true
   } else if (localStorage.puzzle !== undefined) {
-    window.puzzle = Puzzle.deserialize(localStorage.puzzle);
+    window.puzzle = deserializePuzzle(localStorage.puzzle);
     applyThemeButton();
     applyImageButton();
   }
@@ -1050,7 +1042,7 @@ function resizePuzzle(dx, dy, id) {
   }
 
   // We don't call new Puzzle here so that we can persist extended puzzle attributes (pillar, symmetry, etc)
-  var oldPuzzle = puzzle.clone()
+  var oldPuzzle = puzzle;
   puzzle.newGrid(newWidth, newHeight)
 
   var debugGrid = []
