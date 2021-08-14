@@ -198,7 +198,6 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
 
   if (document.getElementById('makePerfect').checked) {
     newPuzzle.perfect = true;
-    newPuzzle.sols = solve(newPuzzle, () => {}, () => {}).length;
   }
   copyTheme(newPuzzle);
   copyImage(newPuzzle);
@@ -234,10 +233,6 @@ window.setSolveMode = function(value) {
 
 window.makePerfect = function(value) {
   document.getElementById('makePerfect').checked = value
-  if (value) {
-    let sols = solve(puzzle, () => {}, () => {});
-    puzzle.sols = Math.min(sols.length, 0xFF);
-  } else delete puzzle.sols;
   puzzle.perfect = value;
 }
 
