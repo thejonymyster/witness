@@ -15,13 +15,13 @@ Now that looksyv2 is out mroe things must be done
 - [ ] fill with selected element
 - [ ] doesnt work on firefox
 - [ ] reset / "randomize" for theme
+- [ ] undo / redo
 - [ ] clean up editor.js
 - [ ] make puzzles bigger for mobile (temporary draggy solution)
 - [ ] main page progression
 - [ ] challenge packs
 - [ ] reduce code size further, group similar ones
 - [ ] optimize verification algorithm
-- [ ] undo / redo
 ### Tutorials for...
 - [ ] curve
 - [ ] xs
