@@ -425,7 +425,9 @@ window.drawSymbolWithSvg = function(svg, params) {
         // drawPolyomino(svg, params, 12, 2, '3 0, 6 3, 9 0, 12 3, 9 6, 12 9, 9 12, 6 9, 3 12, 0 9, 3 6, 0 3')
       break;
     case 'divdiamond': //------------------------------------SHAUN'S DIVIDED DIAMOND
-      simplePoly(svg, params, '-15 0, 0 15, 15 0, 0 -15, 0 -9, 9 0, 0 9, -9 0, 0 -9, 0 -15')
+      let m = 3;
+      if (localStorage.symbolTheme == "Canonical") m = 5;
+      simplePoly(svg, params, `-${m*5} 0, 0 ${m*5}, ${m*5} 0, 0 -${m*5}, 0 -${m*5-6}, ${m*5-6} 0, 0 ${m*5-6}, -${m*5-6} 0, 0 -${m*5-6}, 0 -${m*5}`)
       switch (params.count) {
         case 2:
           simpleDot(svg, params, 0, 0);
@@ -435,98 +437,98 @@ window.drawSymbolWithSvg = function(svg, params) {
           svg.appendChild(rect)
           setAttr(rect, params)
           rect.setAttribute('x', -2);
-          rect.setAttribute('y', -9);
+          rect.setAttribute('y', -m*4);
           rect.setAttribute('width', 4);
-          rect.setAttribute('height', 18);
+          rect.setAttribute('height', m*8);
           break;
         case 4:
-          simpleLine(svg, params, 9, 4, 180);
-          simpleLine(svg, params, 7, 4, 60);
-          simpleLine(svg, params, 7, 4, 300);
+          simpleLine(svg, params, m*4, 4, 180);
+          simpleLine(svg, params, m*3, 4, 60);
+          simpleLine(svg, params, m*3, 4, 300);
           break;
         case 5:
           if (localStorage.symbolTheme == "Canonical") {
-            simpleLine(svg, params, 9, 4, 180);
-            simpleLine(svg, params, 9, 4, 0);
-            simpleLine(svg, params, 9, 4, 90);
-            simpleLine(svg, params, 9, 4, 270);
+            simpleLine(svg, params, m*4, 4, 180);
+            simpleLine(svg, params, m*4, 4, 0);
+            simpleLine(svg, params, m*4, 4, 90);
+            simpleLine(svg, params, m*4, 4, 270);
           } else {
-            simpleLine(svg, params, 7, 4, 45);
-            simpleLine(svg, params, 7, 4, 135);
-            simpleLine(svg, params, 7, 4, 225);
-            simpleLine(svg, params, 7, 4, 315);
+            simpleLine(svg, params, m*3, 4, 45);
+            simpleLine(svg, params, m*3, 4, 135);
+            simpleLine(svg, params, m*3, 4, 225);
+            simpleLine(svg, params, m*3, 4, 315);
           }
           break;
         case 6:
           if (localStorage.symbolTheme == "Canonical") {
-            simpleLine(svg, params, 9, 4, 180);
-            simpleLine(svg, params, 8, 4, 108);
-            simpleLine(svg, params, 7, 4, 36);
-            simpleLine(svg, params, 8, 4, 252);
-            simpleLine(svg, params, 7, 4, 324);
+            simpleLine(svg, params, m*4, 4, 180);
+            simpleLine(svg, params, m*11/3, 4, 108);
+            simpleLine(svg, params, m*3, 4, 36);
+            simpleLine(svg, params, m*11/3, 4, 252);
+            simpleLine(svg, params, m*3, 4, 324);
           } else {
-            simpleLine(svg, params, 7, 4, 45);
-            simpleLine(svg, params, 7, 4, 135);
-            simpleLine(svg, params, 7, 4, 225);
-            simpleLine(svg, params, 7, 4, 315);
-            simpleDot(svg, params, 12, 12);
+            simpleLine(svg, params, m*3, 4, 45);
+            simpleLine(svg, params, m*3, 4, 135);
+            simpleLine(svg, params, m*3, 4, 225);
+            simpleLine(svg, params, m*3, 4, 315);
+            simpleDot(svg, params, m*4, m*4);
           }
           break;
         case 7:
           if (localStorage.symbolTheme == "Canonical") {
-            simpleLine(svg, params, 9, 4, 180);
-            simpleLine(svg, params, 9, 4, 0);
-            simpleLine(svg, params, 9, 4, 120);
-            simpleLine(svg, params, 9, 4, 60);
-            simpleLine(svg, params, 9, 4, 300);
-            simpleLine(svg, params, 9, 4, 240);
+            simpleLine(svg, params, m*4, 4, 180);
+            simpleLine(svg, params, m*4, 4, 0);
+            simpleLine(svg, params, m*3, 4, 120);
+            simpleLine(svg, params, m*3, 4, 60);
+            simpleLine(svg, params, m*3, 4, 300);
+            simpleLine(svg, params, m*3, 4, 240);
           } else {
-            simpleLine(svg, params, 7, 4, 45);
-            simpleLine(svg, params, 7, 4, 135);
-            simpleLine(svg, params, 7, 4, 225);
-            simpleLine(svg, params, 7, 4, 315);
-            simpleDot(svg, params, 12, 12);
-            simpleDot(svg, params, -12, -12);
+            simpleLine(svg, params, m*3, 4, 45);
+            simpleLine(svg, params, m*3, 4, 135);
+            simpleLine(svg, params, m*3, 4, 225);
+            simpleLine(svg, params, m*3, 4, 315);
+            simpleDot(svg, params, m*4, m*4);
+            simpleDot(svg, params, -m*4, -m*4);
           }
           break;
         case 8:
           if (localStorage.symbolTheme == "Canonical") {
-            simpleLine(svg, params, 9, 4, 180);
-            simpleLine(svg, params, 9, 4, 130);
-            simpleLine(svg, params, 9, 4, 80);
-            simpleLine(svg, params, 9, 4, 20);
-            simpleLine(svg, params, 9, 4, 230);
-            simpleLine(svg, params, 9, 4, 280);
-            simpleLine(svg, params, 9, 4, 340);
+            simpleLine(svg, params, m*4, 4, 180);
+            simpleLine(svg, params, m*3, 4, 130);
+            simpleLine(svg, params, m*4, 4, 80);
+            simpleLine(svg, params, m*3, 4, 20);
+            simpleLine(svg, params, m*3, 4, 230);
+            simpleLine(svg, params, m*4, 4, 280);
+            simpleLine(svg, params, m*3, 4, 340);
           } else {
-            simpleLine(svg, params, 7, 4, 45);
-            simpleLine(svg, params, 7, 4, 135);
-            simpleLine(svg, params, 7, 4, 225);
-            simpleLine(svg, params, 7, 4, 315);
-            simpleDot(svg, params, 12, 12);
-            simpleDot(svg, params, -12, -12);
-            simpleDot(svg, params, -12, 12);
+            simpleLine(svg, params, m*3, 4, 45);
+            simpleLine(svg, params, m*3, 4, 135);
+            simpleLine(svg, params, m*3, 4, 225);
+            simpleLine(svg, params, m*3, 4, 315);
+            simpleDot(svg, params, m*4, m*4);
+            simpleDot(svg, params, -m*4, -m*4);
+            simpleDot(svg, params, -m*4, m*4);
           }
           break;
         case 9:
           if (localStorage.symbolTheme == "Canonical") {
-            simpleLine(svg, params, 9, 4, 180);
-            simpleLine(svg, params, 9, 4, 0);
-            simpleLine(svg, params, 9, 4, 90);
-            simpleLine(svg, params, 9, 4, 270);
-            simpleLine(svg, params, 7, 4, 45);
-            simpleLine(svg, params, 7, 4, 135);
-            simpleLine(svg, params, 7, 4, 225);
-            simpleLine(svg, params, 7, 4, 315);
+            simpleLine(svg, params, m*4, 4, 180);
+            simpleLine(svg, params, m*4, 4, 0);
+            simpleLine(svg, params, m*4, 4, 90);
+            simpleLine(svg, params, m*4, 4, 270);
+            simpleLine(svg, params, m*3, 4, 45);
+            simpleLine(svg, params, m*3, 4, 135);
+            simpleLine(svg, params, m*3, 4, 225);
+            simpleLine(svg, params, m*3, 4, 315);
           } else {
-            simpleLine(svg, params, 7, 4, 45);
+            simpleLine(svg, params, m*7/3, 4, 45);
             simpleLine(svg, params, 7, 4, 135);
-            simpleLine(svg, params, 7, 4, 225);
-            simpleLine(svg, params, 7, 4, 315);
-            simpleDot(svg, params, 12, 12);
-            simpleDot(svg, params, -12, -12);
-            simpleDot(svg, params, -12, 12);
-            simpleDot(svg, params, 12, -12);
+            simpleLine(svg, params, m*7/3, 4, 225);
+            simpleLine(svg, params, m*7/3, 4, 315);
+            simpleDot(svg, params, m*4, m*4);
+            simpleDot(svg, params, -m*4, -m*4);
+            simpleDot(svg, params, -m*4, m*4);
+            simpleDot(svg, params, m*4, -m*4);
           }
           break;
       }
