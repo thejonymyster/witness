@@ -22,6 +22,7 @@ Now that looksyv2 is out mroe things must be done
 - [ ] challenge packs
 - [ ] reduce code size further, group similar ones
 - [ ] optimize verification algorithm
+
 ### Tutorials for...
 - [ ] curve
 - [ ] xs
@@ -44,6 +45,7 @@ Now that looksyv2 is out mroe things must be done
 - [ ] dice
 - [ ] xv mino
 - [ ] crystals
+
 ### Might do
 - [ ] vanilla shapes tutorial? (including triangle)
 - [ ] OOB poly

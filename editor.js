@@ -63,39 +63,17 @@ function drawPuzzle() {
 
 function reloadPuzzle() {
   // Disable the Solve (manually) button, clear lines, and redraw the puzzle
-  document.getElementById('solveMode').checked = true
-  document.getElementById('solveMode').onpointerdown()
-  document.getElementById('solutionViewer').style.display = 'none'
+  document.getElementById('solveMode').checked = true;
+  document.getElementById('solveMode').onpointerdown();
+  document.getElementById('solutionViewer').style.display = 'none';
 
-  var save = document.getElementById('save')
-  save.innerText = 'Get URL'
-  save.onpointerdown = exportPuzzle
+  var save = document.getElementById('save');
+  save.innerText = 'Get URL';
+  save.onpointerdown = exportPuzzle;
 
-  var puzzleStyle = document.getElementById('puzzleStyle')
-  if (puzzle.pillar === false) {
-    if (puzzle.symmetry == null) {
-      puzzleStyle.value = 'Default'
-    } else if (puzzle.symmetry.x === true && puzzle.symmetry.y === false) {
-      puzzleStyle.value = 'Horizontal Symmetry'
-    } else if (puzzle.symmetry.x === false && puzzle.symmetry.y === true) {
-      puzzleStyle.value = 'Vertical Symmetry'
-    } else if (puzzle.symmetry.x === true && puzzle.symmetry.y === true) {
-      puzzleStyle.value = 'Rotational Symmetry'
-    }
-  } else if (puzzle.pillar === true) {
-    if (puzzle.symmetry == null) {
-      puzzleStyle.value = 'Pillar'
-    } else if (puzzle.symmetry.x === true && puzzle.symmetry.y === false) {
-      puzzleStyle.value = 'Pillar (H Symmetry)'
-    } else if (puzzle.symmetry.x === false && puzzle.symmetry.y === true) {
-      puzzleStyle.value = 'Pillar (V Symmetry)'
-    } else if (puzzle.symmetry.x === true && puzzle.symmetry.y === true) {
-      puzzleStyle.value = 'Pillar (R Symmetry)'
-    } else if (puzzle.symmetry.x === false && puzzle.symmetry.y === false) {
-      puzzleStyle.value = 'Pillar (Two Lines)'
-    }
-  }
-  console.log('Puzzle style:', puzzleStyle.value)
+  var puzzleStyle = document.getElementById('puzzleStyle');
+  puzzleStyle.value = symmetryModes(puzzle.symmetry, puzzle.pillar);
+  console.log('Puzzle style:', puzzleStyle.value);
 }
 
 //** Buttons which the user can click on

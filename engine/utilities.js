@@ -2,6 +2,10 @@ function namespace(code) {
   code()
 }
 
+// ---------------------------------------------------------------------------------------------------- //
+//* data stuff
+// ---------------------------------------------------------------------------------------------------- //
+
 namespace(function() {
 
 /*** Start cross-compatibility ***/
@@ -39,12 +43,9 @@ window.PLAY_SOUND = function(name) {
   audio.play()
 }
 
-window.ERROR = function(message) {
-  var request = new XMLHttpRequest()
-  request.open('POST', '/error', true) // Fire and forget
-  request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-  request.send('data=' + message)
-}
+// ---------------------------------------------------------------------------------------------------- //
+//* enum stuff
+// ---------------------------------------------------------------------------------------------------- //
 
 window.LINE_NONE     = 0
 window.LINE_BLACK    = 1
@@ -72,10 +73,38 @@ window.GAP_NONE      = 0
 window.GAP_BREAK     = 1
 window.GAP_FULL      = 2
 
-window.dotToSpokes = function(dot) {
-  if (dot >= -12) return 0;
-  else return (dot * -1) - 12
+window.symbols = ['square', 'star', 'pentagon', 'triangle', 'arrow', 'dart', 'atriangle', 'vtriangle', 'blackhole', 'whitehole', 'divdiamond', 'pokerchip', 'bridge', 'scaler', 'sizer', 'twobytwo', 'poly', 'ylop', 'polynt', 'nega', 'copier', 'portal', 'celledhex'];
+window.endEnum = ['top', 'right', 'left', 'bottom'];
+window.themeArgs = ['background', 'outer', 'inner', 'text', 'line-undone', 'line-default', 'line-success', 'line-primary', 'line-secondary'];
+window.symmetryModes = function(symmetry, pillar) {
+  if (pillar) {
+    if (!symmetry) return 'Pillar';
+    else switch (symmetry.y * 2 + symmetry.x) {
+      case 0:
+        return 'Pillar (Two Lines)';
+      case 1:
+        return 'Pillar (H Symmetry)';
+      case 2:
+        return 'Pillar (V Symmetry)';
+      case 3:
+        return 'Pillar (R Symmetry)';
+    }
+  } else {
+    if (!symmetry) return 'Default';
+    else switch (symmetry.y * 2 + symmetry.x) {
+      case 1:
+        return 'Horizontal Symmetry';
+      case 2:
+        return 'Vertical Symmetry';
+      case 3:
+        return 'Rotational Symmetry';
+    }
+  }
 }
+
+// ---------------------------------------------------------------------------------------------------- //
+//* animation stuff
+// ---------------------------------------------------------------------------------------------------- //
 
 var animations = ''
 var l = function(line) {animations += line + '\n'}
@@ -123,6 +152,10 @@ style.type = 'text/css'
 style.title = 'animations'
 style.appendChild(document.createTextNode(animations))
 document.head.appendChild(style)
+
+// ---------------------------------------------------------------------------------------------------- //
+//* log stuff
+// ---------------------------------------------------------------------------------------------------- //
 
 // Custom logging to allow leveling
 var consoleError = console.error
@@ -181,6 +214,117 @@ window.deleteElementsByClassName = function(rootElem, className) {
     if (elems.length === 0) break;
     elems[0].remove()
   }
+}
+
+window.pathsToDir = function(paths) {  
+  let avgs = paths.map(segment => (
+    {'x': (segment.poly1.animatedPoints[0].x + segment.poly1.animatedPoints[1].x + segment.poly1.animatedPoints[2].x + segment.poly1.animatedPoints[3].x), 
+    'y': segment.poly1.animatedPoints[0].y + segment.poly1.animatedPoints[1].y + segment.poly1.animatedPoints[2].y + segment.poly1.animatedPoints[3].y}));
+  let dir = "";
+  for (let i = 1; i < avgs.length; i++) {
+    if (Math.abs(avgs[i].x - avgs[i-1].x) > Math.abs(avgs[i].y - avgs[i-1].y)) {
+        if (avgs[i].x > avgs[i-1].x) dir += 'r';
+        else dir += 'l';
+    } else {
+        if (avgs[i].y > avgs[i-1].y) dir += 'd';
+        else dir += 'u';
+    }
+  }
+  return dir;
+}
+
+// ---------------------------------------------------------------------------------------------------- //
+//* util stuff
+// ---------------------------------------------------------------------------------------------------- //
+
+window.hexToInt = function(hex) {
+  return parseInt(hex.slice(1), 16);
+}
+
+window.intToHex = function(int) {
+  return '#' + Number(int).toString(16).padStart(6, '0');
+}
+
+window.makeBitSwitch = function (...bits) {
+  let cur = 1;
+  let res = 0;
+  for (const b of bits) {
+    if (b) res += cur;
+    cur <<= 1;
+  }
+  res += cur;
+  return res;
+}
+
+window.readBitSwitch = function (bs) {
+  let cur = 0;
+  let res = [];
+  while ((bs >> cur) > 1) {
+    if ((bs >> cur) % 2) res.push(true);
+    else res.push(false);
+    cur++;
+  }
+  return res;
+}
+
+window.intToByte = function(...num) {
+  return num.map(n => String.fromCharCode(((n & 0xff000000) >>> 24), ((n & 0x00ff0000) >>> 16), ((n & 0x0000ff00) >>> 8), n & 0x000000ff))};
+
+window.byteToInt = function(...byte) {
+  return byte.map(b => ((b.charCodeAt(0) << 24 >>> 0) + (b.charCodeAt(1) << 16 >>> 0) + (b.charCodeAt(2) << 8 >>> 0) + (b.charCodeAt(3) >>> 0)));
+}
+
+const _keyStr = "`123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.-0"
+
+window.runLength = function(str) {
+  let res = "";
+  let cur = '';
+  let rep = 0;
+  str += '!'; // terminate
+  for (let i = 0; i < str.length; i++) {
+    if (rep == 64) {
+      res += '~0' + cur;
+      rep = 0;
+    }
+    if (cur != str[i]) { 
+      if (rep > 3) { 
+        res += '~' 
+        res += _keyStr[rep];
+        res += cur;
+      }
+      else res += cur.repeat(rep);
+      cur = str[i]; rep = 1;
+    } else rep++;
+  }
+  return res;
+}
+
+window.derunLength = function(str) {
+  let res = ""
+  for (let i = 0; i < str.length; i++) {
+    if (str[i] == '~') {
+      res += str[i+2].repeat(_keyStr.indexOf(str[i+1]));
+      i += 2;
+    }
+    else res += str[i];
+  }
+  return res;
+}
+
+window.checkboxToggle = function(id, fn) {
+  let checkbox = document.getElementById(id);
+  checkbox.checked = !checkbox.checked
+  checkbox.style.background = (checkbox.checked ? 'var(--text)' : 'var(--background)')
+  if (fn) fn(checkbox.checked)
+}
+
+// ---------------------------------------------------------------------------------------------------- //
+//* puzzle stuff
+// ---------------------------------------------------------------------------------------------------- //
+
+window.dotToSpokes = function(dot) {
+  if (dot >= -12) return 0;
+  else return (dot * -1) - 12
 }
 
 // Automatically solve the puzzle
@@ -261,15 +405,6 @@ function showSolution(puzzle, paths, num) {
   }
 }
 
-window.checkboxToggle = function(id, fn) {
-  let checkbox = document.getElementById(id);
-  checkbox.checked = !checkbox.checked
-  checkbox.style.background = (checkbox.checked ? 'var(--text)' : 'var(--background)')
-  if (fn) fn(checkbox.checked)
-}
-
-window.themeArgs = ['background', 'outer', 'inner', 'text', 'line-undone', 'line-default', 'line-success', 'line-primary', 'line-secondary'];
-
 window.copyTheme = function(puzzle) {
   puzzle.theme = {};
   for (entry of themeArgs) {
@@ -297,80 +432,6 @@ window.applyImage = function(puzzle) {
     if (entry[1] == null) document.documentElement.style.setProperty('--' + entry[0], 'none');
     else document.documentElement.style.setProperty('--' + entry[0], `url(${entry[1]})`);
   }
-}
-
-window.hexToInt = function(hex) {
-  return parseInt(hex.slice(1), 16);
-}
-
-window.intToHex = function(int) {
-  return '#' + Number(int).toString(16).padStart(6, '0');
-}
-
-window.makeBitSwitch = function (...bits) {
-  let cur = 1;
-  let res = 0;
-  for (const b of bits) {
-    if (b) res += cur;
-    cur <<= 1;
-  }
-  res += cur;
-  return res;
-}
-
-window.readBitSwitch = function (bs) {
-  let cur = 0;
-  let res = [];
-  while ((bs >> cur) > 1) {
-    if ((bs >> cur) % 2) res.push(true);
-    else res.push(false);
-    cur++;
-  }
-  return res;
-}
-
-window.intToByte = function(...num) {
-  return num.map(n => String.fromCharCode(((n & 0xff000000) >>> 24), ((n & 0x00ff0000) >>> 16), ((n & 0x0000ff00) >>> 8), n & 0x000000ff))};
-
-window.byteToInt = function(...byte) {
-  return byte.map(b => ((b.charCodeAt(0) << 24 >>> 0) + (b.charCodeAt(1) << 16 >>> 0) + (b.charCodeAt(2) << 8 >>> 0) + (b.charCodeAt(3) >>> 0)));
-}
-
-const _keyStr = "`123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.-0"
-
-window.runLength = function(str) {
-  let res = "";
-  let cur = '';
-  let rep = 0;
-  str += '!'; // terminate
-  for (let i = 0; i < str.length; i++) {
-    if (rep == 64) {
-      res += '~0' + cur;
-      rep = 0;
-    }
-    if (cur != str[i]) { 
-      if (rep > 3) { 
-        res += '~' 
-        res += _keyStr[rep];
-        res += cur;
-      }
-      else res += cur.repeat(rep);
-      cur = str[i]; rep = 1;
-    } else rep++;
-  }
-  return res;
-}
-
-window.derunLength = function(str) {
-  let res = ""
-  for (let i = 0; i < str.length; i++) {
-    if (str[i] == '~') {
-      res += str[i+2].repeat(_keyStr.indexOf(str[i+1]));
-      i += 2;
-    }
-    else res += str[i];
-  }
-  return res;
 }
 
 window.serializeTheme = function(puzzle) {
@@ -406,8 +467,6 @@ function deserializeThemeV1(puzzle, string) {
   applyImage(puzzle);
 }
 
-window.symbols = ['square', 'star', 'pentagon', 'triangle', 'arrow', 'dart', 'atriangle', 'vtriangle', 'blackhole', 'whitehole', 'divdiamond', 'pokerchip', 'bridge', 'scaler', 'sizer', 'twobytwo', 'poly', 'ylop', 'polynt', 'nega', 'copier', 'portal', 'celledhex'];
-window.endEnum = ['top', 'right', 'left', 'bottom'];
 window.serializePuzzle = function(puzzle) {
   // scary task!
   let raw = "";
@@ -562,23 +621,6 @@ window.importSequence = function(string) {
 function importSequenceV1(string) {
   let res = string.split('~~').map(e => window.deserializePuzzle(e));
   return res;
-}
-
-window.pathsToDir = function(paths) {  
-  let avgs = paths.map(segment => (
-    {'x': (segment.poly1.animatedPoints[0].x + segment.poly1.animatedPoints[1].x + segment.poly1.animatedPoints[2].x + segment.poly1.animatedPoints[3].x), 
-    'y': segment.poly1.animatedPoints[0].y + segment.poly1.animatedPoints[1].y + segment.poly1.animatedPoints[2].y + segment.poly1.animatedPoints[3].y}));
-  let dir = "";
-  for (let i = 1; i < avgs.length; i++) {
-    if (Math.abs(avgs[i].x - avgs[i-1].x) > Math.abs(avgs[i].y - avgs[i-1].y)) {
-        if (avgs[i].x > avgs[i-1].x) dir += 'r';
-        else dir += 'l';
-    } else {
-        if (avgs[i].y > avgs[i-1].y) dir += 'd';
-        else dir += 'u';
-    }
-  }
-  return dir;
 }
 
 })
