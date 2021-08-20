@@ -5,4 +5,4 @@ venv/
 sourcemaps/
 *.zip
 puzzles.tsv
-legacy/
+legacy/*
