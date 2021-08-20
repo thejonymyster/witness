@@ -40,10 +40,10 @@ class RegionData {
         let cell = puzzle.getCell(x, y);
         if (immediately || NEGATE_IMMEDIATELY.includes(cell.type) || cell.dot > window.CUSTOM_X) {
             if (!this.nega?.length) { // oh no! no more negators!
-                if (this.copier?.length && this.negaSource) { // but i can copy the used up negator!
+                if (this.copier?.length && this?.negaSource) { // but i can copy the used up negator!
                     let copyc = this.copier.pop();
                     let [copyx, copyy] = xy(copyc);
-                    let [sourcex, sourcey] = xy(this.negaSource)
+                    let [sourcex, sourcey] = xy(this?.negaSource)
                     window.savedGrid[copyx][copyy] = window.savedGrid[sourcex][sourcey]; // copy!
                     puzzle.negations.push({ 'source': {'x': copyx, 'y': copyy}, 'target': {'x': x, 'y': y} });
                     eraseShape(puzzle, x, y); eraseShape(puzzle, copyx, copyy);
@@ -464,7 +464,7 @@ function init(puzzle) { // initialize globals
                 if (!global.regionData[regionNum][cell.type]) global.regionData[regionNum][cell.type] = [];
                 global.regionData[regionNum][cell.type].push(c);
             }
-            if (!global.regionData[regionNum].negaSource && cell.type == 'nega') 
+            if (!global.regionData[regionNum]?.negaSource && cell.type == 'nega') 
                 global.regionData[regionNum].negaSource = c;
         }
     }
