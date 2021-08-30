@@ -299,7 +299,7 @@ function placePolys(polys, puzzle) {
   for (var y=1; y<puzzle.height; y+=2) {
     var row = puzzle.grid[y]
     for (var x=1; x<puzzle.width; x+=2) {
-      var cell = row[x]
+      var cell = row?.[x]
       if (cell > 0) {
         console.log('Cell', x, y, 'has been overfilled and no ylops left to place')
         return false
