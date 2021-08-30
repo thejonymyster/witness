@@ -1060,6 +1060,7 @@ const validate = [
                         darts.push({'pos': c, 'dx': dxtemp*2, 'dy': dytemp*2});
                         break;
                     case 'star':
+                    case 'pokerchip':
                         colors.push(cell.color);
                         break;
                 }
