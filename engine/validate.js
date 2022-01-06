@@ -129,7 +129,7 @@ let width;
 let height;
 function ret(x, y, w=width) { return y * w + x; }
 function xy(c, w=width) { return [c % w, Math.floor(c / w)]; }
-function cel(puzzle, c) { let [x, y] = xy(c); return puzzle.getCell(x, y); }
+function cel(puzzle, c) { return puzzle.getCell(...xy(c)); }
 const DIR = [
     {'x': 0, 'y':-1},
     {'x': 1, 'y':-1},
@@ -186,6 +186,7 @@ window.validate = function(puzzle, quick) {
     width = puzzle.width;
     height = puzzle.height;
     [puzzle, global] = init(puzzle);
+    console.warn(puzzle, global);
     if (puzzle.valid) {
         for (fn of preValidate) {
             if (fn.or ? intersects(fn.or, global.shapes) : (fn.orNot ? !intersects(fn.orNot, global.shapes) : fn.orCustom(puzzle, global))) { // prereq for exec
@@ -221,7 +222,6 @@ window.validate = function(puzzle, quick) {
     puzzle.grid = window.savedGrid;
     delete window.savedGrid;
     puzzle.valid = (puzzle.invalidElements.length == 0);
-    // console.warn(puzzle, global);
 }
 
 function init(puzzle) { // initialize globals
@@ -267,6 +267,21 @@ function init(puzzle) { // initialize globals
             }
         }
     }
+    global.pathSym = [];
+    global.pathAll = [...global.path];
+    let _OPPOSITE = [1, 0, 3, 2];
+    if (puzzle.symmetry != null) {
+        for (let c of global.path) {
+            let o = puzzle.getSymmetricalPos(...xy(c[0]));
+            if (c[1] === undefined) global.pathSym.push([ret(o.x, o.y)]);
+            else global.pathSym.push([ret(o.x, o.y), _OPPOSITE[c[1]]]);
+        }
+        global.pathAll = [];
+        for (let i = 0; i < global.path.length; i++) {
+            global.pathAll.push(global.path[i]);
+            global.pathAll.push(global.pathSym[i]);
+        }
+    }
     let i = 0;
     let portalColorPos = {};
     let portalRegionPos = {};
@@ -300,8 +315,20 @@ function init(puzzle) { // initialize globals
                 for (let j = k-1; j <= k+1; j++) {
                     let [x, y] = xy(global.path[j][0]);
                     puzzle.grid[x][y].line = 0;
+                    global.pathAll.splice(global.pathAll.indexOf(global.path[j]), 1);
                 }
                 global.path.splice(k-1, 3);
+                break;
+            }
+            let k2 = global.pathSym.findIndex(x => x[0] == c);
+            if (k2 != -1) {
+                found = true;
+                for (let j = k2-1; j <= k2+1; j++) {
+                    let [x, y] = xy(global.pathSym[j][0]);
+                    puzzle.grid[x][y].line = 0;
+                    global.pathAll.splice(global.pathAll.indexOf(global.pathSym[j]), 1);
+                }
+                global.pathSym.splice(k2-1, 3);
                 break;
             }
         }
@@ -323,7 +350,7 @@ function init(puzzle) { // initialize globals
         for (let xx of [x-1, x, x+1]) for (let yy of [y-1, y, y+1]) 
             global.regionMatrix[yy][xx] = global.regionMatrix[y][x];
     }
-    for (let o of global.path) {
+    for (let o of global.pathAll) {
         let [x, y] = xy(o[0]);
         global.regionMatrix[y][x] = 0;
     }
@@ -551,7 +578,7 @@ function init(puzzle) { // initialize globals
     for (const region of global.regionCells.all) {
         let st = new Set();
         for (shape of region) {
-            const cell = puzzle.getCell(...xy(shape));
+            const cell = cel(puzzle, shape);
             if (cell?.type == 'line') {
                 if (!cell.dot) continue;
                 if (cell.dot >= window.SOUND_DOT) st.add('soundDot')
@@ -573,13 +600,13 @@ function init(puzzle) { // initialize globals
             corner: [],
             edge: [],
         };
-        for (const [k, regions] of Object.entries(global.regions)) {
+        for (const [k, regions] of Object.entries(global.regionCells)) {
             let i = 0;
             for (const region of regions) {
                 global.regionColors[k].push({});
                 for (const pos of region) { // triple loop! yeahhhh
                     const cell = cel(puzzle, pos);
-                    if (!cell?.color) continue;
+                    if (cell?.color === null || cell?.color === undefined) continue;
                     global.regionColors[k][i][cell.color] ??= [];
                     global.regionColors[k][i][cell.color].push(pos);
                 }
@@ -814,13 +841,29 @@ const lineValidate = [
                     q = Math.floor((cell.dot - 4) / 7) - 0.5;
                 }
             }
+            q = -1;
+            for (let o of global.pathSym) {
+                [x, y] = xy(o[0]);
+                cell = puzzle.getCell(x, y);
+                if (!cell.dot) {
+                    if (q > -1) q -= 0.5;
+                    continue;
+                } 
+                if (q > -1) {
+                    console.info('[line][!] dots length is smaller than necessary: ', x, y, 'dot: ', Math.floor((puzzle.getCell(x, y).dot - 4) / 7));
+                    global.regionData[0].addInvalid(puzzle, o[0]);
+                    if (!puzzle.valid && quick) return;
+                }
+                if (window.CUSTOM_DOTS <= cell.dot && cell.dot < window.SOUND_DOT) {
+                    q = Math.floor((cell.dot - 4) / 7) - 0.5;
+                }
+            }
         }
     }, {
         '_name': 'SOUND DOTS',
         'or': ['soundDot'],
         'exec': function(puzzle, global, quick) {
             let x, y, cell;
-            let i = 0;
             for (let o of global.path) {
                 [x, y] = xy(o[0]);
                 cell = puzzle.getCell(x, y);
@@ -885,7 +928,7 @@ const validate = [
                 let [x, y] = xy(c);
                 let cell = puzzle.getCell(x, y);
                 if (!this.or.includes(cell.type)) continue;
-                if (global.regionColors.cell[regionNum][cell.color].length != 2) {
+                if (global.regionColors.cell[regionNum][cell.color]?.length != 2) {
                     console.info('[!] Star fault: ', cell.color);
                     global.regionData[regionNum].addInvalid(puzzle, c);
                     if (!puzzle.valid && quick) return;
@@ -994,7 +1037,7 @@ const validate = [
             let chippos = {};
             for (const c of global.regionCells.cell[regionNum]) { // here we go
                 const [x, y] = data ? xy(getPortalCoords(c, data), w) : xy(c);
-                let cell = puzzle.getCell(...xy(c));
+                let cell = cel(puzzle, c);
                 let color = cell.color;
                 if (this.or.includes(cell.type)) {
                     if (!chippos[color]) chippos[color] = [];
@@ -1032,7 +1075,7 @@ const validate = [
                 let dir = cell.flip ? [0, 3, 1, 2] : [3, 0, 2, 1];
                 let r = [ret(x-1, y), ret(x+1, y), ret(x, y-1), ret(x, y+1)];
                 for (let i = 0; i < 4; i++) {
-                    let path = global.path.find(x => x[0] == r[i]);
+                    let path = global.pathAll.find(x => x[0] == r[i]);
                     if (!path) continue;
                     if (path[1] != dir[i]) {
                         console.info('[!] Swirl fault at', xy(r[i]), 'goes', endEnum[path[1]], 'supposed to go', endEnum[dir[i]]);
@@ -1077,11 +1120,11 @@ const validate = [
         'exec': function(puzzle, regionNum, global, quick) {
             const isPortaled = global.portalRegion && (global.portalRegion.indexOf(regionNum) + 1);
             let darts = [];
-            for (const c of global.regionCells.cell[regionNum]) if (this.or.includes(puzzle.getCell(...xy(c)).type)) darts.push(c);
+            for (const c of global.regionCells.cell[regionNum]) if (this.or.includes(cel(puzzle, c).type)) darts.push(c);
             const data = isPortaled ? global.portalData[isPortaled-1] : null;
             let span = data ? data.totalSpan : [0, 0, puzzle.width, puzzle.height];
             for (const c of darts) { // here we go
-                const cell = puzzle.getCell(...xy(c));
+                const cell = cel(puzzle, c);
                 const dir = dr(cell.rot).map(a => a * 2); const count = cell.count;
                 const w = data ? data.width : puzzle.width;
                 const [sx, sy] = data ? xy(getPortalCoords(c, data), w) : xy(c);
@@ -1150,7 +1193,7 @@ const validate = [
         'exec': function(puzzle, regionNum, global, quick) {
             const isPortaled = (global.portalRegion != undefined) && (global.portalRegion.indexOf(regionNum) + 1);
             let twobytwos = [];
-            for (const c of global.regionCells.cell[regionNum]) if (this.or.includes(puzzle.getCell(...xy(c)).type)) twobytwos.push(c);
+            for (const c of global.regionCells.cell[regionNum]) if (this.or.includes(cel(puzzle, c).type)) twobytwos.push(c);
             const data = isPortaled ? global.portalData[isPortaled-1] : null;
             const w = data ? data.width : puzzle.width;
             let isReg = function(x, y) { 
@@ -1227,7 +1270,7 @@ const validate = [
             let polys = []; let scalers = [0, 0];
             let pos = { poly: [], ylop: [], polynt: [], xvmino: [], scaler: [] };
             for (const c of global.regionCells.cell[regionNum]) {
-                let cell = puzzle.getCell(...xy(c));
+                let cell = cel(puzzle, c);
                 if (!this.or.includes(cell.type)) continue;
                 pos[cell.type].push(c);
                 if (cell.type == 'scaler') {
@@ -1269,7 +1312,7 @@ const validate = [
             let cs = [null, [], [], [], []];
             const fn = [(x, y) => [x, y], (x, y) => [y, x], (x, y) => [x, -y], (x, y) => [-y, -x], (x, y) => [-x, y]];
             for (const c of global.regionCells.cell[regionNum]) {
-                let cell = puzzle.getCell(...xy(c));
+                let cell = cel(puzzle, c);
                 if (this.or.includes(cell.type)) {
                     symmetry.push(cell.count);
                     cs[cell.count].push(c);
@@ -1299,7 +1342,7 @@ const validate = [
         'exec': function(puzzle, regionNum, global, quick) {
             const isPortaled = (global.portalRegion != undefined) && (global.portalRegion.indexOf(regionNum) + 1);
             let portals = [];
-            if (isPortaled) for (const c of global.regionCells.cell[regionNum]) if (puzzle.getCell(...xy(c))?.type == 'portal') portals.push(c);
+            if (isPortaled) for (const c of global.regionCells.cell[regionNum]) if (cel(puzzle, c)?.type == 'portal') portals.push(c);
             for (const color of global.bridgeRegions[regionNum]) {
                 if (global.invalidBridges[color]) { // invalid
                     for (c of global.bridges[color]) {

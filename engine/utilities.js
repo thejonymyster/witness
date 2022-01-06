@@ -716,8 +716,8 @@ function cellData(type, color, data1, data2) {
       return [ret, 1];
     case 'arrow':
     case 'dart':
-      cell.rot = data1 & 0x8;
-      data1 << 3;
+      ret.rot = data1 & 0x7;
+      data1 >>= 3;
     case 'triangle':
     case 'atriangle':
     case 'divdiamond':

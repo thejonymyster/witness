@@ -184,6 +184,17 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
     newPuzzle.grid[x*2][y*2].end = 'right';
     break;
 
+  case 'Two Lines':
+    x = Math.max(1, x)
+    y = Math.max(1, y)
+    newPuzzle = new Puzzle(x, y, false)
+    newPuzzle.symmetry = {'x':false, 'y':false}
+    newPuzzle.grid[0][y*2].start = true;
+    newPuzzle.grid[x][y*2].start = true;
+    newPuzzle.grid[0][0].end = 'top';
+    newPuzzle.grid[x][0].end = 'top';
+    break;
+
   case 'Pillar':
     x = Math.max(1, x)
     newPuzzle = new Puzzle(x, y, true)
