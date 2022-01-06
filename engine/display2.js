@@ -1,5 +1,7 @@
 namespace(function() {
 
+let audioPlaying = false;
+
 window.draw = function(puzzle, target='puzzle') {
   if (puzzle == null) return
   var svg = document.getElementById(target)
@@ -20,8 +22,8 @@ window.draw = function(puzzle, target='puzzle') {
   }
   var pixelHeight = 41 * puzzle.height + 63
   svg.setAttribute('viewbox', '0 0 ' + pixelWidth + ' ' + pixelHeight)
-  svg.style.width = pixelWidth
-  svg.style.height = pixelHeight
+  svg.style.width = pixelWidth + 'px'
+  svg.style.height = pixelHeight + 'px'
 
   var rect = createElement('rect')
   svg.appendChild(rect)
@@ -50,6 +52,13 @@ window.draw = function(puzzle, target='puzzle') {
     foreground.setAttribute('pointer-events', 'none');
     foreground.setAttribute('preserveAspectRatio', 'none');
     svg.appendChild(foreground);
+  }
+
+  if (!audioPlaying && puzzle.image['background-music']) {
+    var audio = new Audio(puzzle.image['background-music'].replace(/\\/g, ''));  
+    audio.autoplay = true;
+    audio.loop = true;
+    audio.addEventListener('play', () => { audioPlaying = true; });
   }
 
   // For pillar puzzles, add faders for the left and right sides
@@ -227,8 +236,44 @@ function drawSymbols(puzzle, svg, target) {
         'y': y*41 + 23,
         'class': target + '_' + x + '_' + y,
       }
-      if (cell.dot > window.DOT_NONE) {
-        params.type = 'dot'
+      if (cell.dot >= window.SOUND_DOT) {
+        params.type = 'dot';
+        params.color = '#ff6666ff';
+        params.size = cell.dot - window.SOUND_DOT + 1;
+        window.drawSymbolWithSvg(svg, params)
+      } else if (cell.dot >= window.CUSTOM_DOTS) {
+        params.type = 'dots'
+        params.count = (cell.dot - 4);
+        switch (params.count % 7) {
+          case 1:
+            params.color = 'var(--line-default)';
+            params.type = 'dotsHollow';
+            break;
+          case 2:
+            params.color = 'black';
+            break;
+          case 3:
+            params.type = 'dotsHollow';
+          case 4:
+            params.color = 'var(--line-primary)';
+            break;
+          case 5:
+            params.type = 'dotsHollow';
+          case 6:
+            params.color = 'var(--line-secondary)';
+            break;
+          case 0:
+            params.color = 'var(--line-undone)';
+            if (document.getElementById('metaButtons') != null) {
+              params.stroke = 'black'
+              params.strokeWidth = '2px'
+            }
+            break;
+        }
+        params.count = Math.floor((params.count - 1) / 7);
+        window.drawSymbolWithSvg(svg, params);
+      } else if (cell.dot > window.DOT_NONE) {
+        params.type = 'dot';
         if (cell.dot === window.DOT_BLACK) params.color = 'black'
         else if (cell.dot === window.DOT_BLUE) params.color = 'var(--line-primary)'
         else if (cell.dot === window.DOT_YELLOW) params.color = 'var(--line-secondary)'
@@ -277,6 +322,10 @@ function drawSymbols(puzzle, svg, target) {
       } else if (x%2 === 1 && y%2 === 1) {
         // Generic draw for all other elements
         Object.assign(params, cell)
+        if (params.color == 2 && document.getElementById('metaButtons') != null) {
+          params.stroke = 'black'
+          params.strokeWidth = '2px'
+        }
         window.drawSymbolWithSvg(svg, params)
       }
     }

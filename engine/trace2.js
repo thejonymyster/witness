@@ -386,6 +386,9 @@ window.trace = function(event, puzzle, pos, start, symStart=null) {
       data.cursor.onpointerdown = null
       setTimeout(function() { // Run validation asynchronously so we can free the pointer immediately.
         puzzle.endPoint = data.pos
+        puzzle.path = [puzzle.startPoint];
+        for (var i=1; i<data.path.length; i++) puzzle.path.push(data.path[i].dir)
+        puzzle.path.push(0)
         window.validate(puzzle, false) // We want all invalid elements so we can show the user.
 
         for (var negation of puzzle.negations) {
@@ -399,23 +402,17 @@ window.trace = function(event, puzzle, pos, start, symStart=null) {
           window.onSolvedPuzzle(data.path)
           // !important to override the child animation
           data.animations.insertRule('.' + data.svg.id + ' {animation: 1s 1 forwards line-success !important}\n')
-
-          // Convert the traced path into something suitable for solve.drawPath (for publishing purposes)
-          var rawPath = [puzzle.startPoint]
-          for (var i=1; i<data.path.length; i++) rawPath.push(data.path[i].dir)
-          rawPath.push(0)
-
-          if (window.TRACE_COMPLETION_FUNC) window.TRACE_COMPLETION_FUNC(puzzle, rawPath)
+          if (window.TRACE_COMPLETION_FUNC) window.TRACE_COMPLETION_FUNC(puzzle, puzzle.path)
         } else {
           window.PLAY_SOUND('fail')
           document.getElementsByClassName('cursor')[0].style.opacity = 0;
           data.animations.insertRule('.' + data.svg.id + ' {animation: 1s 1 forwards line-fail !important}\n')
           // Get list of invalid elements
-          // if (puzzle.settings.FLASH_FOR_ERRORS) {
+          if (!puzzle.disableFlash) {
             for (var invalidElement of puzzle.invalidElements) {
               data.animations.insertRule('.' + data.svg.id + '_' + invalidElement.x + '_' + invalidElement.y + ' {animation: 0.4s 20 alternate-reverse error}\n')
             }
-          // }
+          }
         }
       }, 1)
 

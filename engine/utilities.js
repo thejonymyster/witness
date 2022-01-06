@@ -56,6 +56,7 @@ window.DOT_BLACK     = 1
 window.DOT_BLUE      = 2
 window.DOT_YELLOW    = 3
 window.DOT_INVISIBLE = 4
+window.CUSTOM_DOTS   = 5
 window.CUSTOM_CROSS               = -1
 window.CUSTOM_CROSS_FILLED        = -2
 window.CUSTOM_CROSS_BLUE          = -3
@@ -68,14 +69,17 @@ window.CUSTOM_CURVE_BLUE          = -9
 window.CUSTOM_CURVE_BLUE_FILLED   = -10
 window.CUSTOM_CURVE_YELLOW        = -11
 window.CUSTOM_CURVE_YELLOW_FILLED = -12
+window.SOUND_DOT   = 40
 window.CUSTOM_X = -13
 window.GAP_NONE      = 0
 window.GAP_BREAK     = 1
 window.GAP_FULL      = 2
 
-window.symbols = ['square', 'star', 'pentagon', 'triangle', 'arrow', 'dart', 'atriangle', 'vtriangle', 'blackhole', 'whitehole', 'divdiamond', 'pokerchip', 'bridge', 'scaler', 'sizer', 'twobytwo', 'poly', 'ylop', 'polynt', 'nega', 'copier', 'portal', 'celledhex'];
+window.symbols = ['square', 'star', 'pentagon', 'triangle', 'arrow', 'dart', 'atriangle', 'vtriangle', 'blackhole', 'whitehole', 'divdiamond', 'pokerchip', 'bridge', 'scaler', 'sizer', 'twobytwo', 'poly', 'ylop', 'polynt', 'nega', 'copier', 'portal', 'celledhex', 'dice', 'xvmino', 'crystal', '!poly', '!ylop', '!polynt', '!xvmino', 'swirl', 'eye'];
+window.polyominoes = ['poly', 'ylop', 'polynt', 'xvmino'];
 window.endEnum = ['top', 'right', 'left', 'bottom'];
 window.themeArgs = ['background', 'outer', 'inner', 'text', 'line-undone', 'line-default', 'line-success', 'line-primary', 'line-secondary'];
+window.symbolColors = ["#000000ff", "#00000080", "#00000000", "#ffffffff", "#ffffff80", "#ccccccff", "#ff0000ff", "#ff66b3ff", "#800000ff", "#ffa500ff", "#fa8f04ff", "#ff6666ff", "#ffff00ff", "#ffff80ff", "#cccc44ff", "#008000ff", "#b0ffb0ff",  "#3cd4d9ff", "#0000ffff", "#6867fdff", "#80ffffff", "#800080ff", "#8101ffff", "#ff07ffff", "#55556cff", "#b4b4c4ff", "#aa0000ff", "#ff4000ff", "#ffc900ff", "#00ff00ff", "#76a856ff", "#aa00aaff"];
 window.symmetryModes = function(symmetry, pillar) {
   if (pillar) {
     if (!symmetry) return 'Pillar';
@@ -125,7 +129,7 @@ l('@keyframes line-success {to {fill: var(--line-success);}}')
 l('@keyframes line-fail {to {fill: var(--line-failure);}}')
 l('@keyframes error {to {fill: red;}}')
 l('@keyframes fade {to {opacity: 0.35;}}')
-l('@keyframes start-grow {from {r:12;} to {r: 24;}}')
+l('@keyframes start-grow { 0% {r: 12;} 100% {r: 24;} }')
 // Neutral button style
 l('#symboltheme, .loadButtonWrapper, button {')
 l('  background-color: var(--outer);')
@@ -216,21 +220,20 @@ window.deleteElementsByClassName = function(rootElem, className) {
   }
 }
 
-window.pathsToDir = function(paths) {  
-  let avgs = paths.map(segment => (
-    {'x': (segment.poly1.animatedPoints[0].x + segment.poly1.animatedPoints[1].x + segment.poly1.animatedPoints[2].x + segment.poly1.animatedPoints[3].x), 
-    'y': segment.poly1.animatedPoints[0].y + segment.poly1.animatedPoints[1].y + segment.poly1.animatedPoints[2].y + segment.poly1.animatedPoints[3].y}));
-  let dir = "";
-  for (let i = 1; i < avgs.length; i++) {
-    if (Math.abs(avgs[i].x - avgs[i-1].x) > Math.abs(avgs[i].y - avgs[i-1].y)) {
-        if (avgs[i].x > avgs[i-1].x) dir += 'r';
-        else dir += 'l';
-    } else {
-        if (avgs[i].y > avgs[i-1].y) dir += 'd';
-        else dir += 'u';
-    }
+window.pathsToDir = function(rawPath) {  
+  let res = "", path = [...rawPath];
+  res += String.fromCharCode(path[0].x);
+  res += String.fromCharCode(path[0].y);
+  path[path.length - 1] = ['', 'left', 'right', 'top', 'bottom'].indexOf(puzzle.getCell(puzzle.endPoint.x, puzzle.endPoint.y).end);
+  for (let i = 1; i < path.length; i += 4) {
+    res += String.fromCharCode(
+      ((Math.max(1, path[i  ]) - 1)     ) |
+      ((Math.max(1, path[i+1]) - 1) << 2) |
+      ((Math.max(1, path[i+2]) - 1) << 4) | 
+      ((Math.max(1, path[i+3]) - 1) << 6)
+    );
   }
-  return dir;
+  return res;
 }
 
 // ---------------------------------------------------------------------------------------------------- //
@@ -420,7 +423,7 @@ window.applyTheme = function(puzzle) {
 
 window.copyImage = function(puzzle) {
   puzzle.image = {};
-  for (entry of ['background-image', 'foreground-image']) {
+  for (entry of ['background-image', 'foreground-image', 'background-music']) {
     let res = getComputedStyle(document.documentElement).getPropertyValue('--' + entry);
     if (res == 'none') puzzle.image[entry] = null;
     else puzzle.image[entry] = res.slice(4, -1);
@@ -437,7 +440,7 @@ window.applyImage = function(puzzle) {
 window.serializeTheme = function(puzzle) {
   let ints = [];
   for (const entry of themeArgs) ints.push(puzzle.theme[entry]);
-  return 'vt1_' + runLength(btoa(intToByte(...ints).join('') + (puzzle.image['background-image'] ?? '') + '\u0000' + (puzzle.image['foreground-image'] ?? '')).replace(/\+/g, '.').replace(/\//g, '-').replace(/=/g, '_'));
+  return 'vt1_' + runLength(btoa(intToByte(...ints).join('') + (puzzle.image['background-image'] ?? '') + '\u0000' + (puzzle.image['foreground-image'] ?? '') + '\u0000' + (puzzle.image['background-music'] ?? '')).replace(/\+/g, '.').replace(/\//g, '-').replace(/=/g, '_'));
 }
 
 window.deserializeTheme = function(puzzle, string) {
@@ -461,6 +464,7 @@ function deserializeThemeV1(puzzle, string) {
     puzzle.image = {};
     puzzle.image['background-image'] = (entry[0]?.length ? entry[0] : null);
     puzzle.image['foreground-image'] = (entry[1]?.length ? entry[1] : null);
+    puzzle.image['background-music'] = (entry[2]?.length ? entry[2] : null);
   }
   window.puzzle = puzzle;
   applyTheme(puzzle);
@@ -468,45 +472,152 @@ function deserializeThemeV1(puzzle, string) {
 }
 
 window.serializePuzzle = function(puzzle) {
-  // scary task!
+  const SCHEMA = new Map([
+    ['sols', 'byte'],
+    ['symmetry', 'byte'], //* symmetry, symmetry?.x, symmetry?.y, pillar, perfect
+    ['height', 'byte'],
+    ['width', 'byte'],
+    ['defaultCorner', 'corner'], //* only if majority of corner is same dot/gap/start, else null
+    ['defaultCell', 'cell'],
+    ['corners', 'sparse[]<corner>'],
+    ['soundDots', '[]<byte>'],
+    ['cells', 'sparse[]<cell>'],
+    ['theme.background', 'int'],
+    ['theme.inner', 'int'],
+    ['theme.outer', 'int'],
+    ['theme.line-default', 'int'],
+    ['theme.line-primary', 'int'],
+    ['theme.line-secondary', 'int'],
+    ['theme.line-success', 'int'],
+    ['theme.line-undone', 'int'],
+    ['theme.text', 'int'],
+    ['image.background-image', 'string'],
+    ['image.foreground-image', 'string'],
+  ]);
+
+  /**
+   *! Cell data structure
+   ** type: type,
+   ** color: byte,
+    // optional - count
+   ** ['triangle', 'arrow', 'dart', 'atriangle', 'divdiamond', 'dice', 'crystal', 'eye']: count: byte
+   ** ['arrow', 'dart']:: count += (4 * dir)
+    // optional - flip
+   ** ['scaler', 'swirl']: flip: byte
+    // optional - poly
+   ** ['poly', 'ylop', 'polynt', 'xvmino']: polyshape: int (canRotate built into cell type)!!
+   */
+
+  /**
+   *! Corner data structure
+   ** dot: byte (dot, gap info)
+   ** start: byte (startx3, endx3 (direction + null));
+   */
+
   let raw = "";
-  if (puzzle.perfect) raw += String.fromCharCode(Math.min(0xff, puzzle.sols));
-  else raw += '\u0001';
+  //* header
+  raw += String.fromCharCode(Math.min(0xff, puzzle.sols ?? 1));
+  raw += String.fromCharCode(makeBitSwitch(puzzle.symmetry, puzzle.symmetry?.x, puzzle.symmetry?.y, puzzle.pillar, puzzle.perfect, puzzle.disableFlash, puzzle.optional));
   raw += String.fromCharCode(Math.floor(puzzle.width / 2));
   raw += String.fromCharCode(Math.floor(puzzle.height / 2));
-  raw += String.fromCharCode(makeBitSwitch(puzzle.symmetry, puzzle.symmetry?.x, puzzle.symmetry?.y, puzzle.pillar)); // start
-  for (let i = 0; i < puzzle.height; i++) for (let j = 0; j < puzzle.width; j++) {
-    let cell = puzzle.grid[j][i];
-    let type = window.symbols.indexOf(cell?.type) + 1;
-    if (cell?.type == 'line') { // we know where the lines are
-      let dot = (5 - (cell.dot ?? 0));
-      let start = endEnum.indexOf(cell.end) + ((cell.start ?? 0) * 5) + ((cell.gap ?? 0) * 10) + 1;
-      if (dot == 5 && !start) raw += '\u0000';
-      else {
-        raw += String.fromCharCode(dot + 1, start);
-      }
-    } else {
-      raw += String.fromCharCode(type);
-      if (type) {
-        let color = parseInt(cell.color.slice(1), 16);
-        raw += intToByte(color)[0];
-        let count = 0;
-        if (['triangle', 'arrow', 'dart', 'atriangle', 'divdiamond'].includes(cell.type)) count += cell.count;
-        if (['arrow', 'dart'].includes(cell.type)) count = count * 8 + cell.rot;
-        if (cell.type == 'scaler') raw += String.fromCharCode(!!cell.flip);
-        if (count) raw += String.fromCharCode(count);
-        if (['poly', 'ylop', 'polynt'].includes(cell.type)) {
-          raw += intToByte(cell.polyshape)[0];
-        }
-      }
-    }
+  //* defaultCorner
+  let med = {};
+  for (let i = 0; i < puzzle.height / 2; i++) for (let j = 0; j < puzzle.width / 2; j++) {
+    if (puzzle.grid[i*2]?.[j*2] === undefined) continue;
+    let dot = getCornerData(puzzle.grid[i*2][j*2]);
+    if (dot[1] != '\0') continue;
+    med[dot] ??= 0; med[dot]++;
   }
-  raw += '\u00ff';
-  ints = [];
+  let defCorner = "\0\0";
+  for (let k in med) if (med[k] >= (puzzle.height * puzzle.width / 8)) defCorner = k;
+  raw += defCorner[0];
+  //* defaultCell
+  med = {};
+  for (let i = 0; i < puzzle.height / 2; i++) for (let j = 0; j < puzzle.width / 2; j++) {
+    if (puzzle.grid[i*2+1]?.[j*2+1] === undefined) continue;
+    let data = getCellData(puzzle.grid[i*2+1][j*2+1]);
+    med[data] ??= 0; med[data]++;
+  }
+  let defCell = "\0";
+  for (let k in med) if (med[k] >= (puzzle.height * puzzle.width / 8)) defCell = k;
+  raw += defCell;
+  //* corners
+  let corner = ["", "", ""];
+  for (let i = 0; i < puzzle.height; i++) for (let j = 0; j < puzzle.width; j++) {
+    if ((i % 2) && (j % 2) || !puzzle.grid[i]?.[j]) continue;
+    let data = getCornerData(puzzle.grid[i][j]);
+    if (!((i % 2) || (j % 2))) { if (data == defCorner) continue; }
+    else if (data == '\0\0') continue;
+    corner[0] += String.fromCharCode(i);
+    corner[1] += String.fromCharCode(j);
+    corner[2] += data;
+  }
+  raw += String.fromCharCode((corner[0].length & 0xFF00) << 8) + String.fromCharCode(corner[0].length & 0xFF);
+  raw += corner[0];
+  raw += corner[1];
+  raw += corner[2];
+  //* soundData
+  raw += String.fromCharCode(puzzle.soundDots.length);
+  for (let i = 0; i < puzzle.soundDots.length; i++) raw += String.fromCharCode(puzzle.soundDots[i]);
+  //* cells
+  let cell = ["", "", ""];
+  for (let i = 0; i < puzzle.height / 2; i++) for (let j = 0; j < puzzle.width / 2; j++) {
+    if (puzzle.grid[i*2+1]?.[j*2+1] === undefined) continue;
+    let data = getCellData(puzzle.grid[i*2+1][j*2+1]);
+    if (defCell == data) continue;
+    cell[0] += String.fromCharCode(i);
+    cell[1] += String.fromCharCode(j);
+    cell[2] += data;
+  }
+  raw += String.fromCharCode((cell[0].length & 0xFF00) << 8) + String.fromCharCode(cell[0].length & 0xFF);
+  raw += cell[0];
+  raw += cell[1];
+  raw += cell[2];
+  let ints = [];
   for (const entry of themeArgs) ints.push(puzzle.theme[entry]);
   raw += intToByte(...ints).join('');
-  raw += (puzzle.image['background-image'] ?? '') + '\u00ff' + (puzzle.image['foreground-image'] ?? '');
-  return 'v3_' + runLength(btoa(raw).replace(/\+/g, '.').replace(/\//g, '-').replace(/\=/g, '_'));
+  let addedFirst = false;
+  if (puzzle.image['foreground-image'])
+    raw += puzzle.image['foreground-image'];
+  if (puzzle.image['background-image']) {
+    raw += '\0' + puzzle.image['background-image'];
+    addedFirst = true;
+  }
+  if (puzzle.image['background-music'])
+    raw += (addedFirst ? '' : '\0') + '\0' + puzzle.image['background-music'];
+  
+  return 'v4_' + runLength(btoa(raw).replace(/\+/g, '.').replace(/\//g, '-').replace(/\=/g, '_'));
+}
+
+function getCellData(cell) {
+  let raw = "";
+  if (!cell) return "\0";
+  if (polyominoes.includes(cell.type) && (cell.polyshape & 1048576)) cell.type = '!' + cell.type;
+  let type = window.symbols.indexOf(cell.type) + 2;
+  if (cell.type[0] == '!') cell.type = cell.type.slice(1);
+  raw += String.fromCharCode(type);
+  raw += String.fromCharCode(cell.color);
+  let count = 0;
+  if (['triangle', 'arrow', 'dart', 'atriangle', 'divdiamond', 'dice', 'crystal', 'eye'].includes(cell.type)) count += cell.count;
+  if (['arrow', 'dart'].includes(cell.type)) count = count * 8 + cell.rot;
+  if (['scaler', 'swirl'].includes(cell.type)) raw += String.fromCharCode(!!cell.flip);
+  if (count) raw += String.fromCharCode(count);
+  if (polyominoes.includes(cell.type)) {
+    raw += String.fromCharCode((cell.polyshape & 0xFF00) >> 8);
+    raw += String.fromCharCode((cell.polyshape & 0xFF));
+  }
+  return raw;
+}
+
+function getCornerData(cell) {
+  if (cell == null) return "\0\0";
+  let dot = cell.dot ? cell.dot + 29 : 0;
+  let start = endEnum.indexOf(cell.end) + 1 + (!!cell.start << 3) + ((cell.gap ?? 0) << 4);
+  return String.fromCharCode(dot) + String.fromCharCode(start);
+}
+
+window.readRawArray = function(str) {
+  return str.split('').map(x => x.charCodeAt(0));
 }
 
 window.deserializePuzzle = function(string) {
@@ -514,12 +625,134 @@ window.deserializePuzzle = function(string) {
   let version = string.slice(0, veri);
   string = string.slice(veri + 1);
   if (version == 'v2') return deserializePuzzleV2(deserializePuzzlePre(string));
-  if (version == 'v3') return deserializePuzzleV3(deserializePuzzlePre(string));
+  else if (version == 'v3') return deserializePuzzleV3(deserializePuzzlePre(string));
+  else if (version == 'v4') return deserializePuzzleV4(deserializePuzzlePre(string));
   else throw Error('unknown puzzle format');
 }
 
 function deserializePuzzlePre(string) {
   return atob(derunLength(string).replace(/\./g, '+').replace(/\-/g, '/').replace(/\_/g, '='));
+}
+
+function deserializePuzzleV4(raw) {
+  //* header
+  let char = readBitSwitch(raw.charCodeAt(1));
+  let puzzle = new Puzzle(raw.charCodeAt(2), raw.charCodeAt(3), char[3]);
+  puzzle.sols = raw.charCodeAt(0);
+  if (char[0]) puzzle.symmetry = {'x': char[1], 'y': char[2]};
+  if (char[4]) puzzle.perfect = true;
+  if (char[5]) puzzle.disableFlash = true;
+  if (char[6]) puzzle.optional = true;
+  let ptr = 4;
+  //* defaults
+  let defCorner = raw.charCodeAt(ptr);
+  if (defCorner) for (let i = 0; i < puzzle.height / 2; i++) for (let j = 0; j < puzzle.width / 2; j++) puzzle.grid[i*2][j*2] = cornerData(defCorner, 0);
+  ptr++;
+  let defCell = raw.charCodeAt(ptr);
+  if (defCell) {
+    ptr++;
+    let temp = cellData(defCell, raw.charCodeAt(ptr), raw.charCodeAt(ptr + 1), raw.charCodeAt(ptr + 2));
+    for (let i = 0; i < puzzle.height / 2; i++) for (let j = 0; j < puzzle.width / 2; j++) {
+      if (puzzle.grid[i*2+1]?.[j*2+1] === undefined) continue;
+      puzzle.grid[i*2+1][j*2+1] = temp[0];
+    } 
+    ptr += temp[1];
+  }
+  ptr++;
+  //* corners
+  let x = [], y = [];
+  let lenCorner = (raw.charCodeAt(ptr) >> 8) + (raw.charCodeAt(ptr + 1));
+  ptr += 2;
+  for (let i = 0; i < lenCorner; i++) { y.push(raw.charCodeAt(ptr)); ptr++; }
+  for (let i = 0; i < lenCorner; i++) { x.push(raw.charCodeAt(ptr)); ptr++; }
+  for (let i = 0; i < lenCorner; i++) { 
+    puzzle.grid[y[i]][x[i]] = cornerData(raw.charCodeAt(ptr), raw.charCodeAt(ptr + 1));
+    ptr += 2; 
+  }
+  //* soundData
+  puzzle.soundDots = [];
+  let lenSoundDots = raw.charCodeAt(ptr);
+  ptr++;
+  for (let i = 0; i < lenSoundDots; i++) {
+    puzzle.soundDots.push(raw.charCodeAt(ptr));
+    ptr++;
+  }
+  //* cells
+  x = []; y = [];
+  let lenCell = (raw.charCodeAt(ptr) >> 8) + (raw.charCodeAt(ptr + 1));
+  ptr += 2;
+  for (let i = 0; i < lenCell; i++) { y.push(raw.charCodeAt(ptr)); ptr++; }
+  for (let i = 0; i < lenCell; i++) { x.push(raw.charCodeAt(ptr)); ptr++; }
+  for (let i = 0; i < lenCell; i++) { 
+    let temp = cellData(raw.charCodeAt(ptr), raw.charCodeAt(ptr + 1), raw.charCodeAt(ptr + 2), raw.charCodeAt(ptr + 3));
+    puzzle.grid[y[i]*2+1][x[i]*2+1] = temp[0];
+    ptr += 2 + temp[1]; 
+  }
+  //* style
+  puzzle.theme = {};
+  for (const entry of themeArgs) {
+    char = byteToInt(raw.slice(ptr, ptr + 4))[0];
+    puzzle.theme[entry] = char;
+    ptr += 4;
+  }
+  //* image
+  let urls = raw.slice(ptr).split('\0');
+  puzzle.image = {};
+  if (urls[0]?.length) puzzle.image['foreground-image'] = urls[0];
+  if (urls[1]?.length) puzzle.image['background-image'] = urls[1];
+  if (urls[2]?.length) puzzle.image['background-music'] = urls[2];
+  window.puzzle = puzzle;
+  applyTheme(puzzle);
+  applyImage(puzzle);
+  return puzzle;
+}
+
+function cellData(type, color, data1, data2) {
+  if (!type) return [null, -1];
+  let ret = {'type': symbols[type - 2], 'color': color};
+  switch (ret.type) {
+    case 'scaler':
+    case 'swirl':
+      ret.flip = !!data1;
+      return [ret, 1];
+    case 'arrow':
+    case 'dart':
+      cell.rot = data1 & 0x8;
+      data1 << 3;
+    case 'triangle':
+    case 'atriangle':
+    case 'divdiamond':
+    case 'dice':
+    case 'crystal':
+    case 'eye':
+      ret.count = data1;
+      return [ret, 1];
+    case 'poly':
+    case 'ylop':
+    case 'polynt':
+    case 'xvmino':
+    case '!poly':
+    case '!ylop':
+    case '!polynt':
+    case '!xvmino':
+      ret.polyshape = (data1 >> 8) | data2;
+      if (ret.type[0] == '!') {
+        ret.type = ret.type.slice(1);
+        ret.polyshape |= 1048576;
+      }
+      return [ret, 2];
+    default:
+      return [ret, 0];
+  }
+}
+
+function cornerData(dot, start) {
+  let ret = {'type': 'line', 'line': 0};
+  if (dot) ret.dot = dot - 29;
+  if (start & 0x7) ret.end = endEnum[(start & 0x7) - 1]
+  if ((start & 0x8) >> 3) ret.start = true;
+  if (start >> 4) ret.gap = (start >> 4);
+  return ret;
 }
 
 function deserializePuzzleV3(raw) {
@@ -563,7 +796,7 @@ function deserializePuzzleV2(raw, sols=1) {
     }
     cell.type = symbols[char - 1];
     i++;
-    cell.color = '#' + Number(byteToInt(raw.slice(i, i+4))[0]).toString(16).padStart(8, '0');
+    cell.color = symbolColors.indexOf('#' + Number(byteToInt(raw.slice(i, i+4))[0]).toString(16).padStart(8, '0'));
     i += 4; char = raw.charCodeAt(i);
     switch (cell.type) {
       case 'arrow':
@@ -575,6 +808,7 @@ function deserializePuzzleV2(raw, sols=1) {
         cell.count = char;
         break;
       case 'scaler':
+      case 'swirl':
         cell.flip = !!char;
         break;
       case 'poly':

@@ -1,280 +1,338 @@
 <html xmlns="http://www.w3.org/2000/xhtml">
-  <head>
-    <meta charset="utf-8">
-    <meta name="description" content="Looksy - Modded Witness Editor">
-    <meta name="author" content="prod">
-    <meta name="robots" content="nosnippet"/>
-    <link rel="stylesheet" type="text/css" href="./data/reset.css" id="stylesheet">
-    <link rel="stylesheet" type="text/css" href="./data/style.css" id="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css" ie-ignore>
-    <link rel="icon" type="image/png" href="./data/favicon.png">
-    <script type="text/javascript" src="./engine/utilities.js"></script>
-    <script type="text/javascript" src="./engine/svg.js"></script>
-    <script async type="text/javascript" src="./engine/puzzle.js"></script>
-    <script async type="text/javascript" src="./engine/solve.js"></script>
-    <script async type="text/javascript" src="./engine/validate.js"></script>
-    <script async type="text/javascript" src="./engine/polyominos.js"></script>
-    <script async type="text/javascript" src="./engine/display2.js"></script>
-    <script async type="text/javascript" src="./engine/trace2.js"></script>
-    <script async type="text/javascript" src="./editor.js"></script>
-    <title>Looksy Editor v2.1.0</title>
-  </head>
-  <body>
-    <div class="wrapper">
-      <header id="header" class="vlist">
-        <button id="header-plus-button" onclick="toggleExpand()"><i id="header-plus" class="xi-plus"></i></button>
-        <div id="header-expand">
-          <br>
-          <div class="hlist">
-            <div class="header-slider vlist">
-              <label for="sens">Mouse Speed</label>
-              <input id="sens" type="range" min='0.1' max='1.3' step='0.1' value='0.7'></input>
-            </div>
-            <div class="header-slider vlist">
-              <label for="volume">Volume</label>
-              <input id="volume" type="range" min='0' max='1' step='0.02' value='0.12'></input>
-            </div>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="Looksy - Modded Witness Editor">
+  <meta name="author" content="prod">
+  <meta name="robots" content="nosnippet" />
+  <link rel="stylesheet" type="text/css" href="./data/reset.css" id="stylesheet">
+  <link rel="stylesheet" type="text/css" href="./data/style.css" id="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css" ie-ignore>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
+  <link rel="icon" type="image/png" href="./data/favicon.png">
+  <script type="text/javascript" src="./engine/utilities.js"></script>
+  <script type="text/javascript" src="./engine/svg.js"></script>
+  <script async type="text/javascript" src="./engine/puzzle.js"></script>
+  <script async type="text/javascript" src="./engine/solve.js"></script>
+  <script async type="text/javascript" src="./engine/validate.js"></script>
+  <script async type="text/javascript" src="./engine/polyominos.js"></script>
+  <script async type="text/javascript" src="./engine/display2.js"></script>
+  <script async type="text/javascript" src="./engine/trace2.js"></script>
+  <script async type="text/javascript" src="./editor.js"></script>
+  <title>Looksy Editor v2.2.0</title>
+</head>
+
+<body>
+  <div class="wrapper">
+    <header id="header" class="vlist">
+      <button id="header-plus-button" onclick="toggleExpand()"><i id="header-plus" class="xi-plus"></i></button>
+      <div id="header-expand">
+        <br>
+        <div class="hlist">
+          <div class="header-slider vlist">
+            <label for="sens">Mouse Speed</label>
+            <input id="sens" type="range" min='0.1' max='1.3' step='0.1' value='0.7'></input>
           </div>
-          <div class="vlist">
-            <label for="symboltheme">Symbol Set</label>
-            <input id="symboltheme" type="button" value='Canonical' onclick="changeTheme()"></input>
+          <div class="header-slider vlist">
+            <label for="volume">Volume</label>
+            <input id="volume" type="range" min='0' max='1' step='0.02' value='0.12'></input>
           </div>
-          <br>
         </div>
-      </header>
-      <!-- <script>loadHeader('Creating puzzle')</script> -->
-      <div class="main-wrapper">
-        <div class="main">
-          <div class="vlist" id="meta" class="noselect">
-            <div class="hlist metaButton-wrapper">
-              <div id="metaButtons" style="display:inline">
-                <button id="deleteButton" onpointerdown="deletePuzzle()">New</button>
-                <button id="loadButton" onpointerdown="importPuzzle()">Load from Clipboard</button>
-              </div>
-              <div class="spacer"></div>
-              <label for="puzzleStyle" style="margin-left: 10px">Puzzle Style: </label>
-              <select id="puzzleStyle" onchange="createEmptyPuzzle(Math.floor(puzzle.width / 2), Math.floor(puzzle.height / 2))">
-                <option>Default</option>
-                <option>Horizontal Symmetry</option>
-                <option>Vertical Symmetry</option>
-                <option>Rotational Symmetry</option>
-                <option>Pillar</option>
-                <option>Pillar (H Symmetry)</option>
-                <option>Pillar (V Symmetry)</option>
-                <option>Pillar (R Symmetry)</option>
-                <option>Pillar (Two Lines)</option>
-              </select>
+        <div class="vlist">
+          <label for="symboltheme">Symbol Set</label>
+          <input id="symboltheme" type="button" value='Canonical' onclick="changeTheme()"></input>
+        </div>
+        <br>
+      </div>
+    </header>
+    <!-- <script>loadHeader('Creating puzzle')</script> -->
+    <div class="main-wrapper">
+      <div class="main">
+        <div class="vlist" id="meta" class="noselect">
+          <div class="hlist metaButton-wrapper">
+            <div id="metaButtons" style="display:inline">
+              <button id="deleteButton" onpointerdown="deletePuzzle()">New</button>
+              <button id="loadButton" onpointerdown="importPuzzle()">Load from Clipboard</button>
             </div>
-            <div>
+            <div class="spacer"></div>
+            <label for="puzzleStyle" style="margin-left: 10px">Puzzle Style: </label>
+            <select id="puzzleStyle"
+              onchange="createEmptyPuzzle(Math.floor(puzzle.width / 2), Math.floor(puzzle.height / 2))">
+              <option>Default</option>
+              <option>Horizontal Symmetry</option>
+              <option>Vertical Symmetry</option>
+              <option>Rotational Symmetry</option>
+              <option>Pillar</option>
+              <option>Pillar (H Symmetry)</option>
+              <option>Pillar (V Symmetry)</option>
+              <option>Pillar (R Symmetry)</option>
+              <option>Pillar (Two Lines)</option>
+            </select>
+          </div>
+          <div class="hlist">
+            <div class="spacer"></div>
+            <label style="margin-right: 8px">Required Solutions:</label>
+            <input type="number" min="1" step="1" value="1" id="sols" onchange="changeSols()"></input>
+            <div id="show-if-tent" style="display: none;">
+              <div class="spacer"></div>
               <div onpointerdown="checkboxToggle('makePerfect', makePerfect)" class="checkbox" id="makePerfect"></div>
               <label onpointerdown="checkboxToggle('makePerfect', makePerfect)" style="margin-right: 8px">Make Perfect</label>
             </div>
-            <div class="hlist editor-screen">
-              <table id="symbolButtons" style="padding: 5px; display:none" cellpadding="4" cellspacing="0">
-                <tr>
-                  <td><button id="start"></button></td>
-                  <td><button id="end"></button></td>
-                  <td><button id="gap"></button></td>
-                  <!-- <td><button id="scratches"></button></td> -->
-                  <!-- <td><button id="diagonal"></button></td> -->
-                </tr><tr>
-                  <td><button id="dot"></button></td>
-                  <td><button id="cross"></button></td>
-                  <td><button id="curve"></button></td>
-                  <td id="x-fakebutton">
-                    <div id="x-fakewrapper">
-                      <div id="x-fakesvg"></div>
-                      <table>
-                        <tr>
-                          <td><button id="x-lu"></button></td>
-                          <td><button id="x-ru"></button></td>
-                        </tr><tr>
-                          <td><button id="x-ld"></button></td>
-                          <td><button id="x-rd"></button></td>
-                        </tr>
-                      </table>
-                    </div>
-                  </td>
-                </tr><tr>
-                  <td><button id="square"></button></td>
-                  <td><button id="star"></button></td>
-                  <td><button id="pentagon"></button></td>
-                  <!-- <td><button id="scratches"></button></td> -->
-                </tr><tr>
-                  <td><button id="triangle"></button></td>
-                  <td><button id="arrow"></button></td>
-                  <td><button id="dart"></button></td>
-                  <td><button id="none" disabled></button></td>
-                </tr><tr>
-                  <td><button id="atriangle"></button></td>
-                  <td><button id="vtriangle"></button></td>
-                  <td><button id="blackhole"></button></td>
-                  <td><button id="whitehole"></button></td>
-                </tr><tr>
-                  <td><button id="divdiamond"></button></td>
-                  <td><button id="pokerchip"></button></td>
-                  <!-- <td><button id="crystals"></button></td> -->
-                  <td><button id="bridge"></button></td>
-                </tr><tr>
-                  <td><button id="scaler"></button></td>
-                  <!-- <td><button id="dice"></button></td> -->
-                  <td><button id="sizer"></button></td>
-                  <td><button id="twobytwo"></button></td>
-                </tr><tr>
-                  <td><button id="poly"></button></td>
-                  <td><button id="ylop"></button></td>
-                  <!-- <td><button id="xvmino"></button></td> -->
-                  <td><button id="polynt"></button></td>
-                </tr><tr>
-                  <td><button id="nega" disabled  ></button></td>
-                  <td><button id="copier" disabled></button></td>
-                  <td><button id="portal"></button></td>
-                  <td><button id="celledhex"></button></td>
-                </tr>
-              </table>
-              <div class="spacer"></div>
-              <div class="hlist editor-puzzlebox">
-                <div class="puzzlebox-wrapper">
-                  <div id="puzzleBox" style="position: relative">
-                    <div id="resize-topleft" class="resize" style="cursor: nwse-resize; left: -10; top: -10; height: 30px; width: 30px"></div>
-                    <div id="resize-top" class="resize" style="cursor: ns-resize; left: 10; top: -10; right: 10; height: 30px"></div>
-                    <div id="resize-topright" class="resize" style="cursor: nesw-resize; top: -10; right: -10; height: 30px; width: 30px"></div>
-                    <div id="resize-right" class="resize" style="cursor: ew-resize; top: 10; right: -10; bottom: 10; width: 30px"></div>
-                    <div id="resize-bottomright" class="resize" style="cursor: nwse-resize; right: -10; bottom: -10; height: 30px; width: 30px"></div>
-                    <div id="resize-bottom" class="resize" style="cursor: ns-resize; right: 10; bottom: -10; left: 10; height: 30px"></div>
-                    <div id="resize-bottomleft" class="resize" style="cursor: nesw-resize; bottom: -10; left: -10; height: 30px; width: 30px"></div>
-                    <div id="resize-left" class="resize" style="cursor: ew-resize; bottom: 10; left: -10; top: 10; width: 30px"></div>
-                    <svg id="puzzle"></svg>
+            <div class="spacer"></div>
+          </div>
+          <div class="hlist">
+            <div class="spacer"></div>
+            <div onpointerdown="checkboxToggle('disableFlash', disableFlash)" class="checkbox" id="disableFlash"></div>
+            <label onpointerdown="checkboxToggle('disableFlash', disableFlash)" style="margin-right: 8px">Disable Flash</label>
+            <div onpointerdown="checkboxToggle('makeOptional', makeOptional)" class="checkbox" id="makeOptional"></div>
+            <label onpointerdown="checkboxToggle('makeOptional', makeOptional)" style="margin-right: 8px">Optional</label>
+            <div class="spacer"></div>
+          </div>
+          <div class="hlist editor-screen">
+            <table id="symbolButtons" style="padding: 5px; display:none" cellpadding="4" cellspacing="0">
+              <tr>
+                <td><button id="start"></button></td>
+                <td><button id="end"></button></td>
+                <td><button id="gap"></button></td>
+                <td id="x-fakebutton">
+                  <div id="x-fakewrapper">
+                    <div id="x-fakesvg"></div>
+                    <table>
+                      <tr>
+                        <td><button id="x-lu"></button></td>
+                        <td><button id="x-ru"></button></td>
+                      </tr>
+                      <tr>
+                        <td><button id="x-ld"></button></td>
+                        <td><button id="x-rd"></button></td>
+                      </tr>
+                    </table>
                   </div>
+                </td>
+              </tr>
+              <tr>
+                <td><button id="dot"></button></td>
+                <td><button id="cross"></button></td>
+                <td><button id="curve"></button></td>
+                <td><button id="dots"></button></td>
+              </tr>
+              <tr>
+                <td><button id="square"></button></td>
+                <td><button id="star"></button></td>
+                <td><button id="pentagon"></button></td>
+                <td><button id="swirl"></button></td>
+              </tr>
+              <tr>
+                <td><button id="triangle"></button></td>
+                <td><button id="arrow"></button></td>
+                <td><button id="dart"></button></td>
+                <td><button id="eye"></button></td>
+              </tr>
+              <tr>
+                <td><button id="atriangle"></button></td>
+                <td><button id="vtriangle"></button></td>
+                <td><button id="blackhole"></button></td>
+                <td><button id="whitehole"></button></td>
+              </tr>
+              <tr>
+                <td><button id="divdiamond"></button></td>
+                <td><button id="pokerchip"></button></td>
+                <td><button id="crystal"></button></td>
+                <td><button id="bridge"></button></td>
+              </tr>
+              <tr>
+                <td><button id="scaler"></button></td>
+                <td><button id="dice"></button></td>
+                <td><button id="sizer"></button></td>
+                <td><button id="twobytwo"></button></td>
+              </tr>
+              <tr>
+                <td><button id="poly"></button></td>
+                <td><button id="ylop"></button></td>
+                <td><button id="xvmino"></button></td>
+                <td><button id="polynt"></button></td>
+              </tr>
+              <tr>
+                <td><button id="nega" disabled></button></td>
+                <td><button id="copier" disabled></button></td>
+                <td><button id="portal"></button></td>
+                <td><button id="celledhex"></button></td>
+              </tr>
+            </table>
+            <div class="spacer"></div>
+            <div class="hlist editor-puzzlebox">
+              <div class="puzzlebox-wrapper">
+                <div id="puzzleBox" style="position: relative">
+                  <div id="resize-topleft" class="resize"
+                    style="cursor: nwse-resize; left: -10; top: -10; height: 30px; width: 30px"></div>
+                  <div id="resize-top" class="resize"
+                    style="cursor: ns-resize; left: 10; top: -10; right: 10; height: 30px"></div>
+                  <div id="resize-topright" class="resize"
+                    style="cursor: nesw-resize; top: -10; right: -10; height: 30px; width: 30px"></div>
+                  <div id="resize-right" class="resize"
+                    style="cursor: ew-resize; top: 10; right: -10; bottom: 10; width: 30px"></div>
+                  <div id="resize-bottomright" class="resize"
+                    style="cursor: nwse-resize; right: -10; bottom: -10; height: 30px; width: 30px"></div>
+                  <div id="resize-bottom" class="resize"
+                    style="cursor: ns-resize; right: 10; bottom: -10; left: 10; height: 30px"></div>
+                  <div id="resize-bottomleft" class="resize"
+                    style="cursor: nesw-resize; bottom: -10; left: -10; height: 30px; width: 30px"></div>
+                  <div id="resize-left" class="resize"
+                    style="cursor: ew-resize; bottom: 10; left: -10; top: 10; width: 30px"></div>
+                  <svg id="puzzle"></svg>
                 </div>
               </div>
-              <div class="spacer"></div>
-              <table id="colorButtons" style="padding: 5px; display:none" cellpadding="4" cellspacing="0">
-                <tr>
-                  <td><button id="#000000ff"></button></td>
-                  <td><button id="#00000080"></button></td>
-                  <td><button id="#00000000"></button></td>
-                </tr>
-                <tr>
-                  <td><button id="#ffffffff"></button></td>
-                  <td><button id="#ffffff80"></button></td>
-                  <td><button id="#ccccccff"></button></td>
-                </tr>
-                <tr>
-                  <td><button id="#ff0000ff"></button></td> 
-                  <td><button id="#ff66b3ff"></button></td>
-                  <td><button id="#800000ff"></button></td>
-                </tr>
-                <tr>
-                  <td><button id="#ffa500ff"></button></td>
-                  <td><button id="#fa8f04ff"></button></td>
-                  <td><button id="#ff6666ff"></button></td>
-                </tr>
-                <tr>
-                  <td><button id="#ffff00ff"></button></td>
-                  <td><button id="#ffff80ff"></button></td>
-                  <td><button id="#cccc44ff"></button></td>
-                </tr>
-                <tr>
-                  <td><button id="#008000ff"></button></td>
-                  <td><button id="#b0ffb0ff"></button></td> 
-                  <td><button id="#3cd4d9ff"></button></td>
-                </tr>
-                <tr>
-                  <td><button id="#0000ffff"></button></td>
-                  <td><button id="#6867fdff"></button></td>
-                  <td><button id="#80ffffff"></button></td>
-                </tr>
-                <tr>
-                  <td><button id="#800080ff"></button></td>
-                  <td><button id="#8101ffff"></button></td>
-                  <td><button id="#ff07ffff"></button></td>
-                </tr>
-              </table>
             </div>
-            <div>
-              <div onpointerdown="checkboxToggle('solveMode', setSolveMode)" class="checkbox" id="solveMode"></div>
-              <label onpointerdown="checkboxToggle('solveMode', setSolveMode)" id="solveManual" style="margin-right: 8px">Solve (manually)</label>
-              <button onpointerdown="solvePuzzle()" id="solveAuto" style="margin-right: 8px">Solve (automatically)</button>
-              <div style="display: inline-block; vertical-align:top">
-                <div id="progressBox">
-                  <label id="progressPercent" style="float: left; margin-left: 4px">0%</label>
-                  <div id="progress"></div>
-                </div>
-                <div id="solutionViewer" style="display: none">
-                  <button id="previousSolution">&larr;</button>
-                  <label id="solutionCount" style="padding: 6px"></label>
-                  <button id="nextSolution">&rarr;</button>
-                </div>
+            <div class="spacer"></div>
+            <table id="colorButtons" style="padding: 5px; display:none" cellpadding="4" cellspacing="0">
+              <tr>
+                <td><button id="#000000ff"></button></td>
+                <td><button id="#00000080"></button></td>
+                <td><button id="#00000000"></button></td>
+                <td><button id="#55556cff"></button></td>
+              </tr>
+              <tr>
+                <td><button id="#ffffffff"></button></td>
+                <td><button id="#ffffff80"></button></td>
+                <td><button id="#ccccccff"></button></td>
+                <td><button id="#b4b4c4ff"></button></td>
+              </tr>
+              <tr>
+                <td><button id="#ff0000ff"></button></td>
+                <td><button id="#ff66b3ff"></button></td>
+                <td><button id="#800000ff"></button></td>
+                <td><button id="#aa0000ff"></button></td>
+              </tr>
+              <tr>
+                <td><button id="#ffa500ff"></button></td>
+                <td><button id="#fa8f04ff"></button></td>
+                <td><button id="#ff6666ff"></button></td>
+                <td><button id="#ff4000ff"></button></td>
+              </tr>
+              <tr>
+                <td><button id="#ffff00ff"></button></td>
+                <td><button id="#ffff80ff"></button></td>
+                <td><button id="#cccc44ff"></button></td>
+                <td><button id="#ffc900ff"></button></td>
+              </tr>
+              <tr>
+                <td><button id="#008000ff"></button></td>
+                <td><button id="#b0ffb0ff"></button></td>
+                <td><button id="#76a856ff"></button></td>
+                <td><button id="#00ff00ff"></button></td>
+              </tr>
+              <tr>
+                <td><button id="#0000ffff"></button></td>
+                <td><button id="#6867fdff"></button></td>
+                <td><button id="#80ffffff"></button></td>
+                <td><button id="#3cd4d9ff"></button></td>
+              </tr>
+              <tr>
+                <td><button id="#800080ff"></button></td>
+                <td><button id="#8101ffff"></button></td>
+                <td><button id="#ff07ffff"></button></td>
+                <td><button id="#aa00aaff"></button></td>
+              </tr>
+            </table>
+          </div>
+          <div>
+            <div onpointerdown="checkboxToggle('solveMode', setSolveMode)" class="checkbox" id="solveMode"></div>
+            <label onpointerdown="checkboxToggle('solveMode', setSolveMode)" id="solveManual"
+              style="margin-right: 8px">Solve (manually)</label>
+            <button onpointerdown="solvePuzzle()" id="solveAuto" style="margin-right: 8px">Solve
+              (automatically)</button>
+            <div style="display: inline-block; vertical-align:top">
+              <div id="progressBox">
+                <label id="progressPercent" style="float: left; margin-left: 4px">0%</label>
+                <div id="progress"></div>
               </div>
-              <button id="save" onpointerdown="exportPuzzle()">Get URL</button>
-              <a href="https://prodzpod.github.io/witness/merge.html"><button>Merge Levels</button></a>
+              <div id="solutionViewer" style="display: none">
+                <button id="previousSolution">&larr;</button>
+                <label id="solutionCount" style="padding: 6px"></label>
+                <button id="nextSolution">&rarr;</button>
+              </div>
             </div>
-            <div class="theme">
-              <h1>Theme Setting</h1>
-              <hr>
-              <ul>
-                <li>
-                  <h2>Background</h2>
-                  <input onchange="changeColor(this.id, this.value)" type="color" id="background-color" value="#ffffff"/>
-                </li>
-                <li>
-                  <h2>Puzzle Background</h2>
-                  <input onchange="changeColor(this.id, this.value)" type="color" id="outer-color" value="#eeeeee"/>
-                </li>
-                <li>
-                  <h2>Puzzle Line</h2>
-                  <input onchange="changeColor(this.id, this.value)" type="color" id="line-undone-color" value="#333333" />
-                </li>
-                <li>
-                  <h2>Puzzle Cell</h2>
-                  <input onchange="changeColor(this.id, this.value)" type="color" id="inner-color" value="#aaaaaa" />
-                </li>
-                <li>
-                  <h2>Text</h2>
-                  <input onchange="changeColor(this.id, this.value)" type="color" id="text-color" value="#000000" />
-                </li>
-                <li>
-                  <h2>Line (Drawn)</h2>
-                  <input onchange="changeColor(this.id, this.value)" type="color" id="line-default-color" value="#cccccc" />
-                </li>
-                <li>
-                  <h2>Line (Primary Symmetry)</h2>
-                  <input onchange="changeColor(this.id, this.value)" type="color" id="line-primary-color" value="#88ffff" />
-                </li>
-                <li>
-                  <h2>Line (Secondary Symmetry)</h2>
-                  <input onchange="changeColor(this.id, this.value)" type="color" id="line-secondary-color" value="#ffff22" />
-                </li>
-                <li>
-                  <h2>Line (Success)</h2>
-                  <input onchange="changeColor(this.id, this.value)" type="color" id="line-success-color" value="#ffffff" />
-                </li>
-                <li>
-                  <h2>Background Image</h2>
-                  <input onchange="changeImage(this.id, this.value)" type="text" id="background-image-input"/>
-                </li>
-                <li>
-                  <h2>Foreground Image</h2>
-                  <input onchange="changeImage(this.id, this.value)" type="text" id="foreground-image-input"/>
-                </li>
-                <li>
-                  <h2>Foreground change requires a refresh!</h2>
-                </li>
-                <li>
-                  <button id="export-theme" onpointerdown="exportTheme()">Export to Clipboard</button>
-                  <button id="import-theme" onpointerdown="importTheme()">Import from Clipboard</button>
-                </li>
-                </ul>
-            </div>
+            <button id="save" onpointerdown="exportPuzzle()">Get URL</button>
+            <a href="https://prodzpod.github.io/witness/merge.html"><button>Merge Levels</button></a>
+          </div>
+          <div id="hide-if-sound-dots" class="sound-dots-wrapper vlist">
+            <h2>Sound Dots (Drag)</h2>
+            <div id="sound-dots" class="hlist"></div>
+          </div>
+          <div class="theme">
+            <h1>Theme Setting</h1>
+            <hr>
+            <ul>
+              <li>
+                <h2>Background</h2>
+                <input onchange="changeColor(this.id, this.value)" type="color" id="background-color" value="#ffffff" />
+              </li>
+              <li>
+                <h2>Puzzle Background</h2>
+                <input onchange="changeColor(this.id, this.value)" type="color" id="outer-color" value="#eeeeee" />
+              </li>
+              <li>
+                <h2>Puzzle Line</h2>
+                <input onchange="changeColor(this.id, this.value)" type="color" id="line-undone-color"
+                  value="#333333" />
+              </li>
+              <li>
+                <h2>Puzzle Cell</h2>
+                <input onchange="changeColor(this.id, this.value)" type="color" id="inner-color" value="#aaaaaa" />
+              </li>
+              <li>
+                <h2>Text</h2>
+                <input onchange="changeColor(this.id, this.value)" type="color" id="text-color" value="#000000" />
+              </li>
+              <li>
+                <h2>Line (Drawn)</h2>
+                <input onchange="changeColor(this.id, this.value)" type="color" id="line-default-color"
+                  value="#cccccc" />
+              </li>
+              <li>
+                <h2>Line (Primary Symmetry)</h2>
+                <input onchange="changeColor(this.id, this.value)" type="color" id="line-primary-color"
+                  value="#88ffff" />
+              </li>
+              <li>
+                <h2>Line (Secondary Symmetry)</h2>
+                <input onchange="changeColor(this.id, this.value)" type="color" id="line-secondary-color"
+                  value="#ffff22" />
+              </li>
+              <li>
+                <h2>Line (Success)</h2>
+                <input onchange="changeColor(this.id, this.value)" type="color" id="line-success-color"
+                  value="#ffffff" />
+              </li>
+              <li>
+                <h2>Background Image</h2>
+                <input onchange="changeImage(this.id, this.value)" type="text" id="background-image-input" />
+              </li>
+              <li>
+                <h2>Foreground Image</h2>
+                <input onchange="changeImage(this.id, this.value)" type="text" id="foreground-image-input" />
+              </li>
+              <li>
+                <h2>Background Music</h2>
+                <input onchange="changeImage(this.id, this.value)" type="text" id="background-music-input" />
+              </li>
+              <li style="margin: 16px;">
+                <button id="export-theme" class="theme-button" onpointerdown="exportTheme()">Export to Clipboard</button>
+                <button id="import-theme" class="theme-button" onpointerdown="importTheme()">Import from Clipboard</button>
+                <button id="reset-theme" class="theme-button" onpointerdown="resetTheme()">Reset Theme</button>
+                <button id="random-theme" class="theme-button" onpointerdown="randomizeTheme()">I Feel Lucky</button>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
-      <div class="spacer"></div>
-      <footer class="noselect">
-        <pre class="footer-text">Funny Looksy, prodzpod 2021</pre>
-        <a href="https://github.com/prodzpod/witness" class="footer-button" title="Source Code"><i class="xi-github"></i></a>
-        <pre>
+    </div>
+    <div class="spacer"></div>
+    <footer class="noselect">
+      <pre class="footer-text">Funny Looksy, prodzpod 2021-2022</pre>
+      <a href="https://github.com/prodzpod/witness" class="footer-button" title="Source Code"><i
+          class="xi-github"></i></a>
+      <pre>
 BSD 3-Clause License
 
 Copyright (c) 2017, jbzdarkid
@@ -305,8 +363,9 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         </pre>
-      </footer>
-    </div>
-    <script async type="text/javascript" src="./engine/footer.js"></script>
-  </body>
+    </footer>
+  </div>
+  <script async type="text/javascript" src="./engine/footer.js"></script>
+</body>
+
 </html>

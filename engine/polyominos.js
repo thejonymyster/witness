@@ -147,9 +147,9 @@ window.polyFitMaster = function(puzzle, regionNum, global, polys, scalers, downs
     }
   } else { // finally, no scalers
     if (polys.length == 0) return [];
-    let ylops   = polys.filter(val => val.type == 'ylop');
+    let ylops   = polys.filter(val => val.type == 'ylop' || val.type == 'xvmino');
     let polynts = polys.filter(val => val.type == 'polynt');
-    polys       = polys.filter(val => val.type == 'poly');
+    polys       = polys.filter(val => val.type == 'poly' || val.type == 'xvmino');
     let polyCorrect = true; polyntCorrect = true;
     if (polys  .length != 0 || ylops.length != 0) {
       polyCorrect   = window.polyFit    (puzzle, regionNum, global, polys, ylops);
@@ -162,7 +162,7 @@ window.polyFitMaster = function(puzzle, regionNum, global, polys, scalers, downs
     if (polyCorrect && polyntCorrect) return []; // correct case!
   }
   let res = [];
-  if ( global.polyIncorrect[regionNum]) res.push('poly', 'ylop');
+  if ( global.polyIncorrect[regionNum]) res.push('poly', 'ylop', 'xvmino');
   if (!global.polyntCorrect[regionNum]) res.push('polynt')
   if (res.length == 0) res.push('scaler') // something should be wrong
   return res;

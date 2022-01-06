@@ -30,7 +30,7 @@ body {
   font-size: 48px;
 }
 
-p, label {
+p, label, h2, a {
   display: inline;
   color: var(--text);
 }
@@ -126,7 +126,6 @@ table {
 
 .editor-screen {
   justify-content: start;
-  overflow-x: overlay;
 }
 
 .editor-puzzlebox {
@@ -180,6 +179,7 @@ table {
 footer {
   background-color: var(--outer);
   color: var(--inner);
+  padding: 16px;
 }
 
 footer i {
@@ -208,7 +208,7 @@ body {
   .navbar-padding { margin-top: 90px; }
   .navbar-content { padding-top: 40px; }
   footer {
-    height: 45px;
+    height: 60px;
     overflow: hidden;
     transition: 0.25s;
   }
@@ -298,16 +298,12 @@ input[type="range"]::-ms-thumb {
 .theme {
   border-radius: 0.5vw;
   border: 1px #767676 solid;
-  margin: 4px;
+  margin: 16px;
   padding: 8px;
-  height: 32px;
   overflow: hidden;
   transition: height 0.5s;
   background-color: var(--outer);
-}
-
-.theme:hover {
-  height: 385px;
+  color: var(--text);
 }
 
 .theme [type=text] {
@@ -404,4 +400,66 @@ li button {
 
 .sols.active {
   background-color: var(--line-default);
+}
+
+.sols.perfect {
+  width: 0px;
+  height: 0px;
+  border-radius: 2px;
+  background-color: transparent;
+  border: 7.5px solid transparent;
+  border-bottom: calc(7.5px * 1.732) solid var(--line-undone);
+}
+
+.sols.perfect.active {
+  background-color: transparent;
+  border-bottom-color: var(--line-default);
+}
+
+#anchor {
+  width: 99%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+}
+
+#chooser {
+  display: flex;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  min-width: 400px;
+  z-index: 1;
+}
+
+#chooser-table {
+  padding: 25px;
+  background-color: var(--inner);
+  border: none;
+}
+
+.chooser-cell {
+  width: 58px;
+  height: 58px;
+}
+
+.sound-dots-wrapper {
+  margin: 32px;
+}
+
+.dropzone {
+  background-color: var(--inner);
+  color: var(--text);
+  padding: 8px;
+  margin: 8px;
+  transition: all 0.2s !important;
+}
+
+.theme-button {
+  margin: 8px;
+  padding: 8px;
+}
+
+#prev, #next {
+  transition: all 0.2s !important;
 }

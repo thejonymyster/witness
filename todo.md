@@ -7,20 +7,20 @@ Now that looksyv2 is out mroe things must be done
 - [ ] Branching paths for sequences
 
 ## Things to do now
-- [ ] hide arrow for play mode (1st, last)
-- [ ] make optional
-- [ ] screw current perfect system, just have users pick number of solns
-- [ ] tent perfects
-- [ ] Editor dot button should act like triangles
-- [ ] fill with selected element
-- [ ] doesnt work on firefox
-- [ ] reset / "randomize" for theme
+- [x] hide arrow for play mode (1st, last)
+- [x] make optional
+- [x] screw current perfect system, just have users pick number of solns
+- [x] tent perfects
+- [x] Editor dot button should act like triangles
+- [x] fill with selected element
+- [x] doesnt work on firefox
+- [x] reset / "randomize" for theme
 - [ ] undo / redo
 - [ ] clean up editor.js
 - [ ] make puzzles bigger for mobile (temporary draggy solution)
 - [ ] main page progression
 - [ ] challenge packs
-- [ ] reduce code size further, group similar ones
+- [x] reduce code size further, group similar ones
 - [ ] optimize verification algorithm
 
 ### Tutorials for...
@@ -42,16 +42,16 @@ Now that looksyv2 is out mroe things must be done
 
 ### New Symbols...
 - [ ] scratches
-- [ ] dice
-- [ ] xv mino
-- [ ] crystals
+- [x] dice
+- [x] xv mino
+- [x] crystals
 
 ### Might do
 - [ ] vanilla shapes tutorial? (including triangle)
 - [ ] OOB poly
 - [ ] More symmetry types (eventually artless' divider? Vertical pillar? torus?)
 - [ ] WTW symbols?
-- [ ] Scissors?
+- [x] Scissors?
 - [ ] Artificial Walls?
 - [ ] Hidden Puzzles?
 - [ ] A way to make localstorage less cluttered

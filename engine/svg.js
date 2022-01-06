@@ -17,7 +17,7 @@ function mx(params) { return params.width  / 2 + params.x; }
 function my(params) { return params.height / 2 + params.y; }
 
 function setAttr(thing, params) {
-  thing.setAttribute('fill', params.color || 'black')
+  thing.setAttribute('fill', (window.symbolColors[params.color] ?? params.color) || '#000000ff')
   if (params.class       !== undefined) thing.setAttribute('class', params.class)
   thing.setAttribute('transform', 'translate(' + mx(params) + ', ' + my(params) + ')')
   if (params.stroke      !== undefined) thing.setAttribute('stroke', params.stroke)
@@ -166,7 +166,9 @@ window.drawSymbolWithSvg = function(svg, params) {
       rect.setAttribute('transform', '')
       break;
     case 'dot': //------------------------------------HEXAGON
-      simplePoly(svg, params, '5.2 9, 10.4 0, 5.2 -9, -5.2 -9, -10.4 0, -5.2 9')
+      let dot = simplePoly(svg, params, '5.2 9, 10.4 0, 5.2 -9, -5.2 -9, -10.4 0, -5.2 9');
+      dot.setAttribute('transform', `translate(${midx}, ${midy}) scale(${(params.size ?? 7) / 7})`);
+      if (params.sound) dot.setAttribute('fill', '#ff6666ff');
       break;
     case 'gap':
       for (xoffset of [-40, 9]) {
@@ -366,13 +368,10 @@ window.drawSymbolWithSvg = function(svg, params) {
         simplePath(svg, params, 'M -13 7 Q -14 11 -10 11 L 10 11 Q 14 11 13 7 L 8 -7 Q 7 -9 5 -9 L -5 -9 Q -7 -9 -8 -7')
       break; 
     case 'cross': //------------------------------------LOOKSY - CROSS
-      simplePoly(svg, params, '-10 -2.5,-10 2.5,-2.5 2.5,-2.5 10,2.5 10,2.5 2.5,10 2.5,10 -2.5,2.5 -2.5,2.5 -10,-2.5 -10,-2.5 -2.5')
-      hex2 = createElement('rect')
-      svg.appendChild(hex2)
-      hex2.setAttribute('fill', 'var(--line-undone)')
-      hex2.setAttribute('transform', 'translate(' + (midx - 2.5) + ', ' + (midy - 2.5) + ')')
-      hex2.setAttribute('width', '5')
-      hex2.setAttribute('height', '5')
+      simplePoly(svg, params, '10 2.5, 10 -2.5, 2.5 -2.5, 2.5 2.5');
+      simplePoly(svg, params, '-10 2.5, -10 -2.5, -2.5 -2.5, -2.5 2.5');
+      simplePoly(svg, params, '2.5 10, 2.5 2.5, -2.5 2.5, -2.5 10');
+      simplePoly(svg, params, '2.5 -10, 2.5 -2.5, -2.5 -2.5, -2.5 -10');
       break;
     case 'crossFilled':
       simplePoly(svg, params, '-10 -2.5,-10 2.5,-2.5 2.5,-2.5 10,2.5 10,2.5 2.5,10 2.5,10 -2.5,2.5 -2.5,2.5 -10,-2.5 -10,-2.5 -2.5')
@@ -382,6 +381,50 @@ window.drawSymbolWithSvg = function(svg, params) {
       break;
     case 'curveFilled':
       simplePoly(svg, params, '10 0, 0 10, -10 0, 0 -10')
+      break;
+    case 'dots':
+      switch (params.count) {
+        case 1:  
+          simplePoly(svg, params, '3 3, -3 3, -3 -3, 3 -3')
+          break;
+        case 2: 
+          simplePoly(svg, params, '1 8, -5 8, -5 2, 1 2')
+          simplePoly(svg, params, '5 -2, -1 -2, -1 -8, 5 -8')
+          break;
+        case 3: 
+          simplePoly(svg, params, '-1 8, -7 8, -7 2, -1 2')
+          simplePoly(svg, params, '-1 -8, -7 -8, -7 -2, -1 -2')
+          simplePoly(svg, params, '7 3, 1 3, 1 -3, 7 -3')
+          break;
+        case 4: 
+          simplePoly(svg, params, '-2 8, -8 8, -8 2, -2 2')
+          simplePoly(svg, params, '-2 -8, -8 -8, -8 -2, -2 -2')
+          simplePoly(svg, params, '2 8, 8 8, 8 2, 2 2')
+          simplePoly(svg, params, '2 -8, 8 -8, 8 -2, 2 -2')
+          break;
+      }
+      break;
+    case 'dotsHollow':
+      switch (params.count) {
+        case 1:  
+          simplePoly(svg, params, '4 4, -4 4, -4 -4, 4 -4, 4 2, 2 2, 2 -2, -2 -2, -2 2, 4 2')
+          break;
+        case 2: 
+          simplePoly(svg, params, '2 9, -6 9, -6 1, 2 1, 2 7, 0 7, 0 3, -4 3, -4 7, 2 7')
+          simplePoly(svg, params, '6 -1, -2 -1, -2 -9, 6 -9, 6 -3, 4 -3, 4 -7, 0 -7, 0 -3, 6 -3')
+          break;
+        case 3: 
+          simplePoly(svg, params, '-1 9, -9 9, -9 1, -1 1, -1 7, -3 7, -3 3, -7 3, -7 7, -1 7')
+          simplePoly(svg, params, '-1 -1, -9 -1, -9 -9, -1 -9, -1 -3, -3 -3, -3 -7, -7 -7, -7 -3, -1 -3')
+          simplePoly(svg, params, '9 4, 1 4, 1 -4, 9 -4, 9 2, 7 2, 7 -2, 3 -2, 3 2, 9 2')
+          break;
+        case 4: 
+          simplePoly(svg, params, '-1 9, -9 9, -9 1, -1 1, -1 7, -3 7, -3 3, -7 3, -7 7, -1 7')
+          simplePoly(svg, params, '-1 -1, -9 -1, -9 -9, -1 -9, -1 -3, -3 -3, -3 -7, -7 -7, -7 -3, -1 -3')
+          simplePoly(svg, params, '9 9, 1 9, 1 1, 9 1, 9 7, 7 7, 7 3, 3 3, 3 7, 9 7')
+          simplePoly(svg, params, '9 -1, 1 -1, 1 -9, 9 -9, 9 -3, 7 -3, 7 -7, 3 -7, 3 -3, 9 -3')
+          break;
+      }
       break;
     case 'twobytwo': //------------------------------------LOOKSY2 - TWOBYTWO
       if (localStorage.symbolTheme == "Canonical") {
@@ -423,6 +466,9 @@ window.drawSymbolWithSvg = function(svg, params) {
         drawPolyomino(svg, params, 12, 2, 12, '0 0, 0 -12, 12 -12, 12 0, 0 0, 2 -2, 8 -2, 2 -8, 2 -2, 0 0, 0 -12, 12 -12, 10 -10, 4 -10, 10 -4, 10 -10, 12 -12, 0 -12')
       // else
         // drawPolyomino(svg, params, 12, 2, '3 0, 6 3, 9 0, 12 3, 9 6, 12 9, 9 12, 6 9, 3 12, 0 9, 3 6, 0 3')
+      break;
+    case 'xvmino': //------------------------------------XV MINOS
+      drawPolyomino(svg, params, 12, 2, 0, '0 0, 12 0, 12 12, 0 12, 0 2, 2 2, 2 10, 10 10, 10 2, 7 2, 7 10, 5 10, 5 2, 0 2');
       break;
     case 'divdiamond': //------------------------------------SHAUN'S DIVIDED DIAMOND
       let m = 3;
@@ -533,6 +579,29 @@ window.drawSymbolWithSvg = function(svg, params) {
           break;
       }
       break;
+    case 'dice':
+      simplePoly(svg, params, `20 20, 20 -20, -20 -20, -20 20, 16 20, 16 16, -16 16, -16 -16, 16 -16, 16 20`).setAttribute('transform', 'translate(' + midx + ', ' + midy + ') rotate(-5)');
+      switch (params.count) {
+        case 8:
+        case 9:
+          simpleDot(svg, params, 0, 10).setAttribute('transform', 'translate(' + midx + ', ' + midy + ') rotate(-5)');
+          simpleDot(svg, params, 0, -10).setAttribute('transform', 'translate(' + midx + ', ' + midy + ') rotate(-5)');
+        case 6:
+        case 7:
+          simpleDot(svg, params, 10, 0).setAttribute('transform', 'translate(' + midx + ', ' + midy + ') rotate(-5)');
+          simpleDot(svg, params, -10, 0).setAttribute('transform', 'translate(' + midx + ', ' + midy + ') rotate(-5)');
+        case 4:
+        case 5:
+          simpleDot(svg, params, -10, 10).setAttribute('transform', 'translate(' + midx + ', ' + midy + ') rotate(-5)');
+          simpleDot(svg, params, 10, -10).setAttribute('transform', 'translate(' + midx + ', ' + midy + ') rotate(-5)');
+        case 2:
+        case 3:
+          simpleDot(svg, params, 10, 10).setAttribute('transform', 'translate(' + midx + ', ' + midy + ') rotate(-5)');
+          simpleDot(svg, params, -10, -10).setAttribute('transform', 'translate(' + midx + ', ' + midy + ') rotate(-5)');
+          break;
+      }
+      if (params.count % 2) simpleDot(svg, params, 0, 0).setAttribute('transform', 'translate(' + midx + ', ' + midy + ') rotate(-5)');
+      break;
     case 'vtriangle': //------------------------------------SUS' TENUOUS TRIANGLE
       if (localStorage.symbolTheme == "Canonical") { 
         simplePath(svg, params, 'M -13.5 12 Q -16.5 12 -13.5 7.5 L -1.5 -12 Q 0 -15 1.5 -12 L 15 9 Q 16.5 12 13.5 12 L 7 9 L 10.5 9 L 1.5 -6 Q 0 -8.3 -1.5 -6 L -10.5 9 L -7 9 L -1 -2 Q 0 -3.8 1 -2 L 7 9 L 13.5 12')
@@ -574,6 +643,12 @@ window.drawSymbolWithSvg = function(svg, params) {
       break;
     case 'pentagon': //------------------------------------SHAUN'S PENTAGONS
       simplePath(svg, params, 'M -6 13.4 Q -9 13.4 -10 11 L -13 0 Q -14 -2.5 -12 -4.5 L -2 -12.5 Q 0 -14 2 -12.5 L 12 -4.5 Q 14 -2.5 13 0 L 10 11 Q 9 13.4 6 13.5')
+      break;
+    case 'crystal':
+      let c = simplePath(svg, params, 'M -10 7.5 Q -12.5 5 -12.5 2.5 L -12.5 -2.5 Q -12.5 -5 -10 -7.5 L -2.5 -15 Q 0 -17.5 2.5 -15 L 10 -7.5 Q 12.5 -5 12.5 -2.5 L 12.5 2.5 Q 12.5 5 10 7.5 L 2.5 15 Q 0 17.5 -2.5 15')
+      transform = rotate(45 * params.count)
+      transform += ' translate(' + midx + ', ' + midy + ')'
+      c.setAttribute('transform', transform)
       break;
     case 'copier': //------------------------------------ARTLESS' COPIER
       simplePath(svg, params, 'M -4 0 L -9 -5 L -5 -9 L 0 -4 L 5 -9 L 9 -5 L 4 0 L 9 5 L 5 9 L 0 4 L -5 9 L -9 5')
@@ -631,6 +706,32 @@ window.drawSymbolWithSvg = function(svg, params) {
       break;
     case 'pokerchip':
       simplePath(svg, params, 'M 1.2 -8.4 Q 0 -9.24 -1.2 -8.4 C -3.6 -7.2 -1.2 -7.2 -3.6 -5.4 C -6 -3.6 -4.8 -6 -7.2 -4.8 Q -8.4 -4.32 -8.4 -2.4 C -8.4 -1.2 -7 -3 -7 0 C -7 3 -8.4 1.2 -8.4 2.4 Q -8.4 4.56 -7.2 4.8 C -4.8 6 -6 3.6 -3.6 5.52 C -1.2 7.2 -3.6 7.2 -1.2 8.4 Q 0 9.12 1.2 8.4 C 3.6 7.2 1.2 7.2 3.6 5.52 C 6 3.6 4.8 6 7.2 4.8 Q 8.4 4.32 8.4 2.4 C 8.4 1.2 7 3 7 0 C 7 -3 8.4 -1.2 8.4 -2.52 Q 8.4 -4.32 7.2 -4.8 C 4.8 -6 6 -3.6 3.6 -5.52 C 1.2 -7.2 3.6 -7.2 1.2 -8.4 L 2.4 -15.6 C 4.8 -14.4 4.8 -12 7.2 -10.8 C 9.6 -9.6 10.8 -10.8 13.2 -9.6 Q 14.4 -8.76 14.4 -6 C 14.4 -3.6 12 -2.4 12 0 C 12 2.4 14.4 3.6 14.4 6 Q 14.4 9 13.2 9.6 C 10.8 10.8 9.6 9.6 7.2 10.8 C 4.8 12 4.8 14.4 2.4 15.6 Q 0 16.56 -2.4 15.6 C -4.8 14.4 -4.8 12 -7.2 10.8 C -9.6 9.6 -10.8 10.8 -13.2 9.6 Q -14.4 9 -14.4 6 C -14.4 3.6 -12 2.4 -12 0 C -12 -2.4 -14.4 -3.6 -14.4 -6 Q -14.4 -8.76 -13.2 -9.6 C -10.8 -10.8 -9.6 -9.6 -7.2 -10.8 C -4.8 -12 -4.8 -14.4 -2.4 -15.6 Q 0 -16.44 2.4 -15.6');
+      break;
+    case 'swirl':
+      if (localStorage.symbolTheme == "Canonical") {
+        if (params.flip) simplePath(svg, params, 'M -18 0 A 18 18 90 1 0 0 -18 L 0 -14 A 14 14 90 1 1 -14 0 L -8 0 L -16 -8 L -24 0')
+        else simplePath(svg, params, 'M 18 0 A 18 18 90 1 1 0 -18 L 0 -14 A 14 14 90 1 0 14 0 L 8 0 L 16 -8 L 24 0')
+      } else {
+        if (params.flip) simplePath(svg, params, 'M 0 0 L -10.4 -10.6 A 15 15 90 1 0 -3.4 -14.4 C -4.1 -14.4 -0.5 -8.9 0 -9 A 9 9 90 1 1 -9 -1.1')
+        else simplePath(svg, params, 'M 0 0 L 10.4 -10.6 A 15 15 90 1 1 3.4 -14.4 C 4.1 -14.4 0.5 -8.9 0 -9 A 9 9 90 1 0 9 -1.1')
+      }
+      break;
+    case 'eye':
+      simplePath(svg, params, 'M -1.33 -14.9625 Q 0 -15.96 1.33 -14.9625 L 19.95 -0.9975 Q 21.28 0 19.95 0.9975 L 1.33 14.9625 Q 0 15.96 -1.33 14.9625 L -19.95 0.9975 Q -21.28 0 -19.95 -0.9975 L -1.33 -14.9625 L 0.665 -10.4738 Q 0 -10.9725 -0.665 -10.4738 L -13.3 -0.9975 Q -14.63 0 -13.3 0.9975 L -0.665 10.4738 Q 0 10.9725 0.665 10.4738 L 13.3 0.9975 Q 14.63 0 13.3 -0.9975 L 0.665 -10.4738');
+      switch (params.count) {
+        case 1:
+          simpleDot(svg, params, 0, -5)
+          break;
+        case 2:
+          simpleDot(svg, params, 5, 0)
+          break;
+        case 3:
+          simpleDot(svg, params, 0, 5)
+          break;
+        case 4:
+          simpleDot(svg, params, -5, 0)
+          break;
+      }
       break;
     case 'none':  break;
     default: //------------------------------------ERROR HANDLING

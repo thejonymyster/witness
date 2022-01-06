@@ -13,7 +13,7 @@ String.prototype.hashCode = function() {
 
 function sol(id) {
   return document.createRange().createContextualFragment(
-    `<div class='sols' id='sols-${id+1}'></div>`);
+    `<div class='sols${((!puzzle.optional) && (currentPanel != localStorage[`puzzleProgress_${code}`])) ? ' active' : ''}${typeof(id) == 'string' ? ' perfect' : ''}' id='sols-${id}'></div>`);
 }
 
 let puzzles;
@@ -21,12 +21,26 @@ let code;
 let currentPanel;
 let solsWrapper;
 let sols;
+let perfectActivated = false;
+let solsPerfect;
 function reloadPanel() {
   while (solsWrapper.firstChild) solsWrapper.removeChild(solsWrapper.firstChild);
+  while (document.getElementById('perfectWrapper').firstChild) document.getElementById('perfectWrapper').removeChild(document.getElementById('perfectWrapper').firstChild);
   window.puzzle = puzzles[currentPanel];
-  if (puzzle.perfect) {
+  if (puzzle.sols > 1) {
     sols = new Set();
-    for (let i = 0; i < puzzle.sols; i++) solsWrapper.appendChild(sol(i));
+    for (let i = 0; i < puzzle.sols; i++) solsWrapper.appendChild(sol(i+1));
+  }
+  perfectActivated = false;
+  if (puzzle.perfect) {
+    let kinds = Array.from(new Set(puzzle.grid.flat().filter(x => x?.type == 'vtriangle').map(x => x.color)));
+    while (kinds.length < 3) kinds.push(-1);
+    if (kinds.length == 3) {
+      perfectActivated = true;
+      solsPerfect = [[kinds[0], kinds[1], kinds[2]], [kinds[0], kinds[2], kinds[1]], [kinds[1], kinds[0], kinds[2]], [kinds[1], kinds[2], kinds[0]], [kinds[2], kinds[0], kinds[1]], [kinds[2], kinds[1], kinds[0]]];
+      solsPerfect = Array.from(new Set(solsPerfect.map(x => x.join('-'))));
+      for (let o of solsPerfect) document.getElementById('perfectWrapper').appendChild(sol(o));
+    }
   }
   let svg = document.getElementById('puzzle')
   while (svg.firstChild) svg.removeChild(svg.firstChild)
@@ -34,6 +48,9 @@ function reloadPanel() {
   window.clearAnimations();
   applyTheme(puzzle);
   applyImage(puzzle);
+  if (localStorage[`puzzleProgress_${code}_${currentPanel}`])
+    window.setPath(window.puzzle, localStorage[`puzzleProgress_${code}_${currentPanel}`]);
+  updateArrows();
 }
 
 window.onload = function() {
@@ -53,29 +70,46 @@ window.reloadSymbolTheme = function() {
 }
 
 window.onSolvedPuzzle = function(paths) {
-  if (puzzle.perfect) {
-    let dir = pathsToDir(paths);
-    sols.add(dir);
-    document.getElementById('sols-' + sols.size).classList.add('active');
-    if (sols.size == puzzle.sols) levelUp();
+  let dir = pathsToDir(puzzle.path);
+  if (puzzle.optional || (currentPanel == localStorage[`puzzleProgress_${code}`])) {
+    if (puzzle.sols > 1) {
+      sols.add(dir);
+      document.getElementById('sols-' + sols.size).classList.add('active');
+    }
+    let vr = puzzle.vtriangleResult?.join('-');
+    if (perfectActivated && solsPerfect.includes(vr)) {
+      solsPerfect.splice(solsPerfect.indexOf(vr), 1);
+      document.getElementById('sols-' + vr).classList.add('active');
+    }
+    if (((sols?.size ?? 1) >= puzzle.sols) && (!perfectActivated || !solsPerfect.length)) levelUp();
   }
-  else levelUp();
+  localStorage[`puzzleProgress_${code}_${currentPanel}`] = dir;
 }
 
 function levelUp() {
   if ((currentPanel == localStorage[`puzzleProgress_${code}`]) && (currentPanel < (puzzles.length - 1))) localStorage[`puzzleProgress_${code}`]++;
+  updateArrows();
+}
+
+function updateArrows() {
+  if (currentPanel == 0) document.getElementById('prev').setAttribute('style', 'opacity: 0;');
+  else document.getElementById('prev').setAttribute('style', 'opacity: 1;');
+  if (currentPanel == localStorage[`puzzleProgress_${code}`]) document.getElementById('next').setAttribute('style', 'opacity: 0;');
+  else document.getElementById('next').setAttribute('style', 'opacity: 1;');
 }
 
 window.getNext = function() {
   if (currentPanel == localStorage[`puzzleProgress_${code}`]) return;
   currentPanel++;
   reloadPanel();
+  if (puzzle.optional) levelUp();
 }
 
 window.getPrev = function() {
   if (currentPanel == 0) return;
   currentPanel--;
   reloadPanel();
+  if (puzzle.optional) levelUp();
 }
 
 });

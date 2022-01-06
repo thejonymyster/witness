@@ -44,8 +44,10 @@ window.Puzzle = class {
     } else {
       this.newGrid(2 * width + 1, 2 * height + 1)
     }
-    this.pillar = pillar
+    this.pillar = pillar;
+    this.sols = 1;
     this.perfect = false;
+    this.soundDots = [];
     if (json) {
       this.perfect = json.perfect;
       this.grid = json.grid;

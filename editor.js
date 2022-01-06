@@ -1,8 +1,8 @@
 namespace(function() {
 
-var activeParams = {'id':'', 'color':'#000000ff', 'polyshape':71}
+let activeParams = {'id':'', 'color':0, 'polyshape':71}
 window.puzzle = null
-var dragging = null
+let dragging = null
 
 // write a singular puzzle for reload purposes
 function writePuzzle() {
@@ -27,24 +27,24 @@ function drawPuzzle() {
   window.clearAnimations()
 
   // @Robustness: Maybe I should be cleaning house more thoroughly? A class or something would let me just remove these...
-  var puzzleElement = document.getElementById('puzzle')
+  let puzzleElement = document.getElementById('puzzle')
   // Remove all 'onTraceStart' calls, they should be interacted through solveManually only.
-  for (var child of puzzleElement.children) {
+  for (let child of puzzleElement.children) {
     child.onpointerdown = null
   }
 
-  var addOnClick = function(elem, x, y) {
+  let addOnClick = function(elem, x, y) {
     elem.onpointerdown = function(event) {onElementClicked(event, x, y)}
   }
 
-  var xPos = 40
-  var topLeft = {'x':40, 'y':40}
-  for (var x=0; x<puzzle.width; x++) {
-    var yPos = 40
-    var width = (x%2 === 0 ? 24 : 58)
-    for (var y=0; y<puzzle.height; y++) {
-      var height = (y%2 === 0 ? 24 : 58)
-      var rect = createElement('rect')
+  let xPos = 40
+  let topLeft = {'x':40, 'y':40}
+  for (let x=0; x<puzzle.width; x++) {
+    let yPos = 40
+    let width = (x%2 === 0 ? 24 : 58)
+    for (let y=0; y<puzzle.height; y++) {
+      let height = (y%2 === 0 ? 24 : 58)
+      let rect = createElement('rect')
       puzzleElement.appendChild(rect)
       rect.setAttribute('x', xPos)
       rect.setAttribute('y', yPos)
@@ -67,19 +67,80 @@ function reloadPuzzle() {
   document.getElementById('solveMode').onpointerdown();
   document.getElementById('solutionViewer').style.display = 'none';
 
-  var save = document.getElementById('save');
+  let save = document.getElementById('save');
   save.innerText = 'Get URL';
   save.onpointerdown = exportPuzzle;
 
-  var puzzleStyle = document.getElementById('puzzleStyle');
+  let puzzleStyle = document.getElementById('puzzleStyle');
   puzzleStyle.value = symmetryModes(puzzle.symmetry, puzzle.pillar);
+  document.getElementById('sols').value = puzzle.sols;
+  document.getElementById('makePerfect').checked = puzzle.perfect;
+  document.getElementById('disableFlash').checked = puzzle.disableFlash;
+  document.getElementById('makeOptional').checked = puzzle.optional;
+  document.getElementById('makePerfect').style.background = (document.getElementById('makePerfect').checked ? 'var(--text)' : 'var(--background)')
+  document.getElementById('disableFlash').style.background = (document.getElementById('disableFlash').checked ? 'var(--text)' : 'var(--background)')
+  document.getElementById('makeOptional').style.background = (document.getElementById('makeOptional').checked ? 'var(--text)' : 'var(--background)')
+  if (puzzle.grid.filter(x => x.filter(y => y?.type == 'vtriangle').length).length) document.getElementById('show-if-tent').style.display = 'flex';
+  else document.getElementById('show-if-tent').style.display = 'none';
+  //* sound ui
+  let sounds = puzzle.grid.flat().filter(x => x?.dot >= 40).map(x => x.dot - 39).sort((a, b) => a - b);
+  temp = [...puzzle.soundDots];
+  if (sounds != temp.sort((a, b) => a - b)) {
+    temp = [...puzzle.soundDots];
+    for (let o of puzzle.soundDots) {
+      if (sounds.includes(o)) sounds.splice(sounds.indexOf(o), 1);
+      else temp.splice(temp.indexOf(o), 1);
+    }
+    puzzle.soundDots = temp;
+    for (let o of sounds) puzzle.soundDots.push(o);
+  }
+  updateSoundDotsList();
   console.log('Puzzle style:', puzzleStyle.value);
+}
+
+let dragged;
+document.addEventListener("dragstart", (event) => { dragged = event.target; if ( event.target?.classList?.contains("dropzone")) event.target.style.opacity = .5; }, false);
+document.addEventListener("dragend", (event) => { if ( event.target?.classList?.contains("dropzone")) event.target.style.opacity = ""; }, false);
+document.addEventListener("dragenter", (event) => { if ( event.target?.classList?.contains("dropzone")) event.target.style.background = "var(--line-default)"; }, false);
+document.addEventListener("dragleave", (event) => { if ( event.target?.classList?.contains("dropzone")) event.target.style.background = ""; }, false);
+document.addEventListener("dragover", (event) => blockThis(event));
+document.addEventListener("drop", (event) => { doDrop(event); }, false);
+
+function updateSoundDotsList() {
+  if (puzzle.soundDots.length) document.getElementById('hide-if-sound-dots').style.display = 'flex';
+  else document.getElementById('hide-if-sound-dots').style.display = 'none';
+  for (let o of Array.from(document.getElementById('sound-dots').childNodes)) o.parentElement.removeChild(o);
+  for (let k in puzzle.soundDots) {
+    let el = document.createElement('div');
+    el.classList.add('dropzone', 'noselect');
+    el.setAttribute('draggable', true);
+    el.setAttribute('ondragstart', `event.dataTransfer.setData('text/plain', null)`)
+    el.innerHTML = puzzle.soundDots[k];
+    el.number = k;
+    document.getElementById('sound-dots').appendChild(el);
+  }
+}
+
+window.blockThis = (event) => {
+  event.preventDefault(); 
+  event.stopPropagation();
+}
+
+function doDrop(event) {
+  let source = dragged.number;
+  let target = event.target.number;
+  let temp = puzzle.soundDots.splice(source, 1)[0];
+  puzzle.soundDots.splice(target, 0, temp);
+  updateSoundDotsList();
+  reloadPuzzle();
+  writePuzzle();
 }
 
 //** Buttons which the user can click on
 window.createEmptyPuzzle = function(x = 4, y = x) {
   style = document.getElementById('puzzleStyle')?.value ?? false
   console.log('Creating new puzzle with style', style)
+  let newPuzzle;
 
   switch (style) {
   default:
@@ -87,14 +148,14 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
     style = 'Default'
     // Intentional fall-through
   case 'Default':
-    var newPuzzle = new Puzzle(x, y)
+    newPuzzle = new Puzzle(x, y)
     newPuzzle.grid[0][y*2].start = true;
     newPuzzle.grid[x*2][0].end = 'right';
     break;
 
   case 'Horizontal Symmetry':
     x = Math.max(1, x)
-    var newPuzzle = new Puzzle(x, y)
+    newPuzzle = new Puzzle(x, y)
     newPuzzle.symmetry = {'x':true, 'y':false}
     newPuzzle.grid[0][y*2].start = true;
     newPuzzle.grid[x*2][y*2].start = true;
@@ -104,7 +165,7 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
 
   case 'Vertical Symmetry':
     y = Math.max(1, y)
-    var newPuzzle = new Puzzle(x, y)
+    newPuzzle = new Puzzle(x, y)
     newPuzzle.symmetry = {'x':false, 'y':true}
     newPuzzle.grid[0][0].start = true;
     newPuzzle.grid[0][y*2].start = true;
@@ -115,7 +176,7 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
   case 'Rotational Symmetry':
     x = Math.max(1, x)
     y = Math.max(1, y)
-    var newPuzzle = new Puzzle(x, y)
+    newPuzzle = new Puzzle(x, y)
     newPuzzle.symmetry = {'x':true, 'y':true}
     newPuzzle.grid[0][y*2].start = true;
     newPuzzle.grid[x*2][0].start = true;
@@ -125,14 +186,14 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
 
   case 'Pillar':
     x = Math.max(1, x)
-    var newPuzzle = new Puzzle(x, y, true)
+    newPuzzle = new Puzzle(x, y, true)
     newPuzzle.grid[0][y*2].start = true;
     newPuzzle.grid[x][0].end = 'top';
     break;
 
   case 'Pillar (H Symmetry)':
     x = Math.max(2, x)
-    var newPuzzle = new Puzzle(x, y, true)
+    newPuzzle = new Puzzle(x, y, true)
     newPuzzle.symmetry = {'x':true, 'y':false}
     newPuzzle.grid[0][y*2].start = true;
     newPuzzle.grid[x][y*2].start = true;
@@ -143,7 +204,7 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
   case 'Pillar (V Symmetry)':
     x = Math.max(1, x)
     y = Math.max(1, y)
-    var newPuzzle = new Puzzle(x, y, true)
+    newPuzzle = new Puzzle(x, y, true)
     newPuzzle.symmetry = {'x':false, 'y':true}
     newPuzzle.grid[0][y*2].start = true;
     newPuzzle.grid[x][0].start = true;
@@ -154,7 +215,7 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
   case 'Pillar (R Symmetry)':
     x = Math.max(2, x)
     y = Math.max(1, y)
-    var newPuzzle = new Puzzle(x, y, true)
+    newPuzzle = new Puzzle(x, y, true)
     newPuzzle.symmetry = {'x':true, 'y':true}
     newPuzzle.grid[0][y*2].start = true;
     newPuzzle.grid[x][0].start = true;
@@ -165,7 +226,7 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
   case 'Pillar (Two Lines)':
     x = Math.max(2, x)
     y = Math.max(1, y)
-    var newPuzzle = new Puzzle(x, y, true)
+    newPuzzle = new Puzzle(x, y, true)
     newPuzzle.symmetry = {'x':false, 'y':false}
     newPuzzle.grid[0][y*2].start = true;
     newPuzzle.grid[x][y*2].start = true;
@@ -174,9 +235,7 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
     break;
   }
 
-  if (document.getElementById('makePerfect').checked) {
-    newPuzzle.perfect = true;
-  }
+  newPuzzle.sols = document.getElementById('sols').value;
   copyTheme(newPuzzle);
   copyImage(newPuzzle);
 
@@ -209,9 +268,31 @@ window.setSolveMode = function(value) {
   }
 }
 
+window.changeSols = function(value) {
+  puzzle.sols = document.getElementById('sols').value;
+  reloadPuzzle();
+  writePuzzle();
+}
+
 window.makePerfect = function(value) {
   document.getElementById('makePerfect').checked = value
   puzzle.perfect = value;
+  reloadPuzzle();
+  writePuzzle();
+}
+
+window.disableFlash = function(value) {
+  document.getElementById('disableFlash').checked = value
+  puzzle.disableFlash = value;
+  reloadPuzzle();
+  writePuzzle();
+}
+
+window.makeOptional = function(value) {
+  document.getElementById('makeOptional').checked = value
+  puzzle.optional = value;
+  reloadPuzzle();
+  writePuzzle();
 }
 
 //** End of user interaction points
@@ -240,17 +321,17 @@ window.onload = function() {
   else createEmptyPuzzle()
   reloadPuzzle()
   // Add theme-appropriate coloring to the style dropdown
-  var puzzleStyle = document.getElementById('puzzleStyle')
+  let puzzleStyle = document.getElementById('puzzleStyle')
   puzzleStyle.style.background = 'var(--background)'
   puzzleStyle.style.color = 'var(--text)'
 
-  for (var resize of document.getElementsByClassName('resize')) {
+  for (let resize of document.getElementsByClassName('resize')) {
     resize.onpointerdown = function(event) {
       if (event.touches > 1) return // Don't attempt to drag during screen resize
       dragStart(event, this)
     }
     if (resize.id == 'resize-left' || resize.id == 'resize-right') {
-      var svg = drawSymbol({'type': 'drag', 'rot':1, 'width':6, 'height':22})
+      let svg = drawSymbol({'type': 'drag', 'rot':1, 'width':6, 'height':22})
       svg.style.width = '6px'
       svg.style.height = '22px'
       resize.appendChild(svg)
@@ -258,7 +339,7 @@ window.onload = function() {
       resize.style.display = 'flex'
       svg.style.margin = 'auto'
     } else if (resize.id == 'resize-top' || resize.id == 'resize-bottom') {
-      var svg = drawSymbol({'type': 'drag', 'rot':0, 'width':22, 'height':6})
+      let svg = drawSymbol({'type': 'drag', 'rot':0, 'width':22, 'height':6})
       svg.style.width = '22px'
       svg.style.height = '6px'
       resize.appendChild(svg)
@@ -277,29 +358,342 @@ window.onSolvedPuzzle = function(paths) {
   return paths
 }
 
-function download(filename, text) {
-  var element = document.createElement('a');
-  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-  element.setAttribute('download', filename);
-  element.style.display = 'none';
-  document.body.appendChild(element);
-  element.click();
-  document.body.removeChild(element);
+let symbolData = {
+  'start': {'type':'start', 'title':'Start point'},
+  'end': {'type':'end', 'y': 18, 'dir':'top', 'title':'End point'},
+  'gap': {'type':'gap', 'title':'Line break'},
+  'dot': {'type':'dot', 'sound': 0, 'title':'Dot'},
+  'square': {'type':'square', 'title':'Square'},
+  'star': {'type':'star', 'title':'Star'},
+  'nega': {'type':'nega', 'title':'Negation'},
+  'triangle': {'type':'triangle', 'count': 1, 'title':'Triangle'},
+  'poly': {'type':'poly', 'title':'Polyomino'},
+  'ylop': {'type':'ylop', 'title':'Negation polyomino'},
+  'bridge': {'type':'bridge', 'title':'Seren\'s Incomplete Pentagon'},
+  'arrow': {'type':'arrow', 'count': 1, 'rot': 0, 'title':'Sigma\'s Arrow'},
+  'sizer': {'type':'sizer', 'title':'Radiazia\'s Sizer'},
+  'cross': {'type':'cross', 'title':'Cross'},
+  'curve': {'type':'curve', 'title':'Diamond'},
+  'crossFilled': {'type':'crossFilled', 'title':'Filled Cross'},
+  'curveFilled': {'type':'curveFilled', 'title':'Filled Diamond'},
+  'twobytwo': {'type':'twobytwo', 'title':'Two-By-Two'},
+  'dart': {'type':'dart', 'count': 1, 'rot': 0, 'title':'Dart'},
+  'polynt': {'type':'polynt', 'title':'unsuspiciousperson\'s Antipolyomino'}, 
+  'divdiamond': {'type':'divdiamond', 'count':1, 'title':'ItzShaun\'s Divided Diamond'}, 
+  'vtriangle': {'type':'vtriangle', 'title':'sus\' Tenuous Triangle'},
+  'x-lu': {'type':'x', 'spokes': 16, 'title':'ItzShaun\' Xs'},
+  'x-ru': {'type':'x', 'spokes': 16, 'title':'ItzShaun\' Xs'},
+  'x-ld': {'type':'x', 'spokes': 16, 'title':'ItzShaun\' Xs'},
+  'x-rd': {'type':'x', 'spokes': 16, 'title':'ItzShaun\' Xs'},
+  'pentagon': {'type':'pentagon', 'title':'ItzShaun\'s Pentagons'},
+  'copier': {'type':'copier', 'title':'Gentova\' Copiers'},
+  'celledhex': {'type':'celledhex', 'title':'ItzShaun\'s Celled Hexes'},
+  'scaler': {'type':'scaler', 'flip': 0, 'title':'Scalers (Revised Artless\' Carrots)'},
+  'portal': {'type':'portal', 'title':'MarioMak\'s Portals'},
+  'blackhole': {'type':'blackhole', 'title':'Pruz\'s Black Holes (Klyzx\'s Revision)'},
+  'atriangle': {'type':'atriangle', 'count': 1, 'title':'Klyzx\'s Antitriangles'},
+  'whitehole': {'type':'whitehole', 'title':'White Holes'},
+  'pokerchip': {'type':'pokerchip', 'title':'MarioMak\'s Chips'},
+  'dice': {'type':'dice', 'count': 1, 'title':'Niko\'s Dices'},
+  'xvmino': {'type':'xvmino', 'title':'Pruz\'s \'Red Polyomino\' (Kate\'s Redesign)'},
+  'crystal': {'type':'crystal', 'count': 1, 'title':'ianpep\'s Crystals'},
+  'dots': {'type': 'dots', 'count': 1, 'title':'ianpep\'s Little Squares'},
+  'swirl': {'type': 'swirl', 'flip': false, 'title':'Alith\'s Swirls'},
+  'eye': {'type': 'eye', 'count': 1, 'title':'AnActualCat\'s Eyes'},
+  'none': {'type': 'none', 'title': 'Symbol Coming Soon!'}
+}
+let xButtons = [];
+
+function buttonBehaviour(event, el, onClickAgain) {
+  reloadPuzzle() // Disable manual solve mode to allow puzzle editing
+  if (!event.shiftKey && activeParams.id === el.id) (onClickAgain)(el);
+  delete el.params.color;
+  activeParams = Object.assign(activeParams, el.params)
+  drawSymbolButtons()
+  if (event.shiftKey) 
+    for (let i = 0; i < puzzle.height; i++) for (let j = 0; j < puzzle.width; j++) 
+      if (!((i + j) % 2)) {
+        onElementClicked(event, j, i, false);
+        puzzleModified()
+        writePuzzle()
+        reloadPuzzle()
+      }
+}
+
+function drawSymbolButtons() {
+  let symbolTable = document.getElementById('symbolButtons')
+  symbolTable.style.display = null;
+  for (let button of symbolTable.getElementsByTagName('button')) {
+    let params = symbolData[button.id]
+    params.id = button.id
+    params.height = params.type == 'x' ? 30 : 58
+    params.width = params.type == 'x' ? 30 : 58
+    params.border = params.type == 'x' ? 0 : 2
+    if (params.type == 'x') xButtons.push(button.id)
+    if (activeParams.id === button.id) {
+      if (['x-lu', 'x-ru', 'x-ld', 'x-rd'].includes(button.id)) {
+        document.getElementById('x-fakebutton').style.backgroundColor = window.symbolColors[activeParams.color];
+        button.parentElement.style.backgroundColor = null;
+      } else {
+        document.getElementById('x-fakebutton').style.backgroundColor = null;
+        button.parentElement.style.backgroundColor = window.symbolColors[activeParams.color];
+      }
+    } else button.parentElement.style.backgroundColor = null;
+    button.style.padding = 0
+    button.style.border = params.border
+    button.style.height = params.height + 2*params.border
+    button.style.width = params.width + 2*params.border
+    button.title = params.title
+    button.params = params
+    button.params.color = (params.type == 'x') ? '#F66' : 'var(--text)'
+    button.style.display = null
+
+    let cycle;
+    switch (button.id) {
+      case 'poly':
+      case 'ylop':
+      case 'polynt':
+      case 'xvmino':
+        button.params.polyshape = activeParams.polyshape
+        button.onpointerdown = function(event) { buttonBehaviour(event, this, (el) => { shapeChooser(); })}
+        break;
+      case 'divdiamond':
+      case 'dice':
+        cycle = 9;
+      case 'triangle':
+      case 'atriangle':
+      case 'crystal':
+      case 'dots':
+      case 'eye':
+        cycle ??= 4;
+        button.onpointerdown = function(event) { buttonBehaviour(event, this, (el) => {
+          let count = symbolData[activeParams.id].count
+          count += (event.isRightClick() ? -1 : 1)
+          if (count <= 0) count = cycle
+          if (count > cycle) count = 1
+          symbolData[activeParams.id].count = count
+          activeParams.count = count
+        })}
+        break;
+      case 'arrow':
+      case 'dart':
+        button.onpointerdown = function(event) { buttonBehaviour(event, this, (el) => {
+          let rot = symbolData[activeParams.id].rot
+          if (rot == null) rot = 0
+          rot = (rot + (event.isRightClick() ? 7 : 1)) % 8;
+          symbolData[activeParams.id].rot = rot
+          activeParams.rot = rot
+        })}
+        break;
+      case 'scaler':
+      case 'swirl':
+        button.onpointerdown = function(event) { buttonBehaviour(event, this, (el) => {
+          let flip = symbolData[activeParams.id].flip
+          flip = !flip;
+          symbolData[activeParams.id].flip = flip
+          activeParams.flip = flip
+        })}
+        break;
+      case 'x-lu':
+      case 'x-ru':
+      case 'x-ld':
+      case 'x-rd':
+      case 'x':
+        button.onpointerdown = function(event) { 
+          const corners = { 'x-lu': 1, 'x-ru': 2, 'x-ld': 4, 'x-rd': 8 };
+          reloadPuzzle() // Disable manual solve mode to allow puzzle editing
+          if (!event.shiftKey && activeParams.id === this.id) for (xbutton of xButtons) {
+            if (event.isRightClick())
+              symbolData[xbutton].spokes = ((symbolData[xbutton].spokes - 1) & ~corners[this.id]) + 1;
+            else
+              symbolData[xbutton].spokes = ((symbolData[xbutton].spokes - 1) ^ corners[this.id]) + 1;
+          }
+          delete this.params.color;
+          activeParams = Object.assign(activeParams, this.params)
+          drawSymbolButtons()
+          if (event.shiftKey) 
+            for (let i = 0; i < puzzle.height; i++) for (let j = 0; j < puzzle.width; j++) 
+              if (!((i + j) % 2)) {
+                onElementClicked(event, j, i, false);
+                puzzleModified()
+                writePuzzle()
+                reloadPuzzle()
+              }
+        }
+        break;
+      case 'dot':
+        button.onpointerdown = function(event) { buttonBehaviour(event, this, (el) => {
+          symbolData[activeParams.id].sound ^= 1
+        }); }
+        break;
+      default:
+        button.onpointerdown = function(event) { buttonBehaviour(event, this, (el) => {}); }
+        break;
+    }
+    button.oncontextmenu = (event) => { event.preventDefault(); }
+
+    while (button.firstChild) button.removeChild(button.firstChild)
+    let svg = window.drawSymbol(params)
+    if (button.id == 'x-lu') {
+      let fakebutton = document.getElementById('x-fakesvg')
+      while (fakebutton.firstChild) fakebutton.removeChild(fakebutton.firstChild)
+      fakebutton.appendChild(svg)
+      svg.setAttribute('viewBox', '-15 -15 60 60')
+      svg.setAttribute('width', '60px')
+    }
+    else if (button.id == 'x-ru' || button.id == 'x-ld' || button.id == 'x-rd') svg.style.display = "none"
+    else button.appendChild(svg)
+    if (window.polyominoes.includes(button.id)) {
+      let is4Wide = (activeParams.polyshape & 0x000F) && (activeParams.polyshape & 0xF000)
+      let is4Tall = (activeParams.polyshape & 0x1111) && (activeParams.polyshape & 0x8888)
+      if (is4Wide || is4Tall) {
+        svg.setAttribute('viewBox', '-8 -8 80 80')
+      }
+    }
+  }
+}
+
+function drawColorButtons() {
+  let colorTable = document.getElementById('colorButtons')
+  colorTable.style.display = null
+  let changeActiveColor = function() {
+    reloadPuzzle() // Disable manual solve mode to allow puzzle editing
+    activeParams.color = symbolColors.indexOf(this.id);
+    let symbolTable = document.getElementById('symbolButtons')
+    for (let button of symbolTable.getElementsByTagName('button')) {
+      if (activeParams.id === button.id) {
+        if (['x-lu', 'x-ru', 'x-ld', 'x-rd'].includes(button.id)) {
+          document.getElementById('x-fakebutton').style.backgroundColor = window.symbolColors[activeParams.color];
+          button.parentElement.style.backgroundColor = null;
+        } else {
+          document.getElementById('x-fakebutton').style.backgroundColor = null;
+          button.parentElement.style.backgroundColor = window.symbolColors[activeParams.color];
+        }
+      } else {
+        button.parentElement.style.backgroundColor = null;
+      }
+    }
+    drawColorButtons()
+  }
+  for (let button of colorTable.getElementsByTagName('button')) {
+    let params = {
+      'width': 45,
+      'height': 45,
+      'border': 2,
+      'type': 'square',
+      'text': button.id,
+      'color': symbolColors.indexOf(button.id),
+    }
+    if (activeParams.color === button.id) {
+      button.parentElement.style.background = 'var(--border)'
+    } else {
+      button.parentElement.style.background = null
+    }
+    button.style.padding = 0
+    button.style.border = params.border
+    button.style.height = params.height + 2*params.border
+    button.style.width = params.width + 2*params.border
+    button.onpointerdown = changeActiveColor
+    while (button.firstChild) button.removeChild(button.firstChild)
+    let crayon = window.drawSymbol(params)
+    button.appendChild(crayon)
+  }
+}
+
+function shapeChooser() {
+  let puzzle = document.getElementById('puzzle')
+  puzzle.style.opacity = 0
+
+  let anchor = document.createElement('div')
+  document.body.appendChild(anchor)
+  anchor.id = 'anchor'
+  anchor.onpointerdown = function(event) {shapeChooserClick(event)}
+
+  let chooser = document.createElement('div')
+  puzzle.parentElement.insertBefore(chooser, puzzle)
+  chooser.id = 'chooser'
+  chooser.onpointerdown = function(event) {shapeChooserClick(event)}
+
+  let chooserTable = document.createElement('table')
+  chooser.appendChild(chooserTable)
+  chooserTable.id = 'chooser-table'
+  chooserTable.onpointerdown = function(event) {shapeChooserClick(event, this)}
+
+  for (let x=0; x<4; x++) {
+    let row = chooserTable.insertRow(x)
+    for (let y=0; y<4; y++) {
+      let cell = row.insertCell(y)
+      cell.classList.add('chooser-cell')
+      cell.powerOfTwo = 1 << (x + y*4)
+      cell.onpointerdown = function(event) {shapeChooserClick(event, this)}
+      if ((activeParams.polyshape & cell.powerOfTwo) !== 0) {
+        cell.clicked = true
+        cell.style.background = 'var(--line-default)'
+      } else {
+        cell.clicked = false
+        cell.style.background = 'var(--line-undone)'
+      }
+    }
+  }
+
+}
+
+function shapeChooserClick(event, cell) {
+  function polySort(shape) {
+    let xBar = 4369;
+    let yBar =   15;
+    if (shape == 0) return 0;
+    while ((shape & xBar) == 0) shape >>= 1;
+    while ((shape & yBar) == 0) shape >>= 4;
+    return shape;
+  }
+
+  let chooser = document.getElementById('chooser')
+  if (cell == null) { // Clicked outside the chooser, close the selection window
+    let anchor = document.getElementById('anchor')
+    let puzzle = document.getElementById('puzzle')
+
+    activeParams.polyshape = polySort(activeParams.polyshape)
+    if (activeParams.polyshape & 0xFFFF == 0) {
+      activeParams.polyshape += 1 // Ensure that at least one square is filled
+      drawSymbolButtons()
+    }
+    chooser.parentElement.removeChild(chooser)
+    anchor.parentElement.removeChild(anchor)
+    puzzle.style.opacity = null
+    puzzle.style.minWidth = null
+    event.stopPropagation()
+    return
+  }
+
+  // Clicks inside the green box are non-closing
+  if (cell.id == 'chooser-table') {
+    event.stopPropagation()
+    return
+  }
+  cell.clicked = !cell.clicked
+  activeParams.polyshape ^= cell.powerOfTwo
+  if (cell.clicked) {
+    cell.style.background = 'var(--line-default)'
+  } else {
+    cell.style.background = 'var(--line-undone)'
+  }
+  drawSymbolButtons()
 }
 
 // Returns the next value in the list.
 // If the value is not found, defaults to the first element.
 // If the value is found, but is the last value, returns null.
 function getNextValue(list, value) {
-  var index = list.indexOf(value)
-  return list[index + 1]
+  let index = list.indexOf(value)
+  return list[index + 1] ?? undefined
 }
 
 // Called whenever a grid cell is clicked. Uses the global activeParams to know
 // what combination of shape & color are currently selected.
 // This function also ensures that the resulting puzzle is still sane, and will modify
 // the puzzle to add symmetrical elements, remove newly invalidated elements, etc.
-function onElementClicked(event, x, y) {
+function onElementClicked(event, x, y, update=true) {
   if (event.isRightClick()) {
     // Clear the associated cell
     if (x%2 === 1 && y%2 === 1) {
@@ -310,7 +704,7 @@ function onElementClicked(event, x, y) {
       puzzle.grid[x][y].dot = null
       puzzle.grid[x][y].gap = null
       if (puzzle.symmetry != null) {
-        var sym = puzzle.getSymmetricalPos(x, y)
+        let sym = puzzle.getSymmetricalPos(x, y)
         puzzle.updateCell2(sym.x, sym.y, 'start', null)
         puzzle.updateCell2(sym.x, sym.y, 'end', null)
       }
@@ -325,7 +719,7 @@ function onElementClicked(event, x, y) {
       puzzle.grid[x][y].start = null
     }
     if (puzzle.symmetry != null) {
-      var sym = puzzle.getSymmetricalPos(x, y)
+      let sym = puzzle.getSymmetricalPos(x, y)
       if (sym.x === x && sym.y === y) {
         // If the two startpoints would be in the same location, do nothing.
         puzzle.grid[x][y].start = null
@@ -337,38 +731,43 @@ function onElementClicked(event, x, y) {
     if (x%2 === 1 && y%2 === 1) return
     if (puzzle.grid[x][y].gap != null) return
 
-    var validDirs = puzzle.getValidEndDirs(x, y)
+    let validDirs = puzzle.getValidEndDirs(x, y)
 
     // If (x, y) is an endpoint, loop to the next direction
     // If the direction loops past the end (or there are no valid directions),
     // remove the endpoint by setting to null.
-    var dir = getNextValue(validDirs, puzzle.grid[x][y].end)
+    let dir = getNextValue(validDirs, puzzle.grid[x][y].end)
     puzzle.grid[x][y].end = dir
     if (puzzle.symmetry != null) {
-      var sym = puzzle.getSymmetricalPos(x, y)
+      let sym = puzzle.getSymmetricalPos(x, y)
       if (sym.x === x && sym.y === y) {
         // If the two endpoints would be in the same location, do nothing.
         puzzle.grid[x][y].end = null
       } else {
-        var symmetricalDir = puzzle.getSymmetricalDir(dir)
+        let symmetricalDir = puzzle.getSymmetricalDir(dir)
         puzzle.updateCell2(sym.x, sym.y, 'end', symmetricalDir)
       }
     }
   } else if (activeParams.type == 'dot') {
     if (x%2 === 1 && y%2 === 1) return
-    var dotColors = [undefined, 1]
-    if (puzzle.symmetry != null) {
-      dotColors.push(2)
-      dotColors.push(3)
+    let dotColors;
+    if (activeParams.sound) {
+      dotColors = [undefined, 40, 41, 42, 43, 44, 45, 46];
+    } else {
+      dotColors = [undefined, 1]
+      if (puzzle.symmetry != null) {
+        dotColors.push(2)
+        dotColors.push(3)
+      }
+      dotColors.push(4)
     }
-    dotColors.push(4)
     puzzle.grid[x][y].dot = getNextValue(dotColors, puzzle.grid[x][y].dot)
     puzzle.grid[x][y].gap = null
   } else if (activeParams.type == 'cross' || activeParams.type == 'curve') {
     let offset = 0;
     if (activeParams.type == 'curve') offset = -6;
     if (x%2 !== 0 || y%2 !== 0) return
-    var dotColors = [undefined, -1 + offset, -2 + offset]
+    let dotColors = [undefined, -1 + offset, -2 + offset]
     if (puzzle.symmetry != null) {
       dotColors.push(-3 + offset)
       dotColors.push(-4 + offset)
@@ -380,7 +779,7 @@ function onElementClicked(event, x, y) {
   } else if (activeParams.type == 'x') {
     if (x%2 !== 0 || y%2 !== 0) return
     let spokes = activeParams.spokes - 1;
-    var savedGrid = puzzle.switchToMaskedGrid() 
+    let savedGrid = puzzle.switchToMaskedGrid() 
     if (!(puzzle.grid[x - 1] && puzzle.grid[x - 1][y - 1])) spokes &= ~1
     if (!(puzzle.grid[x + 1] && puzzle.grid[x + 1][y - 1])) spokes &= ~2
     if (!(puzzle.grid[x - 1] && puzzle.grid[x - 1][y + 1])) spokes &= ~4
@@ -388,6 +787,19 @@ function onElementClicked(event, x, y) {
     puzzle.grid = savedGrid
     if (puzzle.grid[x][y].dot == -13 - spokes) delete puzzle.grid[x][y].dot
     else puzzle.grid[x][y].dot = -13 - spokes;
+    puzzle.grid[x][y].gap = null
+  } else if (activeParams.type == 'dots') {
+    if (x%2 === 1 && y%2 === 1) return
+    let offset = 4 + (7 * activeParams.count);
+    let dotColors = [undefined, 1 + offset, 2 + offset];
+    if (puzzle.symmetry != null) {
+      dotColors.push(3 + offset);
+      dotColors.push(4 + offset);
+      dotColors.push(5 + offset);
+      dotColors.push(6 + offset);
+    }
+    dotColors.push(7 + offset);
+    puzzle.grid[x][y].dot = getNextValue(dotColors, puzzle.grid[x][y].dot);
     puzzle.grid[x][y].gap = null
   } else if (activeParams.type == 'gap') {
     if (x%2 === y%2) return
@@ -397,29 +809,29 @@ function onElementClicked(event, x, y) {
     puzzle.grid[x][y].end = null
     // Ensure that a symmetrical start or end is no longer impossible
     if (puzzle.symmetry != null) {
-      var sym = puzzle.getSymmetricalPos(x, y)
+      let sym = puzzle.getSymmetricalPos(x, y)
       puzzle.grid[sym.x][sym.y].start = null
       puzzle.grid[sym.x][sym.y].end = null
     }
 
     // This potentially isolated a start/endpoint, so ensure that they are removed.
-    for (var i=x-1; i<x+2; i++) {
-      for (var j=y-1; j<y+2; j++) {
+    for (let i=x-1; i<x+2; i++) {
+      for (let j=y-1; j<y+2; j++) {
         if (i%2 !== 0 || j%2 !== 0) continue;
-        var leftCell = puzzle.getCell(i - 1, j)
+        let leftCell = puzzle.getCell(i - 1, j)
         if (leftCell != null && leftCell.gap !== 2) continue;
-        var rightCell = puzzle.getCell(i + 1, j)
+        let rightCell = puzzle.getCell(i + 1, j)
         if (rightCell != null && rightCell.gap !== 2) continue;
-        var topCell = puzzle.getCell(i, j - 1)
+        let topCell = puzzle.getCell(i, j - 1)
         if (topCell != null && topCell.gap !== 2) continue;
-        var bottomCell = puzzle.getCell(i, j + 1)
+        let bottomCell = puzzle.getCell(i, j + 1)
         if (bottomCell != null && bottomCell.gap !== 2) continue;
 
         // At this point, the cell has no defined or non-gap2 neighbors (isolated)
         puzzle.updateCell2(i, j, 'start', false)
         puzzle.updateCell2(i, j, 'end', null)
         if (puzzle.symmetry != null) {
-          var sym = puzzle.getSymmetricalPos(i, j)
+          let sym = puzzle.getSymmetricalPos(i, j)
           console.debug('Enforcing symmetrical startpoint at', sym.x, sym.y)
           puzzle.updateCell2(sym.x, sym.y, 'start', false, 'end', null)
           puzzle.updateCell2(sym.x, sym.y, 'end', null)
@@ -439,7 +851,7 @@ function onElementClicked(event, x, y) {
         'color': activeParams.color,
       }
     }
-  } else if (['scaler'].includes(activeParams.type)) {
+  } else if (['scaler', 'swirl'].includes(activeParams.type)) {
     if (x%2 !== 1 || y%2 !== 1) return
     if (puzzle.grid[x][y] != null
       && puzzle.grid[x][y].type === activeParams.type
@@ -453,7 +865,7 @@ function onElementClicked(event, x, y) {
          'flip': activeParams.flip,
        }
      }
-  } else if (['poly', 'ylop', 'polynt'].includes(activeParams.type)) {
+  } else if (window.polyominoes.includes(activeParams.type)) {
     if (x%2 !== 1 || y%2 !== 1) return
     // Only remove the element if it's an exact match
     console.log(puzzle.grid[x][y], activeParams)
@@ -473,9 +885,9 @@ function onElementClicked(event, x, y) {
         'color': activeParams.color,
         'polyshape': activeParams.polyshape,
       }
-  } else if (activeParams.type == 'triangle' || activeParams.type == 'atriangle' || activeParams.type == 'divdiamond') {
+  } else if (['triangle', 'atriangle', 'divdiamond', 'dice', 'crystal', 'eye'].includes(activeParams.type)) {
     let cycle;
-    if (activeParams.id == 'divdiamond') cycle = 9;
+    if (['divdiamond', 'dice'].includes(activeParams.type)) cycle = 9;
     else cycle = 4;
     if (x%2 !== 1 || y%2 !== 1) return
     // Only increment count if exact match
@@ -494,7 +906,7 @@ function onElementClicked(event, x, y) {
         'count': activeParams.count
       }
     }
-  } else if (activeParams.type == 'arrow' || activeParams.type == 'dart') {
+  } else if (['arrow', 'dart'].includes(activeParams.type)) {
     if (x%2 !== 1 || y%2 !== 1) return
     if (puzzle.grid[x][y] != null
      && puzzle.grid[x][y].type === activeParams.type
@@ -506,10 +918,10 @@ function onElementClicked(event, x, y) {
       }
     } else {
       puzzle.grid[x][y] = {
-        'type':activeParams.type,
-        'color':activeParams.color,
-        'count':activeParams.count,
-        'rot':activeParams.rot,
+        'type': activeParams.type,
+        'color': activeParams.color,
+        'count': activeParams.count,
+        'rot': activeParams.rot,
       }
     }
   } else {
@@ -518,410 +930,37 @@ function onElementClicked(event, x, y) {
   }
 
   // Ensure adjacent endpoints are still pointing in a valid direction.
-  for (var i=x-1; i<x+2; i++) {
-    for (var j=y-1; j<y+2; j++) {
-      var cell = puzzle.getCell(i, j)
+  for (let i=x-1; i<x+2; i++) {
+    for (let j=y-1; j<y+2; j++) {
+      let cell = puzzle.getCell(i, j)
       if (cell == null || cell.end == null) continue;
-      var validDirs = puzzle.getValidEndDirs(i, j)
+      let validDirs = puzzle.getValidEndDirs(i, j)
       if (!validDirs.includes(cell.end)) {
         puzzle.grid[i][j].end = validDirs[0]
         if (puzzle.symmetry != null) {
-          var sym = puzzle.getSymmetricalPos(i, j)
+          let sym = puzzle.getSymmetricalPos(i, j)
           puzzle.grid[sym.x][sym.y] = validDirs[0]
         }
       }
     }
   }
-  puzzleModified()
-  writePuzzle()
-  reloadPuzzle()
-}
 
-var symbolData = {
-  'start': {'type':'start', 'title':'Start point'},
-  'end': {'type':'end', 'y':18, 'dir':'top', 'title':'End point'},
-  'gap': {'type':'gap', 'title':'Line break'},
-  'dot': {'type':'dot', 'title':'Dot'},
-  'square': {'type':'square', 'title':'Square'},
-  'star': {'type':'star', 'title':'Star'},
-  'nega': {'type':'nega', 'title':'Negation'},
-  'triangle': {'type':'triangle', 'count':1, 'title':'Triangle'},
-  'poly': {'type':'poly', 'title':'Polyomino'},
-  'ylop': {'type':'ylop', 'title':'Negation polyomino'},
-  'bridge': {'type':'bridge', 'title':'Seren\'s Incomplete Pentagon'},
-  'arrow': {'type':'arrow', 'count':1, 'rot':0, 'title':'Sigma\'s Arrow'},
-  'sizer': {'type':'sizer', 'title':'Radiazia\'s Sizer'},
-  'cross': {'type':'cross', 'title':'Cross'},
-  'curve': {'type':'curve', 'title':'Diamond'},
-  'crossFilled': {'type':'crossFilled', 'title':'Filled Cross'},
-  'curveFilled': {'type':'curveFilled', 'title':'Filled Diamond'},
-  'twobytwo': {'type':'twobytwo', 'title':'Two-By-Two'},
-  'dart': {'type':'dart', 'count':1, 'rot':0, 'title':'Dart'},
-  'polynt': {'type':'polynt', 'title':'unsuspiciousperson\'s Antipolyomino'}, // i just really liked the idea lol oops
-  'divdiamond': {'type':'divdiamond', 'count':1, 'title':'ItzShaun\'s Divided Diamond'}, // i just really liked the idea lol oops
-  'vtriangle': {'type':'vtriangle', 'title':'sus\' Tenuous Triangle'},
-  'x-lu': {'type':'x', 'spokes':16, 'title':'ItzShaun\' Xs'},
-  'x-ru': {'type':'x', 'spokes':16, 'title':'ItzShaun\' Xs'},
-  'x-ld': {'type':'x', 'spokes':16, 'title':'ItzShaun\' Xs'},
-  'x-rd': {'type':'x', 'spokes':16, 'title':'ItzShaun\' Xs'},
-  'pentagon': {'type':'pentagon', 'title':'ItzShaun\'s Pentagons'},
-  'copier': {'type':'copier', 'title':'Gentova\' Copiers'},
-  'celledhex': {'type':'celledhex', 'title':'ItzShaun\'s Celled Hexes'},
-  'scaler': {'type':'scaler', 'flip': 0, 'title':'Scalers (Revised Artless\' Carrots)'},
-  'portal': {'type':'portal', 'rot': 0, 'title':'MarioMak\'s Portals'},
-  'blackhole': {'type':'blackhole', 'rot': 0, 'title':'Pruz\'s Black Holes (Klyzx\'s Revision)'},
-  'atriangle': {'type':'atriangle', 'count':1, 'title':'Klyzx\'s Antitriangles'},
-  'whitehole': {'type':'whitehole', 'rot': 0, 'title':'White Holes'},
-  'pokerchip': {'type':'pokerchip', 'title':'MarioMak\'s Chips'},
-  'none': {'type': 'none', 'title': 'Symbol Coming Soon!'}
-}
-
-let xButtons = [];
-
-function drawSymbolButtons() {
-
-  var symbolTable = document.getElementById('symbolButtons')
-  symbolTable.style.display = null
-  for (var button of symbolTable.getElementsByTagName('button')) {
-    var params = symbolData[button.id]
-    params.id = button.id
-    params.height = params.type == 'x' ? 30 : 58
-    params.width = params.type == 'x' ? 30 : 58
-    params.border = params.type == 'x' ? 0 : 2
-    if (params.type == 'x') xButtons.push(button.id)
-    if (activeParams.id === button.id) {
-      if (['x-lu', 'x-ru', 'x-ld', 'x-rd'].includes(button.id)) {
-        document.getElementById('x-fakebutton').style.backgroundColor = activeParams.color
-        button.parentElement.style.backgroundColor = null
-      } else {
-        document.getElementById('x-fakebutton').style.backgroundColor = null
-        button.parentElement.style.backgroundColor = activeParams.color
-      }
-    } else {
-      button.parentElement.style.backgroundColor = null
-    }
-    button.style.padding = 0
-    button.style.border = params.border
-    button.style.height = params.height + 2*params.border
-    button.style.width = params.width + 2*params.border
-    button.title = params.title
-    button.params = params
-    if (['poly', 'ylop', 'polynt'].includes(button.id)) {
-      button.params.polyshape = activeParams.polyshape
-      button.onpointerdown = function() {
-        reloadPuzzle() // Disable manual solve mode to allow puzzle editing
-        if (activeParams.id === this.id) {
-          activeParams = Object.assign(activeParams, this.params)
-          shapeChooser()
-        } else {
-          activeParams = Object.assign(activeParams, this.params)
-          drawSymbolButtons()
-        }
-      }
-    } else if (button.id == 'triangle' || button.id == 'atriangle' || button.id == 'divdiamond') {
-      let cycle;
-      if (button.id == 'divdiamond') cycle = 9;
-      else cycle = 4;
-      button.onpointerdown = function(event) {
-        reloadPuzzle() // Disable manual solve mode to allow puzzle editing
-        if (activeParams.id === this.id) {
-          var count = symbolData[activeParams.id].count
-          count += (event.isRightClick() ? -1 : 1)
-          if (count <= 0) count = cycle
-          if (count > cycle) count = 1
-          symbolData[activeParams.id].count = count
-          activeParams.count = count
-        }
-        activeParams = Object.assign(activeParams, this.params)
-        drawSymbolButtons()
-      }
-      button.oncontextmenu = function(event) {event.preventDefault()}
-    } else if (params.type == 'x') {
-      button.style.display = null
-      button.onpointerdown = function(event) {
-        reloadPuzzle() // Disable manual solve mode to allow puzzle editing
-        const corners = { 'x-lu': 1, 'x-ru': 2, 'x-ld': 4, 'x-rd': 8 }
-        for (xbutton of xButtons) {
-          if (event.isRightClick())
-            symbolData[xbutton].spokes = ((symbolData[xbutton].spokes - 1) & ~corners[this.id]) + 1;
-          else
-            symbolData[xbutton].spokes = ((symbolData[xbutton].spokes - 1) ^ corners[this.id]) + 1;
-        }
-        activeParams = Object.assign(activeParams, this.params)
-        drawSymbolButtons()
-      }
-      button.oncontextmenu = function(event) {event.preventDefault()}
-    } else if (button.id == 'arrow') {
-      button.style.display = null
-      button.onpointerdown = function(event) {
-        reloadPuzzle() // Disable manual solve mode to allow puzzle editing
-        if (activeParams.id === this.id) {
-          var rot = symbolData.arrow.rot
-          if (rot == null) rot = 0
-          rot += (event.isRightClick() ? -1 : 1)
-          if (rot < 0) rot = 7
-          if (rot > 7) rot = 0
-          symbolData.arrow.rot = rot
-          activeParams.rot = rot
-        }
-        activeParams = Object.assign(activeParams, this.params)
-        drawSymbolButtons()
-      }
-      button.oncontextmenu = function(event) {event.preventDefault()}
-    } else if (button.id == 'dart') {
-      button.style.display = null
-      button.onpointerdown = function(event) {
-        reloadPuzzle() // Disable manual solve mode to allow puzzle editing
-        if (activeParams.id === this.id) {
-          var rot = symbolData.dart.rot
-          if (rot == null) rot = 0
-          rot += (event.isRightClick() ? -1 : 1)
-          if (rot < 0) rot = 7
-          if (rot > 7) rot = 0
-          symbolData.dart.rot = rot
-          activeParams.rot = rot
-        }
-        activeParams = Object.assign(activeParams, this.params)
-        drawSymbolButtons()
-      }
-      button.oncontextmenu = function(event) {event.preventDefault()}
-    } else if (button.id == 'scaler') {
-      button.style.display = null
-      button.onpointerdown = function(event) {
-        reloadPuzzle() // Disable manual solve mode to allow puzzle editing
-        if (activeParams.id === this.id) {
-          var flip = symbolData.scaler.flip
-          flip = 1 - flip;
-          symbolData.scaler.flip = flip
-          activeParams.flip = flip
-        }
-        activeParams = Object.assign(activeParams, this.params)
-        drawSymbolButtons()
-      }
-      button.oncontextmenu = function(event) {event.preventDefault()}
-    } else {
-      button.style.display = null
-      button.onpointerdown = function() {
-        reloadPuzzle() // Disable manual solve mode to allow puzzle editing
-        activeParams = Object.assign(activeParams, this.params)
-        drawSymbolButtons()
-      }
-    }
-    while (button.firstChild) button.removeChild(button.firstChild)
-    var svg = window.drawSymbol(params)
-    if (button.id == 'x-lu') {
-      var fakebutton = document.getElementById('x-fakesvg')
-      while (fakebutton.firstChild) fakebutton.removeChild(fakebutton.firstChild)
-      fakebutton.appendChild(svg)
-      svg.setAttribute('viewBox', '-15 -15 60 60')
-      svg.setAttribute('width', '60px')
-    }
-    else if (button.id == 'x-ru' || button.id == 'x-ld' || button.id == 'x-rd') svg.style.display = "none"
-    else button.appendChild(svg)
-    if (['poly', 'ylop', 'polynt'].includes(button.id)) {
-      var is4Wide = (activeParams.polyshape & 15) && (activeParams.polyshape & 61440)
-      var is4Tall = (activeParams.polyshape & 4369) && (activeParams.polyshape & 34952)
-      if (is4Wide || is4Tall) {
-        svg.setAttribute('viewBox', '-8 -8 80 80')
-      }
-    }
+  if (update) {
+    puzzleModified()
+    writePuzzle()
+    reloadPuzzle()
   }
 }
 
-function drawColorButtons() {
-  var colorTable = document.getElementById('colorButtons')
-  colorTable.style.display = null
-  var changeActiveColor = function() {
-    reloadPuzzle() // Disable manual solve mode to allow puzzle editing
-    activeParams.color = this.id
-    var symbolTable = document.getElementById('symbolButtons')
-    for (var button of symbolTable.getElementsByTagName('button')) {
-      if (activeParams.id === button.id) {
-        if (['x-lu', 'x-ru', 'x-ld', 'x-rd'].includes(button.id)) {
-          document.getElementById('x-fakebutton').style.backgroundColor = activeParams.color
-          button.parentElement.style.backgroundColor = null
-        } else {
-          document.getElementById('x-fakebutton').style.backgroundColor = null
-          button.parentElement.style.backgroundColor = activeParams.color
-        }
-      } else {
-        button.parentElement.style.backgroundColor = null
-      }
-    }
-    drawColorButtons()
-  }
-  for (var button of colorTable.getElementsByTagName('button')) {
-    var params = {
-      'width': 45,
-      'height': 45,
-      'border': 2,
-      'type':'square',
-      'text': button.id,
-      'color': button.id,
-    }
-    if (activeParams.color === button.id) {
-      button.parentElement.style.background = 'var(--border)'
-    } else {
-      button.parentElement.style.background = null
-    }
-    button.style.padding = 0
-    button.style.border = params.border
-    button.style.height = params.height + 2*params.border
-    button.style.width = params.width + 2*params.border
-    button.onpointerdown = changeActiveColor
-    while (button.firstChild) button.removeChild(button.firstChild)
-    var crayon = window.drawSymbol(params)
-    button.appendChild(crayon)
-
-    if (button.id == 'custom') {
-      button.style.display = null
-      var input = document.createElement('input')
-      input.style = 'position: absolute; margin-left: 30px; margin-top: 3px; width: 110px'
-      input.placeholder = 'hex'
-      button.insertBefore(input, crayon)
-
-      button.onpointerdown = function(event) {
-        for (var button of colorTable.getElementsByTagName('button')) {
-          button.parentElement.style.background = null
-        }
-
-        this.parentElement.style.background = 'var(--border)'
-
-        input.focus()
-        event.preventDefault()
-      }
-      input.onkeypress = function(event) {
-        // If the user tries to type past 6 characters
-        if (this.innerText.length >= 6) {
-          event.preventDefault()
-        }
-
-        // Allow using the enter key to confirm the color
-        if (event.key == 'Enter') {
-          event.preventDefault()
-          this.blur()
-        }
-
-        if ('0123456789ABCDEFabcdef'.includes(event.key)) {
-          // Allowed characters
-        } else {
-          // Block all other chars
-          event.preventDefault()
-        }
-      }
-      input.onblur = function() {
-        params.color = '#' + this.value
-        activeParams.color = '#' + this.value
-        this.parentElement.removeChild(crayon)
-        crayon = window.drawSymbol(params)
-        this.parentElement.appendChild(crayon)
-      }
-    }
-  }
-}
-
-function shapeChooser() {
-  var puzzle = document.getElementById('puzzle')
-  puzzle.style.opacity = 0
-  puzzle.style.minWidth = '432px'
-
-  var anchor = document.createElement('div')
-  document.body.appendChild(anchor)
-  anchor.id = 'anchor'
-  anchor.style.width = '99%'
-  anchor.style.height = '100%'
-  anchor.style.position = 'absolute'
-  anchor.style.top = 0
-  anchor.onpointerdown = function(event) {shapeChooserClick(event)}
-
-  var chooser = document.createElement('div')
-  puzzle.parentElement.insertBefore(chooser, puzzle)
-  chooser.id = 'chooser'
-  chooser.style.display = 'flex'
-  chooser.style.position = 'absolute'
-  chooser.style.width = '100%'
-  chooser.style.height = '100%'
-  chooser.style.minWidth = '400px'
-  chooser.style.zIndex = 1 // Position in front of the puzzle
-  chooser.onpointerdown = function(event) {shapeChooserClick(event)}
-
-  var chooserTable = document.createElement('table')
-  chooser.appendChild(chooserTable)
-  chooserTable.id = 'chooserTable'
-  chooserTable.setAttribute('cellspacing', '24px')
-  chooserTable.setAttribute('cellpadding', '0px')
-  chooserTable.style.padding = 25
-  chooserTable.style.background = 'var(--inner)'
-  chooserTable.style.border = 'var(--border)'
-  chooserTable.onpointerdown = function(event) {shapeChooserClick(event, this)}
-  for (var x=0; x<4; x++) {
-    var row = chooserTable.insertRow(x)
-    for (var y=0; y<4; y++) {
-      var cell = row.insertCell(y)
-      cell.powerOfTwo = 1 << (x + y*4)
-      cell.onpointerdown = function(event) {shapeChooserClick(event, this)}
-      cell.style.width = 58
-      cell.style.height = 58
-      if ((activeParams.polyshape & cell.powerOfTwo) !== 0) {
-        cell.clicked = true
-        cell.style.background = 'var(--line-default)'
-      } else {
-        cell.clicked = false
-        cell.style.background = 'var(--line-undone)'
-      }
-    }
-  }
-}
-
-function shapeChooserClick(event, cell) {
-  function polySort(shape) {
-    let xBar = 4369;
-    let yBar =   15;
-    if (shape == 0) return 0;
-    while ((shape & xBar) == 0) shape >>= 1;
-    while ((shape & yBar) == 0) shape >>= 4;
-    return shape;
-  }
-
-  var chooser = document.getElementById('chooser')
-  if (cell == null) { // Clicked outside the chooser, close the selection window
-    var anchor = document.getElementById('anchor')
-    var puzzle = document.getElementById('puzzle')
-
-    activeParams.polyshape = polySort(activeParams.polyshape)
-    if (activeParams.polyshape === 0 || activeParams.polyshape === 1048576) {
-      activeParams.polyshape += 1 // Ensure that at least one square is filled
-      drawSymbolButtons()
-    }
-    chooser.parentElement.removeChild(chooser)
-    anchor.parentElement.removeChild(anchor)
-    puzzle.style.opacity = null
-    puzzle.style.minWidth = null
-    event.stopPropagation()
-    return
-  }
-  // Clicks inside the green box are non-closing
-  if (cell.id == 'chooserTable') {
-    event.stopPropagation()
-    return
-  }
-  cell.clicked = !cell.clicked
-  activeParams.polyshape ^= cell.powerOfTwo
-  if (cell.clicked) {
-    cell.style.background = 'black'
-  } else {
-    cell.style.background = 'var(--line-undone)'
-  }
-  drawSymbolButtons()
-}
+//* end of nightmare
 
 // All puzzle elements remain fixed, the edge you're dragging is where the new
 // row/column is added. The endpoint will try to stay fixed, but may be re-oriented.
 // In symmetry mode, we will preserve symmetry and try to guess how best to keep start
 // and endpoints in sync with the original design.
 function resizePuzzle(dx, dy, id) {
-  var newWidth = puzzle.width + dx
-  var newHeight = puzzle.height + dy
+  let newWidth = puzzle.width + dx
+  let newHeight = puzzle.height + dy
   console.log('Resizing puzzle of size', puzzle.width, puzzle.height, 'to', newWidth, newHeight)
 
   if (newWidth <= 0 || newHeight <= 0) return false
@@ -932,13 +971,14 @@ function resizePuzzle(dx, dy, id) {
     if (puzzle.pillar && puzzle.symmetry.x && newWidth%4 !== 0) return false
   }
 
+  let xOffset, yOffset;
   if (puzzle.pillar && puzzle.symmetry != null) {
     // Symmetry pillar puzzles always expand horizontally in both directions.
-    var xOffset = dx / 2
+    xOffset = dx / 2
   } else {
-    var xOffset = (id.includes('left') ? dx : 0)
+    xOffset = (id.includes('left') ? dx : 0)
   }
-  var yOffset = (id.includes('top') ? dy : 0)
+  yOffset = (id.includes('top') ? dy : 0)
 
   console.log('Shifting contents by', xOffset, yOffset)
 
@@ -946,9 +986,10 @@ function resizePuzzle(dx, dy, id) {
   // For non-symmetrical puzzles, the answer is always 'no' -- all elements should be directly copied across.
   // For non-pillar symmetry puzzles, we should persist all elements on the half the puzzle which is furthest from the dragged edge. This will keep the puzzle contents stable as we add a row. The exception to this rule is when we expand: We are creating one new row or column which has no source location.
   // For example, a horizontal puzzle with width=3 gets expanded to newWidth=5 (from the right edge), the column at x=2 is new -- it is not being copied nor persisted. This is especially apparent in rotational symmetry puzzles.
-  var PERSIST = 0
-  var COPY = 1
-  var CLEAR = 2
+  const PERSIST = 0
+  const COPY = 1
+  const CLEAR = 2
+
   // x, y are locations on the new grid and should thus be compared to newWidth and newHeight.
   function shouldCopyCell(x, y) {
     if (puzzle.symmetry == null) return PERSIST
@@ -1015,14 +1056,14 @@ function resizePuzzle(dx, dy, id) {
   }
 
   // We don't call new Puzzle here so that we can persist extended puzzle attributes (pillar, symmetry, etc)
-  var oldPuzzle = new Puzzle(JSON.parse(JSON.stringify(puzzle)));
+  let oldPuzzle = new Puzzle(JSON.parse(JSON.stringify(puzzle)));
   puzzle.newGrid(newWidth, newHeight)
-  var debugGrid = []
-  for (var y=0; y<puzzle.height; y++) debugGrid[y] = ''
+  let debugGrid = []
+  for (let y=0; y<puzzle.height; y++) debugGrid[y] = ''
 
-  for (var x=0; x<puzzle.width; x++) {
-    for (var y=0; y<puzzle.height; y++) {
-      var cell = null
+  for (let x=0; x<puzzle.width; x++) {
+    for (let y=0; y<puzzle.height; y++) {
+      let cell = null
       // In case the source location was empty / off the grid, we start with a stand-in empty object.
       if (x%2 === 0 || y%2 === 0) cell = {'type': 'line'}
 
@@ -1036,8 +1077,8 @@ function resizePuzzle(dx, dy, id) {
         break;
       case COPY: // We're copying from the *old* puzzle, not the new one. We don't care what order we copy in.
         debugGrid[y] += 'O'
-        var sym = puzzle.getSymmetricalPos(x, y)
-        var symCell = null
+        let sym = puzzle.getSymmetricalPos(x, y)
+        let symCell = null
         if (oldPuzzle._safeCell(sym.x - xOffset, sym.y - yOffset)) {
           symCell = oldPuzzle.grid[sym.x - xOffset][sym.y - yOffset]
           cell.end = puzzle.getSymmetricalDir(symCell.end)
@@ -1057,17 +1098,17 @@ function resizePuzzle(dx, dy, id) {
   }
 
   console.log('Resize grid actions:')
-  for (var row of debugGrid) console.log(row)
+  for (let row of debugGrid) console.log(row)
 
   // Check to make sure that all endpoints are still pointing in valid directions.
-  for (var x=0; x<puzzle.width; x++) {
-    for (var y=0; y<puzzle.height; y++) {
-      var cell = puzzle.grid[x][y]
+  for (let x=0; x<puzzle.width; x++) {
+    for (let y=0; y<puzzle.height; y++) {
+      let cell = puzzle.grid[x][y]
       if (cell == null) continue;
       if (cell.end == null) continue;
 
       if (puzzle.symmetry == null) {
-        var validDirs = puzzle.getValidEndDirs(x, y)
+        let validDirs = puzzle.getValidEndDirs(x, y)
         if (validDirs.includes(cell.end)) continue;
 
         if (validDirs.length === 0) {
@@ -1078,14 +1119,14 @@ function resizePuzzle(dx, dy, id) {
           puzzle.grid[x][y].end = validDirs[0]
         }
       } else {
-        var sym = puzzle.getSymmetricalPos(x, y)
-        var symDir = puzzle.getSymmetricalDir(cell.end)
-        var validDirs = puzzle.getValidEndDirs(x, y)
-        var validSymDirs = puzzle.getValidEndDirs(sym.x, sym.y)
+        let sym = puzzle.getSymmetricalPos(x, y)
+        let symDir = puzzle.getSymmetricalDir(cell.end)
+        let validDirs = puzzle.getValidEndDirs(x, y)
+        let validSymDirs = puzzle.getValidEndDirs(sym.x, sym.y)
         if (validDirs.includes(cell.end) && validSymDirs.includes(symDir)) continue;
 
         while (validDirs.length > 0) {
-          var dir = validDirs.pop()
+          let dir = validDirs.pop()
           symDir = puzzle.getSymmetricalDir(dir)
           if (validDirs.includes(dir) && validSymDirs.includes(symDir)) {
             console.log('Changing direction of endpoint', x, y, 'from', cell.end, 'to', dir)
@@ -1105,7 +1146,7 @@ function resizePuzzle(dx, dy, id) {
   return true
 }
 
-var passive = false
+let passive = false
 try {
   window.addEventListener('test', null, Object.defineProperty({}, 'passive', {
     get: function() {
@@ -1124,7 +1165,7 @@ function dragStart(event, elem) {
     'y': event.pageY || event.clientY || event.touches[0].pageY,
   }
 
-  var anchor = document.createElement('div')
+  let anchor = document.createElement('div')
   document.body.appendChild(anchor)
 
   anchor.id = 'anchor'
@@ -1141,7 +1182,7 @@ function dragStart(event, elem) {
 function dragEnd(event, elem) {
   console.log('Drag ended')
   dragging = null
-  var anchor = document.getElementById('anchor')
+  let anchor = document.getElementById('anchor')
   anchor.parentElement.removeChild(anchor)
   document.onmousemove = null
   document.ontouchmove = null
@@ -1149,15 +1190,15 @@ function dragEnd(event, elem) {
 }
 
 function dragMove(event, elem) {
-  var newDragging = {
+  let newDragging = {
     'x': event.pageX || event.clientX || event.touches[0].pageX,
     'y': event.pageY || event.clientY || event.touches[0].pageY,
   }
   console.spam(newDragging.x, newDragging.y)
   if (event.buttons === 0) return dragEnd(event, elem)
   if (dragging == null) return
-  var dx = 0
-  var dy = 0
+  let dx = 0
+  let dy = 0
   if (elem.id.includes('left')) {
     dx = dragging.x - newDragging.x
   } else if (elem.id.includes('right')) {
@@ -1171,19 +1212,19 @@ function dragMove(event, elem) {
 
   console.spam(dx, dy)
 
-  var xLim = 40
-  var xScale = 2
+  let xLim = 40
+  let xScale = 2
   // Symmetry + Pillars requires an even number of cells (2xN, 4xN, etc)
   if (puzzle.symmetry != null && puzzle.pillar === true) {
     xScale = 4
   }
 
-  var yLim = 40
+  let yLim = 40
   // 4x4 and larger will only expand downwards, so we have to require more motion.
   if (puzzle.height >= 9) {
-    var yLim = 60
+    let yLim = 60
   }
-  var yScale = 2
+  let yScale = 2
 
   // Note: We only modify dragging when we reach a limit.
   // Note: We use Math.sign (rather than Math.round or Math.floor) since we only want to resize 1 unit at a time.
@@ -1224,6 +1265,7 @@ window.changeImage = function (id, value) {
   else value = `url(${value})`;
   document.documentElement.style.setProperty('--' + id.slice(0, -6), value);
   copyImage(puzzle);
+  reloadPuzzle();
   writePuzzle();
 }
 
@@ -1233,17 +1275,14 @@ function applyThemeButton() {
   }
 }
 function applyImageButton() {
-  for (const entry of ['background-image', 'foreground-image']) {
+  for (const entry of ['background-image', 'foreground-image', 'background-music']) {
     let res = getComputedStyle(document.documentElement).getPropertyValue('--' + entry);
     if (res == 'none')  document.getElementById(entry+'-input').value = "";
     else document.getElementById(entry+'-input').value = res.slice(4, -1).replace(/\\/g, '');
   }
 }
 
-window.exportTheme = function () {
-  let res = serializeTheme(puzzle);
-  navigator.clipboard.writeText(res).then();
-}
+window.exportTheme = function () { navigator.clipboard.writeText(serializeTheme(puzzle)).then(); }
 
 window.importTheme = function () {
   navigator.clipboard.readText().then((clipText) => {
@@ -1254,24 +1293,78 @@ window.importTheme = function () {
   });
 }
 
-window.exportPuzzle = function() {
-  if (puzzle.perfect)
-    solve(puzzle, () => {}, function (paths) {
-      puzzle.sols = paths.length
-      let res = serializePuzzle(puzzle);
-      navigator.clipboard.writeText('https://prodzpod.github.io/witness#' + res).then();
-    })
-  else {
-    let res = serializePuzzle(puzzle);
-    navigator.clipboard.writeText('https://prodzpod.github.io/witness#' + res).then();
-  }
+window.resetTheme = function () {
+  deserializeTheme(puzzle, 'vt1_AP---wDW1tYAs7Oz~6ABwcHAAxMTEAP---wCI--8A--8iAA__');
+  applyThemeButton();
+  applyImageButton();
+  writePuzzle();
 }
+
+window.randomizeTheme = function () {
+  puzzle.theme['line-primary'] = 8978431;
+  puzzle.theme['line-secondary'] = 16776994;
+  let invert = (Math.random() > 0.5);
+  let hue = Math.random();
+  let hueIncrement = (Math.random() - 0.5) / 12;
+  let saturation = Math.random() / 10;
+  let saturationIncrement = (Math.random() - 0.5) / 12;
+  if (saturationIncrement < 0) {
+    saturation = 1 - saturation;
+    saturationIncrement *= -1;
+  }
+  if (invert) {
+    puzzle.theme['line-success'] = 16777215;
+    puzzle.theme['background'] = HSVtoRGB(hue, saturation, 1 / 8);
+    puzzle.theme['outer'] = HSVtoRGB(hue + (hueIncrement), saturation + (saturationIncrement), 1 / 4);
+    puzzle.theme['line-undone'] = HSVtoRGB(hue + (hueIncrement * 2), saturation + (saturationIncrement), 1 / 2);
+    puzzle.theme['inner'] = HSVtoRGB(hue + (hueIncrement * 3), saturation + (saturationIncrement * 2), 2 / 3);
+    puzzle.theme['line-default'] = HSVtoRGB(hue + (hueIncrement * 4), saturation + (saturationIncrement * 4), 3 / 4);
+    puzzle.theme['text'] = HSVtoRGB(hue + (hueIncrement * 5), saturation + (saturationIncrement * 6), 7 / 8);
+  } else {
+    puzzle.theme['text'] = 0;
+    puzzle.theme['line-default'] = HSVtoRGB(hue, saturation, 1 / 8);
+    puzzle.theme['line-success'] = HSVtoRGB(hue + (hueIncrement), saturation + (saturationIncrement), 1 / 4);
+    puzzle.theme['line-undone'] = HSVtoRGB(hue + (hueIncrement * 2), saturation + (saturationIncrement), 1 / 2);
+    puzzle.theme['inner'] = HSVtoRGB(hue + (hueIncrement * 3), saturation + (saturationIncrement * 2), 2 / 3);
+    puzzle.theme['outer'] = HSVtoRGB(hue + (hueIncrement * 4), saturation + (saturationIncrement * 4), 3 / 4);
+    puzzle.theme['background'] = HSVtoRGB(hue + (hueIncrement * 5), saturation + (saturationIncrement * 6), 7 / 8);
+  }
+  applyTheme(puzzle);
+  applyImage(puzzle);
+  applyThemeButton();
+  applyImageButton();
+  writePuzzle();
+}
+
+function HSVtoRGB(h, s, v) {
+  var r, g, b, i, f, p, q, t;
+  if (arguments.length === 1) {
+      s = h.s, v = h.v, h = h.h;
+  }
+  i = Math.floor(h * 6);
+  f = h * 6 - i;
+  p = v * (1 - s);
+  q = v * (1 - f * s);
+  t = v * (1 - (1 - f) * s);
+  switch (i % 6) {
+      case 0: r = v, g = t, b = p; break;
+      case 1: r = q, g = v, b = p; break;
+      case 2: r = p, g = v, b = t; break;
+      case 3: r = p, g = q, b = v; break;
+      case 4: r = t, g = p, b = v; break;
+      case 5: r = v, g = p, b = q; break;
+  }
+  return parseInt(`${Math.round(r * 255).toString(16).padStart(2, '0')}${Math.round(g * 255).toString(16).padStart(2, '0')}${Math.round(b * 255).toString(16).padStart(2, '0')}`, 16);
+}
+
+window.exportPuzzle = function() { navigator.clipboard.writeText('https://prodzpod.github.io/witness#' + serializePuzzle(puzzle)).then(); }
 
 window.importPuzzle = function() {
   navigator.clipboard.readText().then(clipText => {
     deserializePuzzle(clipText.replace(/https:.+?#/, ''));
     applyThemeButton();
     applyImageButton();
+    updateSoundDotsList();
     reloadPuzzle();
     writePuzzle();
     document.getElementById('deleteButton').disabled = true

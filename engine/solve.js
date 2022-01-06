@@ -74,7 +74,7 @@ window.solve = function(p, partialCallback, finalCallback) {
       }
       if (cell.end != null) numEndpoints++
       if (cell.type == 'nega') puzzle.hasNegations = true
-      if (cell.type == 'poly' || cell.type == 'ylop' || cell.type == 'polynt') puzzle.hasPolyominos = true
+      if (window.polyominoes.includes(cell.type)) puzzle.hasPolyominos = true
     }
   }
 
@@ -216,6 +216,7 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
   if (cell.end != null) {
     path.push(PATH_NONE)
     puzzle.endPoint = {'x': x, 'y': y}
+    puzzle.path = path;
     window.validate(puzzle, true)
     if (puzzle.valid) solutionPaths.push(path.slice())
     path.pop()
@@ -294,6 +295,36 @@ window.cancelSolving = function() {
   console.log('Cancelled solving')
   window.MAX_SOLUTIONS = 0 // Causes all new solveLoop calls to exit immediately.
   tasks = []
+}
+
+window.setPath = function(puzzle, raw) {
+  let path = [];
+  path.push({'x': raw.charCodeAt(0), 'y': raw.charCodeAt(1)});
+  let [x, y] = [path[0].x, path[0].y];
+  for (let ptr = 2; ptr < raw.length; ptr++) {
+    let temp = raw.charCodeAt(ptr);
+    let dir = [(temp & 3), (temp & 12) >> 2, (temp & 48) >> 4, (temp & 192) >> 6];
+    const _DIR = ['left', 'right', 'top', 'bottom'];
+    for (let o of dir) {
+      if (puzzle.getCell(x, y)?.end == _DIR[o]) {
+        path.push(0);
+        break;
+      }
+      path.push(o + 1);
+      switch (o) {
+        case 0:
+          x--; break;
+        case 1:
+          x++; break;
+        case 2:
+          y--; break;
+        case 3:
+          y++; break;
+      }
+    }
+  }
+  puzzle.path = path;
+  drawPath(puzzle, path);
 }
 
 // Uses trace2 to draw the path on the grid, logs a graphical representation of the solution,

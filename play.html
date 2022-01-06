@@ -17,7 +17,7 @@
     <script async type="text/javascript" src="./engine/display2.js"></script>
     <script async type="text/javascript" src="./engine/trace2.js"></script>
     <script async type="text/javascript" src="./play.js"></script>
-    <title>Looksy v2.1.0</title>
+    <title>Looksy v2.2.0</title>
   </head>
   <body>
     <div class="wrapper">
@@ -47,19 +47,20 @@
             <div class="spacer"></div>
             <div class="hlist" id="solsWrapper"></div>
             <div class="hlist">
-              <button class="nav" onclick="getPrev()" id="prev"><i class="xi-angle-left"></i></button>
+              <button class="nav" onclick="getPrev()" id="prev" style="opacity: 0;"><i class="xi-angle-left"></i></button>
               <div class="puzzlebox-wrapper">
                 <div id="puzzleBox" style="position: relative">
                   <svg id="puzzle"></svg>
                 </div>
               </div>
-              <button class="nav" onclick="getNext()" id="next"><i class="xi-angle-right"></i></button>
+              <button class="nav" onclick="getNext()" id="next" style="opacity: 0;"><i class="xi-angle-right"></i></button>
             </div>
+            <div class="hlist" id="perfectWrapper"></div>
             <div class="spacer"></div>
         </div>
       </div>
       <footer class="noselect">
-        <pre class="footer-text">Funny Looksy, prodzpod 2021</pre>
+        <pre class="footer-text">Funny Looksy, prodzpod 2021-2022</pre>
         <a href="https://github.com/prodzpod/witness" class="footer-button" title="Source Code"><i class="xi-github"></i></a>
         <pre>
 BSD 3-Clause License
