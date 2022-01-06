@@ -186,7 +186,6 @@ window.validate = function(puzzle, quick) {
     width = puzzle.width;
     height = puzzle.height;
     [puzzle, global] = init(puzzle);
-    console.warn(puzzle, global);
     if (puzzle.valid) {
         for (fn of preValidate) {
             if (fn.or ? intersects(fn.or, global.shapes) : (fn.orNot ? !intersects(fn.orNot, global.shapes) : fn.orCustom(puzzle, global))) { // prereq for exec
@@ -239,6 +238,7 @@ function init(puzzle) { // initialize globals
             edge: [],
         }
     };
+    console.warn(puzzle, global);
     window.savedGrid = puzzle.grid;
     global.path = [];
     for (let o of puzzle.path) {
@@ -354,11 +354,8 @@ function init(puzzle) { // initialize globals
         let [x, y] = xy(o[0]);
         global.regionMatrix[y][x] = 0;
     }
-    for (let x = 0; x < puzzle.width; x++) {
-        for (let y = 0; y < puzzle.height; y++) {
-            global.regions.all[global.regionMatrix[y][x]].push(ret(x, y));
-        }
-    }
+    for (let x = 0; x < puzzle.width; x++) for (let y = 0; y < puzzle.height; y++) if (global.regionMatrix[y][x] != -1)
+        global.regions.all[global.regionMatrix[y][x]].push(ret(x, y));
     if (global.shapes.has('portal')) { // certified portal business
         for (const color in portalColorPos) for (const c of portalColorPos[color]) {
             const region = matrix(global, ...xy(c));
