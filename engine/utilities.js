@@ -522,18 +522,18 @@ window.serializePuzzle = function(puzzle) {
   raw += String.fromCharCode(Math.floor(puzzle.height / 2));
   //* defaultCorner
   let med = {};
-  for (let i = 0; i < puzzle.height / 2; i++) for (let j = 0; j < puzzle.width / 2; j++) {
+  for (let i = 0; i < puzzle.width / 2; i++) for (let j = 0; j < puzzle.height / 2; j++) {
     if (puzzle.grid[i*2]?.[j*2] === undefined) continue;
     let dot = getCornerData(puzzle.grid[i*2][j*2]);
     if (dot[1] != '\0') continue;
     med[dot] ??= 0; med[dot]++;
   }
   let defCorner = "\0\0";
-  for (let k in med) if (med[k] >= (puzzle.height * puzzle.width / 8)) defCorner = k;
+  for (let k in med) if (med[k] >= (puzzle.width * puzzle.height / 8)) defCorner = k;
   raw += defCorner[0];
   //* defaultCell
   med = {};
-  for (let i = 0; i < puzzle.height / 2; i++) for (let j = 0; j < puzzle.width / 2; j++) {
+  for (let i = 0; i < puzzle.width / 2; i++) for (let j = 0; j < puzzle.height / 2; j++) {
     if (puzzle.grid[i*2+1]?.[j*2+1] === undefined) continue;
     let data = getCellData(puzzle.grid[i*2+1][j*2+1]);
     med[data] ??= 0; med[data]++;
@@ -543,7 +543,7 @@ window.serializePuzzle = function(puzzle) {
   raw += defCell;
   //* corners
   let corner = ["", "", ""];
-  for (let i = 0; i < puzzle.height; i++) for (let j = 0; j < puzzle.width; j++) {
+  for (let i = 0; i < puzzle.width; i++) for (let j = 0; j < puzzle.height; j++) {
     if ((i % 2) && (j % 2) || !puzzle.grid[i]?.[j]) continue;
     let data = getCornerData(puzzle.grid[i][j]);
     if (!((i % 2) || (j % 2))) { if (data == defCorner) continue; }
@@ -561,7 +561,7 @@ window.serializePuzzle = function(puzzle) {
   for (let i = 0; i < puzzle.soundDots.length; i++) raw += String.fromCharCode(puzzle.soundDots[i]);
   //* cells
   let cell = ["", "", ""];
-  for (let i = 0; i < puzzle.height / 2; i++) for (let j = 0; j < puzzle.width / 2; j++) {
+  for (let i = 0; i < puzzle.width / 2; i++) for (let j = 0; j < puzzle.height / 2; j++) {
     if (puzzle.grid[i*2+1]?.[j*2+1] === undefined) continue;
     let data = getCellData(puzzle.grid[i*2+1][j*2+1]);
     if (defCell == data) continue;
@@ -585,7 +585,6 @@ window.serializePuzzle = function(puzzle) {
   }
   if (puzzle.image['background-music'])
     raw += (addedFirst ? '' : '\0') + '\0' + puzzle.image['background-music'];
-  
   return 'v4_' + runLength(btoa(raw).replace(/\+/g, '.').replace(/\//g, '-').replace(/\=/g, '_'));
 }
 
@@ -646,13 +645,13 @@ function deserializePuzzleV4(raw) {
   let ptr = 4;
   //* defaults
   let defCorner = raw.charCodeAt(ptr);
-  if (defCorner) for (let i = 0; i < puzzle.height / 2; i++) for (let j = 0; j < puzzle.width / 2; j++) puzzle.grid[i*2][j*2] = cornerData(defCorner, 0);
+  if (defCorner) for (let i = 0; i < puzzle.width / 2; i++) for (let j = 0; j < puzzle.height / 2; j++) puzzle.grid[i*2][j*2] = cornerData(defCorner, 0);
   ptr++;
   let defCell = raw.charCodeAt(ptr);
   if (defCell) {
     ptr++;
     let temp = cellData(defCell, raw.charCodeAt(ptr), raw.charCodeAt(ptr + 1), raw.charCodeAt(ptr + 2));
-    for (let i = 0; i < puzzle.height / 2; i++) for (let j = 0; j < puzzle.width / 2; j++) {
+    for (let i = 0; i < puzzle.width / 2; i++) for (let j = 0; j < puzzle.height / 2; j++) {
       if (puzzle.grid[i*2+1]?.[j*2+1] === undefined) continue;
       puzzle.grid[i*2+1][j*2+1] = temp[0];
     } 
