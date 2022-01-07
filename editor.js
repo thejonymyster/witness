@@ -425,14 +425,22 @@ function buttonBehaviour(event, el, onClickAgain) {
   delete el.params.color;
   activeParams = Object.assign(activeParams, el.params)
   drawSymbolButtons()
-  if (event.shiftKey) 
+  if (event.shiftKey) {
+    let avail = (y, x) => { return (y % 2 == 1) && (x % 2 == 1); }
+    if (['dot', 'cross', 'curve', 'dots', 'soundDot', 'x'].includes(el.params.type))
+      avail = (y, x) => { return (y % 2 == 0) && (x % 2 == 0); }
+    else if (['gap', 'line'].includes(el.params.type))
+      avail = (y, x) => { return (y % 2) != (x % 2); }
+    else if (['start', 'end'].includes(el.params.type))
+      avail = (y, x) => { return (y % 2 != 1) || (x % 2 != 1); }
     for (let i = 0; i < puzzle.height; i++) for (let j = 0; j < puzzle.width; j++) 
-      if (!((i + j) % 2)) {
+      if (avail(i, j)) {
         onElementClicked(event, j, i, false);
         puzzleModified()
         writePuzzle()
         reloadPuzzle()
       }
+  }
 }
 
 function drawSymbolButtons() {
