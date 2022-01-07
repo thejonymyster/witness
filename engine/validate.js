@@ -238,7 +238,7 @@ function init(puzzle) { // initialize globals
             edge: [],
         }
     };
-    // console.warn(puzzle, global);
+    console.warn(puzzle, global);
     window.savedGrid = puzzle.grid;
     global.path = [];
     for (let o of puzzle.path) {
@@ -1282,6 +1282,8 @@ const validate = [
             }
             let downscalable = [];          
             for (let i = 0; i < polys.length; i++) if (polys[i].downscalable()) downscalable.push(i); // every polys are upscalable rn
+            if (global.regionShapes[regionNum].includes('xvmino') && !global.regionShapes[regionNum].includes('poly'))
+                global.regionData[regionNum].addInvalids(puzzle, pos['xvmino']);
             global.polyntCorrect[regionNum] = true; global.polyIncorrect[regionNum] = true;
             let ret = window.polyFitMaster(puzzle, regionNum, global, polys, scalers, downscalable, Array.from({length: polys.length}, (_, i) => i));
             for (poly of polys) {
