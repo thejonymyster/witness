@@ -210,7 +210,7 @@ window.setLogLevel = function(level) {
   console.groupEnd = consoleGroupEnd
   if (level === 'spam') return
 }
-setLogLevel('info') //! CHANGE THIS IN DEV
+setLogLevel('error') //! CHANGE THIS IN DEV
 
 window.deleteElementsByClassName = function(rootElem, className) {
   var elems = []
