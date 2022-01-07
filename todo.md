@@ -18,22 +18,22 @@ Now that looksyv2 is out mroe things must be done
 - [ ] undo / redo
 - [ ] clean up editor.js
 - [ ] make puzzles bigger for mobile (temporary draggy solution)
-- [ ] main page progression
+- [x] main page progression
 - [ ] challenge packs
 - [x] reduce code size further, group similar ones
 - [ ] optimize verification algorithm
 
 ### Tutorials for...
-- [ ] curve
+- [x] curve
 - [ ] xs
-- [ ] arrow
+- [x] arrow
 - [ ] dart
 - [ ] antitriangle
-- [ ] tent (in progress by sus)
+- [x] tent
 - [ ] the holes
 - [ ] div diamond
-- [ ] chips (in progress by mak i think??)
-- [ ] incomplete pentagon (steal from seren)
+- [x] chips
+- [x] incomplete pentagon
 - [ ] scaler
 - [ ] sizer
 - [ ] twobytwo
