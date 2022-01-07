@@ -219,7 +219,6 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
     puzzle.endPoint = {'x': x, 'y': y}
     puzzle.path = path;
     window.validate(puzzle, true)
-    console.warn(puzzle.path, puzzle.valid);
     if (puzzle.valid) solutionPaths.push(path.slice())
     path.pop()
 

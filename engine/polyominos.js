@@ -191,7 +191,10 @@ window.polyFit = function(puzzle, regionNum, global, polys, ylops) {
     key  = '';  for (const ylop of ylops) key += ' ' + ylop.polyshape;
     key += '|'; for (const poly of polys) key += ' ' + poly.polyshape;
     res = knownCancellations[key];
-    if (res != null) return res;
+    if (res != null) {
+      console.info('[!] Known Cancellation:', key);
+      return res;
+    }
   }
   // For polyominos, we clear the grid to mark it up again:
   let savedGrid = puzzle.grid;
