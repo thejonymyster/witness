@@ -218,6 +218,7 @@ window.validate = function(puzzle, quick) {
         let [x, y] = xy(c);
         puzzle.invalidElements[i] = {'x': x, 'y': y};
     }
+    for (let o of global.pathLine) puzzle.getCell(...xy(o[0])).line = 0;
     puzzle.grid = window.savedGrid;
     delete window.savedGrid;
     puzzle.valid = (puzzle.invalidElements.length == 0);
@@ -269,6 +270,7 @@ function init(puzzle) { // initialize globals
     }
     global.pathSym = [];
     global.pathAll = [...global.path];
+    global.pathLine = [];
     let _OPPOSITE = [1, 0, 3, 2];
     if (puzzle.symmetry != null) {
         for (let c of global.path) {
@@ -302,6 +304,17 @@ function init(puzzle) { // initialize globals
             if (cell.type == 'eye') {
                 global.shapes.add('eye');
                 eyes.push([x, y, puzzle.getCell(x, y).count]);
+            }
+            if (cell.gap === window.CUSTOM_LINE) {
+                global.shapes.add('line');
+                for (let o of (x % 2 ? [ret(x, y), ret(x-1, y), ret(x+1, y)] : [ret(x, y), ret(x, y+1), ret(x, y-1)])) {
+                    if (!(global.pathAll.findIndex(z => z[0] == o) + 1)) {
+                        global.pathSym.push([o]);
+                        global.pathAll.push([o]);
+                        global.pathLine.push([o]);
+                        puzzle.getCell(...xy(o)).line = 1;
+                    }
+                }
             }
         }
     }

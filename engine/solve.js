@@ -23,7 +23,7 @@ function countNodes(x, y, depth) {
   // Check for collisions (outside, gap, self, other)
   var cell = puzzle.getCell(x, y)
   if (cell == null) return
-  if (cell.gap > window.GAP_NONE) return
+  if (window.CUSTOM_LINE > cell.gap && cell.gap > window.GAP_NONE) return
   if (cell.line !== window.LINE_NONE) return
 
   if (puzzle.symmetry == null) {
@@ -33,7 +33,7 @@ function countNodes(x, y, depth) {
     if (puzzle.matchesSymmetricalPos(x, y, sym.x, sym.y)) return // Would collide with our reflection
 
     var symCell = puzzle.getCell(sym.x, sym.y)
-    if (symCell.gap > window.GAP_NONE) return
+    if (window.CUSTOM_LINE > symCell.gap && symCell.gap > window.GAP_NONE) return
 
     puzzle.updateCell2(x, y, 'line', window.LINE_BLUE)
     puzzle.updateCell2(sym.x, sym.y, 'line', window.LINE_YELLOW)
@@ -194,8 +194,9 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
 
   // Check for collisions (outside, gap, self, other)
   var cell = puzzle.getCell(x, y)
+  // console.warn(path, cell?.line, cell?.gap);
   if (cell == null) return
-  if (cell.gap > window.GAP_NONE) return
+  if (window.CUSTOM_LINE > cell.gap && cell.gap > window.GAP_NONE) return
   if (cell.line !== window.LINE_NONE) return
 
   if (puzzle.symmetry == null) {
@@ -205,7 +206,7 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
     if (puzzle.matchesSymmetricalPos(x, y, sym.x, sym.y)) return // Would collide with our reflection
 
     var symCell = puzzle.getCell(sym.x, sym.y)
-    if (symCell.gap > window.GAP_NONE) return
+    if (window.CUSTOM_LINE > symCell.gap && symCell.gap > window.GAP_NONE) return
 
     puzzle.updateCell2(x, y, 'line', window.LINE_BLUE)
     puzzle.updateCell2(sym.x, sym.y, 'line', window.LINE_YELLOW)
@@ -218,6 +219,7 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
     puzzle.endPoint = {'x': x, 'y': y}
     puzzle.path = path;
     window.validate(puzzle, true)
+    console.warn(puzzle.path, puzzle.valid);
     if (puzzle.valid) solutionPaths.push(path.slice())
     path.pop()
 

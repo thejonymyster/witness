@@ -74,6 +74,7 @@ window.CUSTOM_X = -13
 window.GAP_NONE      = 0
 window.GAP_BREAK     = 1
 window.GAP_FULL      = 2
+window.CUSTOM_LINE = 3
 
 window.symbols = ['square', 'star', 'pentagon', 'triangle', 'arrow', 'dart', 'atriangle', 'vtriangle', 'blackhole', 'whitehole', 'divdiamond', 'pokerchip', 'bridge', 'scaler', 'sizer', 'twobytwo', 'poly', 'ylop', 'polynt', 'nega', 'copier', 'portal', 'celledhex', 'dice', 'xvmino', 'crystal', '!poly', '!ylop', '!polynt', '!xvmino', 'swirl', 'eye'];
 window.polyominoes = ['poly', 'ylop', 'polynt', 'xvmino'];
@@ -209,7 +210,7 @@ window.setLogLevel = function(level) {
   console.groupEnd = consoleGroupEnd
   if (level === 'spam') return
 }
-setLogLevel('warn') //! CHANGE THIS IN DEV
+setLogLevel('info') //! CHANGE THIS IN DEV
 
 window.deleteElementsByClassName = function(rootElem, className) {
   var elems = []

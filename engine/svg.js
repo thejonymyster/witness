@@ -738,6 +738,15 @@ window.drawSymbolWithSvg = function(svg, params) {
       for (let i = (Math.random() / 2); i < 5; i++)
         simplePath(svg, params, 'M 0 -4 C -14 -4 0 -24 0 -24 C 0 -24 14 -4 0 -4 L 0 -8 C 7 -8 0 -18 0 -19 C 0 -18 -7 -8 0 -8 M 6 -8 L 6 0 L -6 0 L -6 -8').setAttribute('transform', `translate(${midx}, ${midy}) rotate(${i * 72}) scale(${scale})`);
       break;
+    case 'line':
+      if (!params.rot) {
+        simpleLine(svg, params, 28, 2, 90)
+        simpleLine(svg, params, 28, 2, -90)
+      } else {
+        simpleLine(svg, params, 28, 2, 0)
+        simpleLine(svg, params, 28, 2, 180)
+      }
+      break;
     case 'none':  break;
     default: //------------------------------------ERROR HANDLING
       console.error('Cannot draw unknown SVG type: ' + params.type)

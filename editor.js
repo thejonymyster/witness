@@ -411,6 +411,10 @@ let symbolData = {
   'dots': {'type': 'dots', 'count': 1, 'title':'ianpep\'s Little Squares'},
   'swirl': {'type': 'swirl', 'flip': false, 'title':'Alith\'s Swirls'},
   'eye': {'type': 'eye', 'count': 1, 'title':'AnActualCat\'s Eyes'},
+  'line': {'type': 'line', 'title': 'Predrawn Line'},
+  'squareToPentagon': {'type':'square', 'title':'Square'},
+  'whiteAndBlackHole': {'type':'blackhole', 'title':'Pruz\'s Black Holes (Klyzx\'s Revision)'},
+  'CrossCurve': {'type':'cross', 'title':'Cross'},
   'none': {'type': 'none', 'title': 'Symbol Coming Soon!'}
 }
 let xButtons = [];
@@ -435,6 +439,7 @@ function drawSymbolButtons() {
   let symbolTable = document.getElementById('symbolButtons')
   symbolTable.style.display = null;
   for (let button of symbolTable.getElementsByTagName('button')) {
+    if (['more', 'less'].includes(button.id)) continue;
     let params = symbolData[button.id]
     params.id = button.id
     params.height = params.type == 'x' ? 30 : 58
@@ -443,10 +448,10 @@ function drawSymbolButtons() {
     if (params.type == 'x') xButtons.push(button.id)
     if (activeParams.id === button.id) {
       if (['x-lu', 'x-ru', 'x-ld', 'x-rd'].includes(button.id)) {
-        document.getElementById('x-fakebutton').style.backgroundColor = window.symbolColors[activeParams.color];
+        if (document.getElementById('x-fakebutton')) document.getElementById('x-fakebutton').style.backgroundColor = window.symbolColors[activeParams.color];
         button.parentElement.style.backgroundColor = null;
       } else {
-        document.getElementById('x-fakebutton').style.backgroundColor = null;
+        if (document.getElementById('x-fakebutton')) document.getElementById('x-fakebutton').style.backgroundColor = null;
         button.parentElement.style.backgroundColor = window.symbolColors[activeParams.color];
       }
     } else button.parentElement.style.backgroundColor = null;
@@ -537,6 +542,24 @@ function drawSymbolButtons() {
           symbolData[activeParams.id].sound ^= 1
         }); }
         break;
+      case 'squareToPentagon':
+        button.onpointerdown = function(event) { buttonBehaviour(event, this, (el) => {
+          if (symbolData[activeParams.id].type == 'square') symbolData[activeParams.id] = symbolData['pentagon'];
+          else symbolData[activeParams.id] = symbolData['square'];
+        }); }
+        break;
+      case 'whiteAndBlackHole':
+        button.onpointerdown = function(event) { buttonBehaviour(event, this, (el) => {
+          if (symbolData[activeParams.id].type == 'blackhole') symbolData[activeParams.id] = symbolData['whitehole'];
+          else symbolData[activeParams.id] = symbolData['blackhole'];
+        }); }
+        break;
+      case 'CrossCurve':
+        button.onpointerdown = function(event) { buttonBehaviour(event, this, (el) => {
+          if (symbolData[activeParams.id].type == 'cross') symbolData[activeParams.id] = symbolData['curve'];
+          else symbolData[activeParams.id] = symbolData['cross'];
+        }); }
+        break;
       default:
         button.onpointerdown = function(event) { buttonBehaviour(event, this, (el) => {}); }
         break;
@@ -564,6 +587,27 @@ function drawSymbolButtons() {
   }
 }
 
+window.seeMore = function() {
+  document.getElementById('colLess').style.visibility = 'collapse';
+  document.getElementById('colMore').style.visibility = 'visible';
+  document.getElementById('x-fakebutton').style.display = 'table-cell';
+  document.getElementById('nega').style.display = 'none';
+  document.getElementById('copier').parentNode.style.display = 'table-cell';
+  document.getElementById('more').style.display = 'none';
+  document.getElementById('less').style.display = 'unset';
+}
+
+window.seeLess = function() {
+  document.getElementById('colLess').style.visibility = 'visible';
+  document.getElementById('colMore').style.visibility = 'collapse';
+  document.getElementById('x-fakebutton').style.display = 'none';
+  document.getElementById('copier').parentNode.style.display = 'none';
+  document.getElementById('nega').style.display = 'table-cell';
+  document.getElementById('more').style.display = 'unset';
+  document.getElementById('less').style.display = 'none';
+  
+}
+
 function drawColorButtons() {
   let colorTable = document.getElementById('colorButtons')
   colorTable.style.display = null
@@ -574,10 +618,10 @@ function drawColorButtons() {
     for (let button of symbolTable.getElementsByTagName('button')) {
       if (activeParams.id === button.id) {
         if (['x-lu', 'x-ru', 'x-ld', 'x-rd'].includes(button.id)) {
-          document.getElementById('x-fakebutton').style.backgroundColor = window.symbolColors[activeParams.color];
+          if (document.getElementById('x-fakebutton')) document.getElementById('x-fakebutton').style.backgroundColor = window.symbolColors[activeParams.color];
           button.parentElement.style.backgroundColor = null;
         } else {
-          document.getElementById('x-fakebutton').style.backgroundColor = null;
+          if (document.getElementById('x-fakebutton')) document.getElementById('x-fakebutton').style.backgroundColor = null;
           button.parentElement.style.backgroundColor = window.symbolColors[activeParams.color];
         }
       } else {
@@ -773,7 +817,7 @@ function onElementClicked(event, x, y, update=true) {
       dotColors.push(4)
     }
     puzzle.grid[x][y].dot = getNextValue(dotColors, puzzle.grid[x][y].dot)
-    puzzle.grid[x][y].gap = null
+    if (puzzle.grid[x][y].gap !== window.CUSTOM_LINE) puzzle.grid[x][y].gap = null
   } else if (activeParams.type == 'cross' || activeParams.type == 'curve') {
     let offset = 0;
     if (activeParams.type == 'curve') offset = -6;
@@ -786,7 +830,7 @@ function onElementClicked(event, x, y, update=true) {
       dotColors.push(-6 + offset)
     }
     puzzle.grid[x][y].dot = getNextValue(dotColors, puzzle.grid[x][y].dot)
-    puzzle.grid[x][y].gap = null
+    if (puzzle.grid[x][y].gap !== window.CUSTOM_LINE) puzzle.grid[x][y].gap = null
   } else if (activeParams.type == 'x') {
     if (x%2 !== 0 || y%2 !== 0) return
     let spokes = activeParams.spokes - 1;
@@ -798,7 +842,7 @@ function onElementClicked(event, x, y, update=true) {
     puzzle.grid = savedGrid
     if (puzzle.grid[x][y].dot == -13 - spokes) delete puzzle.grid[x][y].dot
     else puzzle.grid[x][y].dot = -13 - spokes;
-    puzzle.grid[x][y].gap = null
+    if (puzzle.grid[x][y].gap !== window.CUSTOM_LINE) puzzle.grid[x][y].gap = null
   } else if (activeParams.type == 'dots') {
     if (x%2 === 1 && y%2 === 1) return
     let offset = 4 + (7 * activeParams.count);
@@ -811,10 +855,18 @@ function onElementClicked(event, x, y, update=true) {
     }
     dotColors.push(7 + offset);
     puzzle.grid[x][y].dot = getNextValue(dotColors, puzzle.grid[x][y].dot);
-    puzzle.grid[x][y].gap = null
-  } else if (activeParams.type == 'gap') {
+    if (puzzle.grid[x][y].gap !== window.CUSTOM_LINE) puzzle.grid[x][y].gap = null
+  } else if (['gap', 'line'].includes(activeParams.type)) {
     if (x%2 === y%2) return
-    puzzle.grid[x][y].gap = getNextValue([undefined, 1, 2], puzzle.grid[x][y].gap)
+    puzzle.grid[x][y].gap = getNextValue(activeParams.type == 'gap' ? [undefined, 1, 2] : [undefined, 3], puzzle.grid[x][y].gap)
+    if (activeParams.type == 'line') {
+      if (update) {
+        puzzleModified()
+        writePuzzle()
+        reloadPuzzle()
+      } 
+      return;
+    }
     puzzle.grid[x][y].dot = null
     puzzle.grid[x][y].start = null
     puzzle.grid[x][y].end = null

@@ -463,3 +463,12 @@ li button {
 #prev, #next {
   transition: all 0.2s !important;
 }
+
+.symbolButtons-wrapper {
+  width: 264px;
+  overflow: hidden;
+}
+
+#symbolButtons * {
+  transition: all 0s !important;
+}

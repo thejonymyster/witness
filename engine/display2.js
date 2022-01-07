@@ -203,6 +203,20 @@ function drawGrid(puzzle, svg, target) {
           svg.appendChild(circ)
         }
       }
+
+      if (cell?.gap === window.CUSTOM_LINE) {
+        var params = {
+          'width':58,
+          'height':58,
+          'x': x*41 + 23,
+          'y': y*41 + 23,
+          'class': target + '_' + x + '_' + y,
+          'type': 'line',
+          'color': 'var(--line-default)'
+        }
+        if (x%2 === 0 && y%2 === 1) params.rot = 1
+        drawSymbolWithSvg(svg, params)
+      }
     }
   }
   // Determine if left-side needs a 'wrap indicator'
