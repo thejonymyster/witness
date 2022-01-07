@@ -734,7 +734,7 @@ function cellData(type, color, data1, data2) {
     case '!ylop':
     case '!polynt':
     case '!xvmino':
-      ret.polyshape = (data1 >> 8) | data2;
+      ret.polyshape = (data1 << 8) | data2;
       if (ret.type[0] == '!') {
         ret.type = ret.type.slice(1);
         ret.polyshape |= 1048576;
