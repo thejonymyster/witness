@@ -161,7 +161,7 @@ function contains(a, b) {
     return true;        
 }
 function isBounded(puzzle, x, y) { return (0 <= x && x < puzzle.width && 0 <= y && y < puzzle.height); }
-function matrix(global, x, y) { return global.regionMatrix[y]?.[x]; }
+function matrix(puzzle, global, x, y) { return global.regionMatrix[y]?.[puzzle.pillar ? rdiv(x, puzzle.width) : x]; }
 function safepush(obj, k, v, makeset=false) { obj[k] ??= (makeset ? new Set() : []); makeset ? obj[k].add(v) : obj[k].push(v); }
 function getPortalCoords(c, data) { // from: <real>, to: PortalCoords(portalOffset-Adjusted)<virtual>
     for (const i in data.originalRegions.all) {
@@ -329,23 +329,31 @@ function init(puzzle) { // initialize globals
             let k = global.path.findIndex(x => loopover ? (x[0] == ret(c, o[1])) : (x[0] == c));
             if (k != -1) {
                 found = true;
-                for (let j = k-1; j <= k+1; j++) {
-                    let [x, y] = xy(global.path[j][0]);
-                    puzzle.grid[x][y].line = 0;
-                    global.pathAll.splice(global.pathAll.indexOf(global.path[j]), 1);
+                let [x, y] = xy(global.path[k][0]);
+                for (let c of (x % 2 ? [ret(x, y), ret(x-1, y), ret(x+1, y)] : [ret(x, y), ret(x, y+1), ret(x, y-1)])) {
+                    global.pathAll.splice(global.pathAll.findIndex(x => x[0] == c), 1);
+                    if (global.path.findIndex(x => x[0] == c) + 1) global.path.splice(global.path.findIndex(x => x[0] == c), 1);
+                    if (global.pathSym.findIndex(x => x[0] == c) + 1) global.pathSym.splice(global.pathAll.findIndex(x => x[0] == c), 1);
+                    if (global.pathLine.findIndex(x => x[0] == c) + 1) {
+                        puzzle.getCell(...xy(c)).line = 0;
+                        global.pathLine.splice(global.pathLine.findIndex(x => x[0] == c), 1);
+                    }
                 }
-                global.path.splice(k-1, 3);
                 break;
             }
             let k2 = global.pathSym.findIndex(x => loopover ? (x[0] == ret(c, o[1])) : (x[0] == c));
             if (k2 != -1) {
                 found = true;
-                for (let j = k2-1; j <= k2+1; j++) {
-                    let [x, y] = xy(global.pathSym[j][0]);
-                    puzzle.grid[x][y].line = 0;
-                    global.pathAll.splice(global.pathAll.indexOf(global.pathSym[j]), 1);
+                let [x, y] = xy(global.pathSym[k2][0]);
+                for (let c of (x % 2 ? [ret(x, y), ret(x-1, y), ret(x+1, y)] : [ret(x, y), ret(x, y+1), ret(x, y-1)])) {
+                    global.pathAll.splice(global.pathAll.findIndex(x => x[0] == c), 1);
+                    if (global.path.findIndex(x => x[0] == c) + 1) global.path.splice(global.path.findIndex(x => x[0] == c), 1);
+                    if (global.pathSym.findIndex(x => x[0] == c) + 1) global.pathSym.splice(global.pathAll.findIndex(x => x[0] == c), 1);
+                    if (global.pathLine.findIndex(x => x[0] == c) + 1) {
+                        puzzle.getCell(...xy(c)).line = 0;
+                        global.pathLine.splice(global.pathLine.findIndex(x => x[0] == c), 1);
+                    }
                 }
-                global.pathSym.splice(k2-1, 3);
                 break;
             }
         }
@@ -365,7 +373,7 @@ function init(puzzle) { // initialize globals
     }
     for (let x = 1; x < puzzle.width; x+=2) for (let y = 1; y < puzzle.height; y+=2) {
         for (let xx of [x-1, x, x+1]) for (let yy of [y-1, y, y+1]) 
-            global.regionMatrix[yy][xx] = global.regionMatrix[y][x];
+            if (global.regionMatrix[y][x] > 0) global.regionMatrix[yy][xx] = global.regionMatrix[y][x];
     }
     for (let o of global.pathAll) {
         let [x, y] = xy(o[0]);
@@ -375,7 +383,7 @@ function init(puzzle) { // initialize globals
         global.regions.all[global.regionMatrix[y][x]].push(ret(x, y));
     if (global.shapes.has('portal')) { // certified portal business
         for (const color in portalColorPos) for (const c of portalColorPos[color]) {
-            const region = matrix(global, ...xy(c));
+            const region = matrix(puzzle, global, ...xy(c));
             safepush(portalRegionPos, region, c);
             portalPosRegion[c] = region;
             safepush(portalRegionColor, region, color);
@@ -668,10 +676,10 @@ const preValidate = [
                 let color = cell.color;
                 if (quick && global.vtriangleColors[color] == -1) continue;
                 let count = 0;
-                if (matrix(global, x+1, y) === 0) count++;
-                if (matrix(global, x-1, y) === 0) count++;
-                if (matrix(global, x, y-1) === 0) count++;
-                if (matrix(global, x, y+1) === 0) count++;
+                if (matrix(puzzle, global, x+1, y) === 0) count++;
+                if (matrix(puzzle, global, x-1, y) === 0) count++;
+                if (matrix(puzzle, global, x, y-1) === 0) count++;
+                if (matrix(puzzle, global, x, y+1) === 0) count++;
                 if (count == 0) count = -1;
                 global.vtriangleColors[color] ??= count;
                 for (const [k, v] of Object.entries(global.vtriangleColors)) {
@@ -733,15 +741,15 @@ const preValidate = [
                 }
                 pos[color].push(c);
                 if (cell.type == 'blackhole') {
-                    if (matrix(global, x+1, y) === 0) count[color][0]++;
-                    if (matrix(global, x-1, y) === 0) count[color][1]++;
-                    if (matrix(global, x, y-1) === 0) count[color][2]++;
-                    if (matrix(global, x, y+1) === 0) count[color][3]++;
+                    if (matrix(puzzle, global, x+1, y) === 0) count[color][0]++;
+                    if (matrix(puzzle, global, x-1, y) === 0) count[color][1]++;
+                    if (matrix(puzzle, global, x, y-1) === 0) count[color][2]++;
+                    if (matrix(puzzle, global, x, y+1) === 0) count[color][3]++;
                 } else {
-                    if (matrix(global, x+1, y+1) === 0) count[color][0]++;
-                    if (matrix(global, x-1, y-1) === 0) count[color][1]++;
-                    if (matrix(global, x+1, y-1) === 0) count[color][2]++;
-                    if (matrix(global, x-1, y+1) === 0) count[color][3]++;
+                    if (matrix(puzzle, global, x+1, y+1) === 0) count[color][0]++;
+                    if (matrix(puzzle, global, x-1, y-1) === 0) count[color][1]++;
+                    if (matrix(puzzle, global, x+1, y-1) === 0) count[color][2]++;
+                    if (matrix(puzzle, global, x-1, y+1) === 0) count[color][3]++;
                 }
             }
             for (color in pos) {
@@ -765,8 +773,8 @@ const preValidate = [
                     let cell = puzzle.getCell(x, y);
                     if (!this.or.includes(cell.type)) continue;
                     let color = cell.color;
-                    global.bridgeRegions[color] ??= new Set([matrix(global, x, y)]);
-                    global.bridgeRegions[color].add(matrix(global, x, y));
+                    global.bridgeRegions[color] ??= new Set([matrix(puzzle, global, x, y)]);
+                    global.bridgeRegions[color].add(matrix(puzzle, global, x, y));
                     if (global.bridges[color]) { // already existing
                         global.invalidBridges[color] ??= global.bridges[color];
                         delete global.bridges[color];
@@ -798,7 +806,7 @@ const lineValidate = [
             const isCross = function(x, y, end, n) {
                 if (puzzle.pillar) x = (x + puzzle.width) % puzzle.width; // pillary boys, i hate pillary boys
                 if (end == n && puzzle.endPoint.x == x + (n==2?1:(n==1?-1:0)) && puzzle.endPoint.y == y + (n==0?1:(n==3?-1:0))) return true;
-                return matrix(global, x, y) === 0;
+                return matrix(puzzle, global, x, y) === 0;
             }
             for (let c of global.regionCells.corner[0]) {
                 let [x, y] = xy(c);
@@ -825,10 +833,10 @@ const lineValidate = [
                 if (cell.dot > window.CUSTOM_X) continue;
                 let spokes = -cell.dot - 13
                 let regions = new Set();
-                if (spokes & 1) regions.add(matrix(global, x-1, y-1));
-                if (spokes & 2) regions.add(matrix(global, x+1, y-1));
-                if (spokes & 4) regions.add(matrix(global, x-1, y+1));
-                if (spokes & 8) regions.add(matrix(global, x+1, y+1));
+                if (spokes & 1) regions.add(matrix(puzzle, global, x-1, y-1));
+                if (spokes & 2) regions.add(matrix(puzzle, global, x+1, y-1));
+                if (spokes & 4) regions.add(matrix(puzzle, global, x-1, y+1));
+                if (spokes & 8) regions.add(matrix(puzzle, global, x+1, y+1));
                 for (const region of regions) global.regionShapes[region].push('x');
                 global.invalidXs.push(c);
             }
@@ -958,10 +966,10 @@ const validate = [
                 let cell = puzzle.getCell(x, y);
                 if (!this.or.includes(cell.type)) continue;
                 let count = 0 // count !!
-                if (matrix(global, x+1, y) === 0) count++;
-                if (matrix(global, x-1, y) === 0) count++;
-                if (matrix(global, x, y-1) === 0) count++;
-                if (matrix(global, x, y+1) === 0) count++;
+                if (matrix(puzzle, global, x+1, y) === 0) count++;
+                if (matrix(puzzle, global, x-1, y) === 0) count++;
+                if (matrix(puzzle, global, x, y-1) === 0) count++;
+                if (matrix(puzzle, global, x, y+1) === 0) count++;
                 if (count != cell.count) {
                     console.info('[!] Triangle fault at', x, y, 'needs', cell.count, 'sides - actually has', count);
                     global.regionData[regionNum].addInvalid(puzzle, c);
@@ -977,23 +985,23 @@ const validate = [
                 let count = 0;
                 let end = endEnum.indexOf(puzzle.getCell(x, y)?.end); // top - right - left - bottom
                 if (puzzle.endPoint.x !== x || puzzle.endPoint.y !== y) end = -1;
-                if (matrix(global, x, y-1) + matrix(global, x-1, y) === 0) count++;
-                if (matrix(global, x+1, y) + matrix(global, x, y+1) === 0) count++;
-                if (matrix(global, x, y-1) + matrix(global, x+1, y) === 0) count++;
-                if (matrix(global, x-1, y) + matrix(global, x, y+1) === 0) count++;
+                if (matrix(puzzle, global, x, y-1) + matrix(puzzle, global, x-1, y) === 0) count++;
+                if (matrix(puzzle, global, x+1, y) + matrix(puzzle, global, x, y+1) === 0) count++;
+                if (matrix(puzzle, global, x, y-1) + matrix(puzzle, global, x+1, y) === 0) count++;
+                if (matrix(puzzle, global, x-1, y) + matrix(puzzle, global, x, y+1) === 0) count++;
                 return count;
             };
             function checkEdge(x, y, n) {
                 let count = 0;
                 let end = endEnum.indexOf(puzzle.getCell(x, y)?.end); // top - right - left - bottom
                 if (puzzle.endPoint.x !== x || puzzle.endPoint.y !== y) end = -1;
-                if (!matrix(global, x, y) && (end == n)) count++;
+                if (!matrix(puzzle, global, x, y) && (end == n)) count++;
                 end = endEnum.indexOf(puzzle.getCell((n%2 == 1 ? x+1 : x), (n%2 == 1 ? y : y+1))?.end); // top - right - left - bottom
                 if (puzzle.endPoint.x !== (n%2 == 1 ? x+1 : x) || puzzle.endPoint.y !== (n%2 == 1 ? y : y+1)) end = -1;
-                if (!matrix(global, x, y) && (end == n)) count++;
+                if (!matrix(puzzle, global, x, y) && (end == n)) count++;
                 end = endEnum.indexOf(puzzle.getCell((n%2 == 1 ? x-1 : x), (n%2 == 1 ? y : y-1))?.end); // top - right - left - bottom
                 if (puzzle.endPoint.x !== (n%2 == 1 ? x-1 : x) || puzzle.endPoint.y !== (n%2 == 1 ? y : y-1)) end = -1;
-                if (!matrix(global, x, y) && (end == n)) count++;
+                if (!matrix(puzzle, global, x, y) && (end == n)) count++;
                 return count;
             }
             for (let c of global.regionCells.cell[regionNum]) {
@@ -1115,7 +1123,7 @@ const validate = [
                     if (puzzle.pillar) x = (x + puzzle.width) % puzzle.width;
                     if (!isBounded(puzzle, x, y)) break; 
                     if (x == sourcex && y == sourcey) break; 
-                    if (matrix(global, x, y) === 0) {
+                    if (matrix(puzzle, global, x, y) === 0) {
                         count++;
                         if (count > cell.count) break;
                     }
@@ -1156,7 +1164,7 @@ const validate = [
                         if (x < 0) x += puzzle.width;
                         if (x >= puzzle.width) x -= puzzle.width;
                     }
-                    if ((data && data.regions.cell.includes(ret(x, y, w))) || !data && matrix(global, x, y) == regionNum) target++;
+                    if ((data && data.regions.cell.includes(ret(x, y, w))) || !data && matrix(puzzle, global, x, y) == regionNum) target++;
                     if (span[0] > x || x >= span[2] || span[1] > y || y > span[3] || (x == sx && y == sy) || target > count) break;
                 }
                 if (target !== count) {
@@ -1212,7 +1220,7 @@ const validate = [
             const w = data ? data.width : puzzle.width;
             let isReg = function(x, y) { 
                 if (data) return data.regions.cell.includes(ret(x, y, w, data.totalSpan[0], data.totalSpan[1]));
-                else return matrix(global, x, y) == regionNum;
+                else return matrix(puzzle, global, x, y) == regionNum;
             };
             for (const c of twobytwos) {
                 const [x, y] = data ? xy(getPortalCoords(c, data), w) : xy(c);
@@ -1363,14 +1371,14 @@ const validate = [
                 if (global.invalidBridges[color]) { // invalid
                     for (c of global.bridges[color]) {
                         let [x, y] = xy(c);
-                        if (matrix(global, x, y) == regionNum) global.regionData[regionNum].addInvalid(puzzle, c);
+                        if (matrix(puzzle, global, x, y) == regionNum) global.regionData[regionNum].addInvalid(puzzle, c);
                     }
                 } else { // valid, start logic
                     let res = false;
                     //* make adjacency graph
                     let adj = {};
                     function isCellBridgePathFriendly(x, y, color) { 
-                        if (matrix(global, x, y) !== regionNum) return false;
+                        if (matrix(puzzle, global, x, y) !== regionNum) return false;
                         let cell = puzzle.getCell(x, y);
                         return cell?.color == undefined || cell.color === color; 
                     }
@@ -1403,7 +1411,7 @@ const validate = [
                     treeloop(global.bridges[color][0]);
                     for (const el of tree) {
                         let [x, y] = xy(el);
-                        if (x % 2 && y % 2 && tree.has(el+2) && tree.has(el+(puzzle.width*2)) && tree.has(el+(puzzle.width*2)+2) && matrix(global, x+1, y+1) == 0) res = true;
+                        if (x % 2 && y % 2 && tree.has(el+2) && tree.has(el+(puzzle.width*2)) && tree.has(el+(puzzle.width*2)+2) && matrix(puzzle, global, x+1, y+1) == 0) res = true;
                     }
                     seen = new Set(tree);
                     //* check if tree is unique

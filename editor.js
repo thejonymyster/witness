@@ -695,9 +695,9 @@ function shapeChooser() {
 
 function shapeChooserClick(event, cell) {
   function polySort(shape) {
-    let xBar = 4369;
-    let yBar =   15;
-    if (shape == 0) return 0;
+    let xBar = 0x1111;
+    let yBar = 0x000F;
+    if ((shape & 0xFFFF) == 0) return 1;
     while ((shape & xBar) == 0) shape >>= 1;
     while ((shape & yBar) == 0) shape >>= 4;
     return shape;
@@ -709,6 +709,7 @@ function shapeChooserClick(event, cell) {
     let puzzle = document.getElementById('puzzle')
 
     activeParams.polyshape = polySort(activeParams.polyshape)
+    console.warn(activeParams.polyshape)
     if (activeParams.polyshape & 0xFFFF == 0) {
       activeParams.polyshape += 1 // Ensure that at least one square is filled
       drawSymbolButtons()
