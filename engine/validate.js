@@ -860,7 +860,7 @@ const lineValidate = [
         '_name': 'SOUND DOTS',
         'or': ['soundDot'],
         'exec': function(puzzle, global, quick) {
-            let x, y, cell;
+            let x, y, cell, i = 0;
             for (let o of global.path) {
                 [x, y] = xy(o[0]);
                 cell = puzzle.getCell(x, y);
