@@ -250,19 +250,19 @@ function init(puzzle) { // initialize globals
             switch (o) {
                 case 1:
                     global.path[k].push(endEnum.indexOf('left'));
-                    global.path.push([ret(x - 1, y)]);
+                    global.path.push([ret(rdiv(x - 1, puzzle.width), rdiv(y, puzzle.height))]);
                     break;
                 case 2:
                     global.path[k].push(endEnum.indexOf('right'));
-                    global.path.push([ret(x + 1, y)]);
+                    global.path.push([ret(rdiv(x + 1, puzzle.width), rdiv(y, puzzle.height))]);
                     break;
                 case 3:
                     global.path[k].push(endEnum.indexOf('top'));
-                    global.path.push([ret(x, y - 1)]);
+                    global.path.push([ret(rdiv(x, puzzle.width), rdiv(y - 1, puzzle.height))]);
                     break;
                 case 4:
                     global.path[k].push(endEnum.indexOf('bottom'));
-                    global.path.push([ret(x, y + 1)]);
+                    global.path.push([ret(rdiv(x, puzzle.width), rdiv(y + 1, puzzle.height))]);
                     break;
             }
         }
@@ -308,8 +308,12 @@ function init(puzzle) { // initialize globals
     const _EYEDIR = [1234567, -puzzle.width, 1, puzzle.width, -1];
     for (let o of eyes) {
         let found = false;
-        for (let c = ret(o[0], o[1]); isBounded(puzzle, ...xy(c)); c += _EYEDIR[o[2]]) {
-            let k = global.path.findIndex(x => x[0] == c);
+        let loopover = puzzle.pillar && !(o[2] % 2);
+        for (
+            let c = loopover ? rdiv(ret(o[0], o[1]) + _EYEDIR[o[2]], puzzle.width) : ret(o[0], o[1]); 
+            loopover ? c != o[0] : isBounded(puzzle, ...xy(c)); 
+            loopover ? c = rdiv(c + _EYEDIR[o[2]], puzzle.width) : c += _EYEDIR[o[2]]) {
+            let k = global.path.findIndex(x => loopover ? (x[0] == ret(c, o[1])) : (x[0] == c));
             if (k != -1) {
                 found = true;
                 for (let j = k-1; j <= k+1; j++) {
@@ -320,7 +324,7 @@ function init(puzzle) { // initialize globals
                 global.path.splice(k-1, 3);
                 break;
             }
-            let k2 = global.pathSym.findIndex(x => x[0] == c);
+            let k2 = global.pathSym.findIndex(x => loopover ? (x[0] == ret(c, o[1])) : (x[0] == c));
             if (k2 != -1) {
                 found = true;
                 for (let j = k2-1; j <= k2+1; j++) {

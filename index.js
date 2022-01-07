@@ -49,6 +49,12 @@ const PROGRESS = [
         'puzzles': -1,
         'endPoint': [14, 8],
         'URL': "https://seren-35.github.io/witness-playground/"
+    }, {
+        '_name': 'editor',
+        'hash': 0,
+        'puzzles': -1,
+        'endPoint': [8, 0],
+        'URL': "https://prodzpod.github.io/witness/editor"
     }
 ]
 

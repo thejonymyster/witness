@@ -277,6 +277,10 @@ window.byteToInt = function(...byte) {
   return byte.map(b => ((b.charCodeAt(0) << 24 >>> 0) + (b.charCodeAt(1) << 16 >>> 0) + (b.charCodeAt(2) << 8 >>> 0) + (b.charCodeAt(3) >>> 0)));
 }
 
+window.rdiv = function(n, a) {
+  return ((n % a) + a) % a;
+}
+
 const _keyStr = "`123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.-0"
 
 window.runLength = function(str) {
