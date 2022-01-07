@@ -238,7 +238,7 @@ function init(puzzle) { // initialize globals
             edge: [],
         }
     };
-    console.warn(puzzle, global);
+    // console.warn(puzzle, global);
     window.savedGrid = puzzle.grid;
     global.path = [];
     for (let o of puzzle.path) {
