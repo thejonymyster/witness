@@ -5,6 +5,11 @@
        url("Constantia.ttf")   format("truetype"),
        url("Constantia.woff2") format("woff2");
 }
+
+html, body {
+  overscroll-behavior-y: contain;
+}
+
 label, select, option, input, a, button, h1, h2 {
   font-family: "Constantia-Bold";
   font-variant: small-caps;

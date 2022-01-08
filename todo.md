@@ -16,8 +16,8 @@ Now that looksyv2 is out mroe things must be done
 - [x] doesnt work on firefox
 - [x] reset / "randomize" for theme
 - [ ] undo / redo
-- [ ] clean up editor.js
-- [ ] make puzzles bigger for mobile (temporary draggy solution)
+- [x] clean up editor.js
+- [x] make puzzles bigger for mobile (temporary draggy solution)
 - [x] main page progression
 - [ ] challenge packs
 - [x] reduce code size further, group similar ones
