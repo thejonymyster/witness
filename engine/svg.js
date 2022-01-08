@@ -645,6 +645,10 @@ window.drawSymbolWithSvg = function(svg, params) {
       simplePath(svg, params, 'M -6 13.4 Q -9 13.4 -10 11 L -13 0 Q -14 -2.5 -12 -4.5 L -2 -12.5 Q 0 -14 2 -12.5 L 12 -4.5 Q 14 -2.5 13 0 L 10 11 Q 9 13.4 6 13.5')
       break;
     case 'crystal':
+      if (params.count == 5) {
+        simplePath(svg, params, 'M -10 6.25 Q -12.5 5 -12.5 2.5 Q -12.5 -5 -8.75 -12.5 Q -5 -20 0 -20 C -2.5 -17.5 0 -11 2.5 -10 L 10 -6.25 Q 12.5 -5 12.5 -2.5 Q 12.5 5 8.75 12.5 Q 5 20 0 20 C 2.5 17.5 0 11 -2.5 10').setAttribute('transform', 'translate(' + midx + ', ' + midy + ') rotate(60)');
+        break;
+      }
       let c = simplePath(svg, params, 'M -10 7.5 Q -12.5 5 -12.5 2.5 L -12.5 -2.5 Q -12.5 -5 -10 -7.5 L -2.5 -15 Q 0 -17.5 2.5 -15 L 10 -7.5 Q 12.5 -5 12.5 -2.5 L 12.5 2.5 Q 12.5 5 10 7.5 L 2.5 15 Q 0 17.5 -2.5 15')
       transform = rotate(45 * params.count)
       transform += ' translate(' + midx + ', ' + midy + ')'

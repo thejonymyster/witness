@@ -483,10 +483,11 @@ function drawSymbolButtons() {
         break;
       case 'divdiamond':
       case 'dice':
-        cycle = 9;
+        cycle ??= 9;
+      case 'crystal':
+        cycle ??= 5
       case 'triangle':
       case 'atriangle':
-      case 'crystal':
       case 'dots':
       case 'eye':
         cycle ??= 4;
@@ -945,6 +946,7 @@ function onElementClicked(event, x, y, update=true) {
   } else if (['triangle', 'atriangle', 'divdiamond', 'dice', 'crystal', 'eye'].includes(activeParams.type)) {
     let cycle;
     if (['divdiamond', 'dice'].includes(activeParams.type)) cycle = 9;
+    else if (['crystal'].includes(activeParams.type)) cycle = 5;
     else cycle = 4;
     if (x%2 !== 1 || y%2 !== 1) return
     // Only increment count if exact match

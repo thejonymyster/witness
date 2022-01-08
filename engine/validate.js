@@ -129,7 +129,7 @@ let width;
 let height;
 function ret(x, y, w=width) { return y * w + x; }
 function xy(c, w=width) { return [c % w, Math.floor(c / w)]; }
-function cel(puzzle, c) { return puzzle.getCell(...xy(c)); }
+function cel(puzzle, c, w=puzzle.width) { return puzzle.getCell(...xy(c, w)); }
 const DIR = [
     {'x': 0, 'y':-1},
     {'x': 1, 'y':-1},
@@ -1324,38 +1324,33 @@ const validate = [
         '_name': 'CRYSTAL CHECK',
         'or': ['crystal'],
         'exec': function(puzzle, regionNum, global, quick) {
-            let cells = global.portalRegion?.includes(regionNum) ? global.portalData[global.portalRegion.indexOf(regionNum)].regions.cell : global.regions.cell[regionNum];
-            let w = global.portalRegion?.includes(regionNum) ? global.portalData[global.portalRegion.indexOf(regionNum)].width : puzzle.width;
-            let span = [
-                (cells.reduce((prev, cur) => Math.min(prev, xy(cur, w)[0]), Number.MAX_SAFE_INTEGER) - 1), 
-                (cells.reduce((prev, cur) => Math.min(prev, xy(cur, w)[1]), Number.MAX_SAFE_INTEGER) - 1)
-            ]
-            span.push((cells.reduce((prev, cur) => Math.max(prev, xy(cur, w)[0]), 0) - 1 - span[0]) / 4);
-            span.push((cells.reduce((prev, cur) => Math.max(prev, xy(cur, w)[1]), 0) - 1 - span[1]) / 4);
-            let symmetry = [];
-            let cs = [null, [], [], [], []];
-            const fn = [(x, y) => [x, y], (x, y) => [y, x], (x, y) => [x, -y], (x, y) => [-y, -x], (x, y) => [-x, y]];
-            for (const c of global.regionCells.cell[regionNum]) {
-                let cell = cel(puzzle, c);
-                if (this.or.includes(cell.type)) {
-                    symmetry.push(cell.count);
-                    cs[cell.count].push(c);
+            let hasPortal = global.portalRegion?.includes(regionNum);
+            let cells = hasPortal ? global.portalData[global.portalRegion.indexOf(regionNum)].regions.cell : global.regions.cell[regionNum];
+            let w = hasPortal ? global.portalData[global.portalRegion.indexOf(regionNum)].width : puzzle.width;
+            let cs = [null, [], [], [], [], []];
+            const fn = [(x, y) => [x, y], (x, y) => [y, x], (x, y) => [x, -y], (x, y) => [-y, -x], (x, y) => [-x, y], (x, y) => [-x, -y]];
+            if (hasPortal) {
+                for (const o of Object.entries(global.portalData[global.portalRegion.indexOf(regionNum)].regionPosCell)) {
+                    let cell = o[1].find(x => this.or.includes(x.type));
+                    if (cell) cs[cell.count].push(o[0]);
+                }
+            } else {
+                for (const c of global.regionCells.cell[regionNum]) {
+                    let cell = cel(puzzle, c, w);
+                    if (this.or.includes(cell.type)) cs[cell.count].push(c);
                 }
             }
-            symmetry = Array.from(new Set(symmetry));
             for (const c of cells) {
                 let [x, y] = xy(c, w);
-                x = ((x - span[0] - 1) / 2) - span[2]; 
-                y = ((y - span[1] - 1) / 2) - span[3]; 
-                for (let q of symmetry) {
-                    if (cs[q] == null) continue;
-                    let [xx, yy] = fn[q](x, y);
-                    xx = (xx + span[2]) * 2 + 1 + span[0];
-                    yy = (yy + span[3]) * 2 + 1 + span[1];
+                for (let q = 1; q <= 4; q++) for (let cc of cs[q]) {
+                    let [cx, cy] = xy(cc, w);
+                    let [xx, yy] = fn[q](x - cx, y - cy);
+                    xx += cx; yy += cy;
                     if (!cells.find(x => x == ret(xx, yy))) {
                         console.info('[!] Crystal fault at', x, y);
-                        global.regionData[regionNum].addInvalids(puzzle, cs[q]);
-                        cs[q] = null;
+                        global.regionData[regionNum].addInvalid(puzzle, cc);
+                        if (quick) return;
+                        cs[q].splice(cs[q].indexOf(cc), 1);
                     }
                 }
             }
