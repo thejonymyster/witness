@@ -486,3 +486,7 @@ li button {
 #symbolButtons tr > td:nth-child(5), #symbolButtons tr > td:nth-child(6), #symbolButtons tr > td:nth-child(7), #symbolButtons tr > td:nth-child(8), #symbolButtons #less-wrapper {
   display: var(--more);
 }
+
+.main > .hlist {
+  margin: 16px;
+}

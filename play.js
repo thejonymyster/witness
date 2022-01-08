@@ -60,7 +60,7 @@ window.onload = function() {
   if (toLoad) {
     puzzles = importSequence(toLoad.slice(1));
     localStorage[`puzzleProgress_${code}`] ??= 0;
-    currentPanel = localStorage[`puzzleProgress_${code}`];
+    currentPanel = Math.min(localStorage[`puzzleProgress_${code}`], puzzles.length - 1);
     reloadPanel();
   } else window.location.replace('prodzpod.github.io/witness');
 }
@@ -87,19 +87,19 @@ window.onSolvedPuzzle = function(paths) {
 }
 
 function levelUp() {
-  if ((currentPanel == localStorage[`puzzleProgress_${code}`]) && (currentPanel < (puzzles.length - 1))) localStorage[`puzzleProgress_${code}`]++;
+  if ((currentPanel == localStorage[`puzzleProgress_${code}`]) && (currentPanel < puzzles.length)) localStorage[`puzzleProgress_${code}`]++;
   updateArrows();
 }
 
 function updateArrows() {
   if (currentPanel == 0) document.getElementById('prev').setAttribute('style', 'opacity: 0;');
   else document.getElementById('prev').setAttribute('style', 'opacity: 1;');
-  if (currentPanel == localStorage[`puzzleProgress_${code}`]) document.getElementById('next').setAttribute('style', 'opacity: 0;');
+  if (currentPanel == Math.min(localStorage[`puzzleProgress_${code}`], puzzles.length - 1)) document.getElementById('next').setAttribute('style', 'opacity: 0;');
   else document.getElementById('next').setAttribute('style', 'opacity: 1;');
 }
 
 window.getNext = function() {
-  if (currentPanel == localStorage[`puzzleProgress_${code}`]) return;
+  if (currentPanel == Math.min(localStorage[`puzzleProgress_${code}`], puzzles.length - 1)) return;
   currentPanel++;
   reloadPanel();
   if (puzzle.optional) levelUp();
