@@ -563,7 +563,7 @@ function hookMovementEvents(start) {
       }
     }
     if (!eventIsWithinPuzzle) return // Ignore drag events that aren't within the puzzle
-    event.preventDefault() // Prevent accidental scrolling if the touch event is within the puzzle.
+    // event.preventDefault() // Prevent accidental scrolling if the touch event is within the puzzle.
 
     var newPos = {
       'x': event.pageX || event.touches[0].pageX,
