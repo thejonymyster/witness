@@ -27,9 +27,15 @@
           <div><p>Merge your looksy puzzles into a panel sequence.</p></div>
           <div id="warning" style="visibility: hidden;"><p style="color: red;">WARNING: The resulting URL is *long*. it might not work on some browsers.</p></div>
           <div class="list-wrapper vlist">
-            <button onpointerdown="importSequence2()" id="importButton">Import Sequence</button>
+            <div class="hlist">
+              <button onpointerdown="importSequence2()" id="importButton">Import Sequence</button>
+              <button onpointerdown="updateList()" id="updateButton">Update list</button>
+            </div>
             <div id="list"></div>
-            <button onpointerdown="exportSequence2()" id="exportButton">Export Sequence</button>
+            <div class="hlist">
+              <button onpointerdown="exportSequence2()" id="exportButton">Export Sequence</button>
+              <button onpointerdown="exportSequence2(true)" id="exportIDNButton">Export as Short Link</button>
+            </div>
           </div>
           <div class="spacer"></div>
         </div>

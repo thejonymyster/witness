@@ -53,27 +53,30 @@ window.insertData = function(id) {
 
 window.importSequence2 = function() {
     navigator.clipboard.readText().then(clipText => {
-        clipText = clipText.replace(/https:.+?#/, '');
-        let veri = clipText.indexOf('_');
-        let version = clipText.slice(0, veri);
-        clipText = clipText.slice(veri + 1);
-        if (version == 'vs1') {
-            list = clipText.replace(/https:.+?#/, '').split('~~');
-            while (listlength < list.length) {
-                document.getElementById('list').append(emptyList(listlength));
-                listlength++;
-            }
-            while (listlength > list.length) {
-                document.getElementById(`list-${listlength-1}-wrapper`).remove();
-                listlength--;
-            }
-            updateElems();
-        } else throw Error('invalid sequence type')
+        list = importSequence(clipText.replace(/https:.+?#/, ''));
+        while (listlength < list.length) {
+            document.getElementById('list').append(emptyList(listlength));
+            listlength++;
+        }
+        while (listlength > list.length) {
+            document.getElementById(`list-${listlength-1}-wrapper`).remove();
+            listlength--;
+        }
+        updateElems();
     })
 }
 
-window.exportSequence2 = function() {
-    navigator.clipboard.writeText('https://prodzpod.github.io/witness#' + exportSequence(list));
+window.exportSequence2 = function(useIDN = false) {
+    updateList(); // make sure all versions are the same
+    navigator.clipboard.writeText('https://prodzpod.github.io/witness#' + exportSequence(list, useIDN));
+}
+
+window.updateList = function() {
+    let newList = [];
+    for (let o of list) newList.push(serializePuzzle(deserializePuzzle(o)));
+    list = newList;
+    document.documentElement.setAttribute('style', '');
+    updateElems();
 }
 
 });

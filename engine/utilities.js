@@ -282,7 +282,7 @@ window.rdiv = function(n, a) {
   return ((n % a) + a) % a;
 }
 
-const _keyStr = "`123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.-0"
+const _keyStr = " 123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.-0"
 
 window.runLength = function(str) {
   let res = "";
@@ -296,14 +296,67 @@ window.runLength = function(str) {
     }
     if (cur != str[i]) { 
       if (rep > 3) { 
-        res += '~' 
-        res += _keyStr[rep];
-        res += cur;
+        res += '~' + _keyStr[rep] + cur;
       }
       else res += cur.repeat(rep);
       cur = str[i]; rep = 1;
     } else rep++;
   }
+  return res;
+}
+
+window.runLengthV2 = function(str) {
+  let res = "";
+  let cur = '';
+  let rep = 0;
+  str += '!'; // terminate
+  //* STAGE 1: SINGLE LETTER RLE
+  for (let i = 0; i < str.length; i++) {
+    if (rep == 64) {
+      res += '~~0' + cur;
+      rep = 0;
+    }
+    if (cur != str[i]) { 
+      if (rep > 4) { 
+        res += '~~' + _keyStr[rep] + cur;
+      }
+      else res += cur.repeat(rep);
+      cur = str[i]; rep = 1;
+    } else rep++;
+  }
+  //* STAGE 2: 4 LETTER RLE
+  str = res;
+  res = "";
+  cur = '';
+  rep = 0;
+  str += '!!!!'; // terminate
+  for (let i = 0; i < str.length - 3;) {
+    if (rep == 64) {
+      res += '~0' + cur;
+      rep = 0;
+    }
+    if (rep) {
+      if (cur == str.slice(i, i+4)) {
+        rep++;
+        i += 4;
+      } else {
+        res += '~' + _keyStr[rep] + cur
+        cur = '';
+        rep = 0;
+      }
+    } else {
+      if (str.slice(i, i+4) == str.slice(i+4, i+8)) {
+        cur = str.slice(i, i+4)
+        rep = 1;
+        i += 4;
+      }
+      else {
+        res += str[i];
+        i++;
+      }
+    }
+  }
+  res = res.replace(/\!+/g, '');
   return res;
 }
 
@@ -313,6 +366,30 @@ window.derunLength = function(str) {
     if (str[i] == '~') {
       res += str[i+2].repeat(_keyStr.indexOf(str[i+1]));
       i += 2;
+    }
+    else res += str[i];
+  }
+  return res;
+}
+
+window.derunLengthV2 = function(str) {
+  let res = ""
+  for (let i = 0; i < str.length; i++) {
+    if (str.slice(i, i+2) == '~~') {
+      res += '~~';
+      i++;
+    } else if (str[i] == '~') {
+      res += str.slice(i+2, i+6).repeat(_keyStr.indexOf(str[i+1]));
+      i += 5;
+    }
+    else res += str[i];
+  }
+  str = res;
+  res = "";
+  for (let i = 0; i < str.length; i++) {
+    if (str.slice(i, i+2) == '~~') {
+      res += str[i+3].repeat(_keyStr.indexOf(str[i+2]));
+      i += 3;
     }
     else res += str[i];
   }
@@ -478,15 +555,6 @@ function deserializeThemeV1(puzzle, string) {
 
 window.serializePuzzle = function(puzzle) {
   const SCHEMA = new Map([
-    ['sols', 'byte'],
-    ['symmetry', 'byte'], //* symmetry, symmetry?.x, symmetry?.y, pillar, perfect
-    ['height', 'byte'],
-    ['width', 'byte'],
-    ['defaultCorner', 'corner'], //* only if majority of corner is same dot/gap/start, else null
-    ['defaultCell', 'cell'],
-    ['corners', 'sparse[]<corner>'],
-    ['soundDots', '[]<byte>'],
-    ['cells', 'sparse[]<cell>'],
     ['theme.background', 'int'],
     ['theme.inner', 'int'],
     ['theme.outer', 'int'],
@@ -496,6 +564,15 @@ window.serializePuzzle = function(puzzle) {
     ['theme.line-success', 'int'],
     ['theme.line-undone', 'int'],
     ['theme.text', 'int'],
+    ['sols', 'byte'],
+    ['symmetry', 'byte'], //* symmetry, symmetry?.x, symmetry?.y, pillar, perfect
+    ['height', 'byte'],
+    ['width', 'byte'],
+    ['defaultCorner', 'corner'], //* only if majority of corner is same dot/gap/start, else null
+    ['defaultCell', 'cell'],
+    ['corners', 'sparse[]<corner>'],
+    ['soundDots', '[]<byte>'],
+    ['cells', 'sparse[]<cell>'],
     ['image.background-image', 'string'],
     ['image.foreground-image', 'string'],
   ]);
@@ -525,6 +602,9 @@ window.serializePuzzle = function(puzzle) {
   raw += String.fromCharCode(makeBitSwitch(puzzle.symmetry, puzzle.symmetry?.x, puzzle.symmetry?.y, puzzle.pillar, puzzle.perfect, puzzle.disableFlash, puzzle.optional));
   raw += String.fromCharCode(Math.floor(puzzle.width / 2));
   raw += String.fromCharCode(Math.floor(puzzle.height / 2));
+  let ints = [];
+  for (const entry of themeArgs) ints.push(puzzle.theme[entry]);
+  raw += intToByte(...ints).join('');
   //* defaultCorner
   let med = {};
   for (let i = 0; i < puzzle.width / 2; i++) for (let j = 0; j < puzzle.height / 2; j++) {
@@ -578,9 +658,7 @@ window.serializePuzzle = function(puzzle) {
   raw += cell[0];
   raw += cell[1];
   raw += cell[2];
-  let ints = [];
-  for (const entry of themeArgs) ints.push(puzzle.theme[entry]);
-  raw += intToByte(...ints).join('');
+  //* image
   let addedFirst = false;
   if (puzzle.image['foreground-image'])
     raw += puzzle.image['foreground-image'];
@@ -590,7 +668,7 @@ window.serializePuzzle = function(puzzle) {
   }
   if (puzzle.image['background-music'])
     raw += (addedFirst ? '' : '\0') + '\0' + puzzle.image['background-music'];
-  return 'v4_' + runLength(btoa(raw).replace(/\+/g, '.').replace(/\//g, '-').replace(/\=/g, '_'));
+  return 'v5_' + runLength(btoa(raw).replace(/\+/g, '.').replace(/\//g, '-').replace(/\=/g, '_'));
 }
 
 function getCellData(cell) {
@@ -631,11 +709,86 @@ window.deserializePuzzle = function(string) {
   if (version == 'v2') return deserializePuzzleV2(deserializePuzzlePre(string));
   else if (version == 'v3') return deserializePuzzleV3(deserializePuzzlePre(string));
   else if (version == 'v4') return deserializePuzzleV4(deserializePuzzlePre(string));
+  else if (version == 'v5') return deserializePuzzleV5(deserializePuzzlePre(string));
   else throw Error('unknown puzzle format');
 }
 
 function deserializePuzzlePre(string) {
   return atob(derunLength(string).replace(/\./g, '+').replace(/\-/g, '/').replace(/\_/g, '='));
+}
+
+function deserializePuzzleV5(raw) {
+  let ptr = 0;
+  //* header
+  let char = readBitSwitch(raw.charCodeAt(ptr+1));
+  let puzzle = new Puzzle(raw.charCodeAt(ptr+2), raw.charCodeAt(ptr+3), char[3]);
+  puzzle.sols = raw.charCodeAt(ptr);
+  ptr += 4;
+  if (char[0]) puzzle.symmetry = {'x': char[1], 'y': char[2]};
+  if (char[4]) puzzle.perfect = true;
+  if (char[5]) puzzle.disableFlash = true;
+  if (char[6]) puzzle.optional = true;
+  //* style
+  puzzle.theme = {};
+  for (const entry of themeArgs) {
+    char = byteToInt(raw.slice(ptr, ptr + 4))[0];
+    puzzle.theme[entry] = char;
+    ptr += 4;
+  }
+  //* defaults
+  let defCorner = raw.charCodeAt(ptr);
+  if (defCorner) for (let i = 0; i < puzzle.width / 2; i++) for (let j = 0; j < puzzle.height / 2; j++) puzzle.grid[i*2][j*2] = cornerData(defCorner, 0);
+  ptr++;
+  let defCell = raw.charCodeAt(ptr);
+  if (defCell) {
+    ptr++;
+    let temp = cellData(defCell, raw.charCodeAt(ptr), raw.charCodeAt(ptr + 1), raw.charCodeAt(ptr + 2));
+    for (let i = 0; i < puzzle.width / 2; i++) for (let j = 0; j < puzzle.height / 2; j++) {
+      if (puzzle.grid[i*2+1]?.[j*2+1] === undefined) continue;
+      puzzle.grid[i*2+1][j*2+1] = temp[0];
+    } 
+    ptr += temp[1];
+  }
+  ptr++;
+  //* corners
+  let x = [], y = [];
+  let lenCorner = (raw.charCodeAt(ptr) >> 8) + (raw.charCodeAt(ptr + 1));
+  ptr += 2;
+  for (let i = 0; i < lenCorner; i++) { y.push(raw.charCodeAt(ptr)); ptr++; }
+  for (let i = 0; i < lenCorner; i++) { x.push(raw.charCodeAt(ptr)); ptr++; }
+  for (let i = 0; i < lenCorner; i++) { 
+    puzzle.grid[y[i]][x[i]] = cornerData(raw.charCodeAt(ptr), raw.charCodeAt(ptr + 1));
+    ptr += 2; 
+  }
+  //* soundData
+  puzzle.soundDots = [];
+  let lenSoundDots = raw.charCodeAt(ptr);
+  ptr++;
+  for (let i = 0; i < lenSoundDots; i++) {
+    puzzle.soundDots.push(raw.charCodeAt(ptr));
+    ptr++;
+  }
+  //* cells
+  x = []; y = [];
+  let lenCell = (raw.charCodeAt(ptr) >> 8) + (raw.charCodeAt(ptr + 1));
+  ptr += 2;
+  for (let i = 0; i < lenCell; i++) { y.push(raw.charCodeAt(ptr)); ptr++; }
+  for (let i = 0; i < lenCell; i++) { x.push(raw.charCodeAt(ptr)); ptr++; }
+  for (let i = 0; i < lenCell; i++) { 
+    let temp = cellData(raw.charCodeAt(ptr), raw.charCodeAt(ptr + 1), raw.charCodeAt(ptr + 2), raw.charCodeAt(ptr + 3));
+    puzzle.grid[y[i]*2+1][x[i]*2+1] = temp[0];
+    ptr += 2 + temp[1]; 
+  }
+  //* image
+  let urls = raw.slice(ptr).split('\0');
+  puzzle.image = {};
+  if (urls[0]?.length) puzzle.image['foreground-image'] = urls[0];
+  if (urls[1]?.length) puzzle.image['background-image'] = urls[1];
+  if (urls[2]?.length) puzzle.image['background-music'] = urls[2];
+  window.puzzle = puzzle;
+  applyTheme(puzzle);
+  applyImage(puzzle);
+  return puzzle;
 }
 
 function deserializePuzzleV4(raw) {
@@ -844,8 +997,60 @@ function deserializePuzzleV2(raw, sols=1) {
   return puzzle;
 }
 
-window.exportSequence = function(list) {
-    return 'vs1_' + list.join('~~');
+const base = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzゝぁあぃいぅうぇえぉおゕかきくゖけこさしすせそたちっつてとなにぬねのはひふへほまみむめもゃやゅゆょよらりるれろゎわゐゑをんヽァアィイゥウェエォオヵカキㇰクヶケコサㇱシㇲスセソタチッツテㇳトナニㇴヌネノㇵハㇶヒㇷフㇸヘㇹホマミㇺムメモャヤュユョヨㇻラㇼリㇽルㇾレㇿロヮワヰヱヲンㄅㆠㄆㆴㄇㄈㄪㄉㄊㆵㄋㄌㄍㆣㄎㆶㄫㆭㄏㆷㄐㆢㄑㄒㄬㄓㄔㄕㄖㄗㆡㄘㄙㄚㆩㄛㆧㆦㄜㄝㆤㆥㄞㆮㄟㄠㆯㄡㄢㄣㄤㆲㄥㆰㆱㆬㄦㄧㆪㆳㄨㆫㆨㄩæɓƃƈđɖɗƌðǝəɛƒǥɠɣƣƕħıɨɩƙłƚɲƞŋœøɔɵȣƥʀʃŧƭʈɯʊʋƴƶȥʒƹȝþƿƨƽƅʔɐɑɒʙƀɕʣʥʤɘɚɜɝɞʚɤʩɡɢʛʜɦɧɪʝɟʄʞʪʫʟɫɬɭɮƛʎɱɴɳɶɷɸʠĸɹɺɻɼɽɾɿʁʂƪʅʆʨƾʦʧƫʇʉɥɰʌʍʏƍʐʑƺʓƻʕʡʢʖǀǁǂǃʗʘʬʭαβγδεϝϛζηθικλμνξοπϟϙρστυφχψωϡϳϗаәӕбвгґғҕдԁђԃҙеєжҗзԅѕӡԇиҋіјкқӄҡҟҝлӆљԉмӎнӊңӈҥњԋоөпҧҁрҏсԍҫтԏҭћуүұѹфхҳһѡѿѽѻцҵчҷӌҹҽҿџшщъыьҍѣэюяѥѧѫѩѭѯѱѳѵҩӀ҃҄҅҆֊ᐁᐂᐃᐄᐅᐆᐇᐈᐉᐊᐋᐌᐍᐎᐏᐐᐑᐒᐓᐔᐕᐖᐗᐘᐙᐚᐛᐜᐝᐞᐟᐠᐡᐢᐣᐤᐥᐦᐧᐨᐩᐪᐫᐬᐭᐮᐯᐰᐱᐲᐳᐴᐵᐶᐷᐸᐹᐺᐻᐼᐽᐾᐿᑀᑁᑂᑃᑄᑅᑆᑇᑈᑉᑊᑋᑌᑍᑎᑏᑐᑑᑒᑓᑔᑕᑖᑗᑘᑙᑚᑛᑜᑝᑞᑟᑠᑡᑢᑣᑤᑥᑦᑧᑨᑩᑪᑫᑬᑭᑮᑯᑰᑱᑲᑳᑴᑵᑶᑷᑸᑹᑺᑻᑼᑽᑾᑿᒀᒁᒂᒃᒄᒅᒆᒇᒈᒉᒊᒋᒌᒍᒎᒏᒐᒑᒒᒓᒔᒕᒖᒗᒘᒙᒚᒛᒜᒝᒞᒟᒠᒡᒢᒣᒤᒥᒦᒧᒨᒩᒪᒫᒬᒭᒮᒯᒰᒱᒲᒳᒴᒵᒶᒷᒸᒹᒺᒻᒼᒽᒾᒿᓀᓁᓂᓃᓄᓅᓆᓇᓈᓉᓊᓋᓌᓍᓎᓏᓐᓑᓒᓓᓔᓕᓖᓗᓘᓙᓚᓛᓜᓝᓞᓟᓠᓡᓢᓣᓤᓥᓦᓧᓨᓩᓪᓫᓬᓭᓮᓯᓰᓱᓲᓳᓴᓵᓶᓷᓸᓹᓺᓻᓼᓽᓾᓿᔀᔁᔂᔃᔄᔅᔆᔇᔈᔉᔊᔋᔌᔍᔎᔏᔐᔑᔒᔓᔔᔕᔖᔗᔘᔙᔚᔛᔜᔝᔞᔟᔠᔡᔢᔣᔤᔥᔦᔧᔨᔩᔪᔫᔬᔭᔮᔯᔰᔱᔲᔳᔴᔵᔶᔷᔸᔹᔺᔻᔼᔽᔾᔿᕀᕁᕂᕃᕄᕅᕆᕇᕈᕉᕊᕋᕌᕍᕎᕏᕐᕑᕒᕓᕔᕕᕖᕗᕘᕙᕚᕛᕜᕝᕞᕟᕠᕡᕢᕣᕤᕥᕦᕧᕨᕩᕪᕫᕬᕭᕮᕯᕰᕱᕲᕳᕴᕵᕶᕷᕸᕹᕺᕻᕽᙯᕾᕿᖀᖁᖂᖃᖄᖅᖆᖇᖈᖉᖊᖋᖌᖍᙰᖎᖏᖐᖑᖒᖓᖔᖕᙱᙲᙳᙴᙵᙶᖖᖗᖘᖙᖚᖛᖜᖝᖞᖟᖠᖡᖢᖣᖤᖥᖦᕼᖧᖨᖩᖪᖫᖬᖭᖮᖯᖰᖱᖲᖳᖴᖵᖶᖷᖸᖹᖺᖻᖼᖽᖾᖿᗀᗁᗂᗃᗄᗅᗆᗇᗈᗉᗊᗋᗌᗍᗎᗏᗐᗑᗒᗓᗔᗕᗖᗗᗘᗙᗚᗛᗜᗝᗞᗟᗠᗡᗢᗣᗤᗥᗦᗧᗨᗩᗪᗫᗬᗭᗮᗯᗰᗱᗲᗳᗴᗵᗶᗷᗸᗹᗺᗻᗼᗽᗾᗿᘀᘁᘂᘃᘄᘅᘆᘇᘈᘉᘊᘋᘌᘍᘎᘏᘐᘑᘒᘓᘔᘕᘖᘗᘘᘙᘚᘛᘜᘝᘞᘟᘠᘡᘢᘣᘤᘥᘦᘧᘨᘩᘪᘫᘬᘭᘮᘯᘰᘱᘲᘳᘴᘵᘶᘷᘸᘹᘺᘻᘼᘽᘾᘿᙀᙁᙂᙃᙄᙅᙆᙇᙈᙉᙊᙋᙌᙍᙎᙏᙐᙑᙒᙓᙔᙕᙖᙗᙘᙙᙚᙛᙜᙝᙞᙟᙠᙡᙢᙣᙤᙥᙦᙧᙨᙩᙪᙫᙬᚁᚂᚃᚄᚅᚆᚇᚈᚉᚊᚋᚌᚍᚎᚏᚐᚑᚒᚓᚔᚕᚖᚗᚘᚙᚚᚠᚡᚢᚤᚥᚦᚧᛰᚨᚩᚬᚭᚮᚯᚰᚱᚲᚳᚴᚵᚶᚷᚹᛩᚺᚻᚼᚽᚾᚿᛀᛁᛂᛃᛄᛅᛆᛮᛇᛈᛕᛉᛊᛋᛪᛌᛍᛎᛏᛐᛑᛒᛓᛔᛖᛗᛘᛙᛯᛚᛛᛜᛝᛞᛟᚪᚫᚣᛠᛣᚸᛤᛡᛢᛥᛦᛧᛨ᠐᠑᠒᠓᠔᠕᠖᠗᠘᠙ᢀᢁᢂᢃᢄᢅᢆᡃᠠᢇᠡᡄᡝᠢᡅᡞᡳᢈᡟᠣᡆᠤᡇᡡᠥᡈᠦᡉᡠᠧᠨᠩᡊᡢᢊᢛᠪᡋᠫᡌᡦᠬᡍᠭᡎᡤᢚᡥᠮᡏᠯᠰᠱᡧᢜᢝᢢᢤᢥᠲᡐᡨᠳᡑᡩᠴᡒᡱᡜᢋᠵᡓᡪᡷᠶᡕᡲᠷᡵᠸᡖᠹᡫᡶᠺᡗᡣᡴᢉᠻᠼᡔᡮᠽᡯᡘᡬᠾᡙᡭᠿᡀᡁᡂᡚᡛᡰᢌᢞᢍᢎᢟᢏᢐᢘᢠᢑᢡᢒᢓᢨᢔᢣᢕᢙᢖᢗᢦᢧᢩաբգդեզէըթժիլխծկհձղճմյնշոչպջռսվտրցւփքօֆՙ፩፪፫፬፭፮፯፰፱ሀሁሂሃሄህሆለሉሊላሌልሎሏሐሑሒሓሔሕሖሗመሙሚማሜምሞሟሠሡሢሣሤሥሦሧረሩሪራሬርሮሯሰሱሲሳሴስሶሷሸሹሺሻሼሽሾሿቀቁቂቃቄቅቆቈቊቋቌቍቐቑቒቓቔቕቖቘቚቛቜቝበቡቢባቤብቦቧቨቩቪቫቬቭቮቯተቱቲታቴትቶቷቸቹቺቻቼችቾቿኀኁኂኃኄኅኆኈኊኋኌኍነኑኒናኔንኖኗኘኙኚኛኜኝኞኟአኡኢኣኤእኦኧከኩኪካኬክኮኰኲኳኴኵኸኹኺኻኼኽኾዀዂዃዄዅወዉዊዋዌውዎዐዑዒዓዔዕዖዘዙዚዛዜዝዞዟዠዡዢዣዤዥዦዧየዩዪያዬይዮደዱዲዳዴድዶዷዸዹዺዻዼዽዾዿጀጁጂጃጄጅጆጇገጉጊጋጌግጎጐጒጓጔጕጘጙጚጛጜጝጞጠጡጢጣጤጥጦጧጨጩጪጫጬጭጮጯጰጱጲጳጴጵጶጷጸጹጺጻጼጽጾጿፀፁፂፃፄፅፆፈፉፊፋፌፍፎፏፐፑፒፓፔፕፖፗፘፙፚᎠᎡᎢᎣᎤᎥᎦᎧᎨᎩᎪᎫᎬᎭᎮᎯᎰᎱᎲᎳᎴᎵᎶᎷᎸᎹᎺᎻᎼᎽᎾᎿᏀᏁᏂᏃᏄᏅᏆᏇᏈᏉᏊᏋᏌᏍᏎᏏᏐᏑᏒᏓᏔᏕᏖᏗᏘᏙᏚᏛᏜᏝᏞᏟᏠᏡᏢᏣᏤᏥᏦᏧᏨᏩᏪᏫᏬᏭᏮᏯᏰᏱᏲᏳᏴ𐌀𐌁𐌂𐌃𐌄𐌅𐌆𐌇𐌈𐌉𐌊𐌋𐌌𐌍𐌎𐌏𐌐𐌑𐌒𐌓𐌔𐌕𐌖𐌗𐌘𐌙𐌚𐌛𐌜𐌝𐌞𐌰𐌱𐌲𐌳𐌴𐌵𐌶𐌷𐌸𐌹𐌺𐌻𐌼𐌽𐌾𐌿𐍀𐍁𐍂𐍃𐍄𐍅𐍆𐍇𐍈𐍉𐍊";
+function idn(x) {
+  if (x < base.length) return base[x];
+  x -= base.length;
+  if (x <= 0x2BA3) return String.fromCodePoint(0xAC00 + x); // Hangul Syllable
+  x -= 0x2BA4;
+  if (x <= 0x19B5) return String.fromCodePoint(0x3400 + x); // CJK Extension A
+  x -= 0x19B6;
+  if (x <= 0x5145) return String.fromCodePoint(0x4E00 + x); // CJK Ideograph
+  x -= 0x5146;
+  if (x <= 0x048C) return String.fromCodePoint(0xA000 + x); // Yi Letters
+  x -= 0x048D;
+  if (x <= 0xA6D6) return String.fromCodePoint(0x20000 + x); // CJK Extension B+
+  throw Error('x is over 0xFFFF; WTF?');
+}
+function deidn(x, y) {
+  let c = x.charCodeAt(0);
+  let isSurrogate = (0xD800 <= c && c <= 0xDFFF);
+  if (isSurrogate) c = 0x10000 + ((x.charCodeAt(0) - 0xD800) * 0x400) + (y.charCodeAt(0) - 0xDC00);
+  let ret = base.length;
+  if (0xAC00 <= c && c <= 0xD7A3) return [ret + c - 0xAC00, isSurrogate];
+  ret += 0x2BA4;
+  if (0x3400 <= c && c <= 0x4DB5) return [ret + c - 0x3400, isSurrogate];
+  ret += 0x19B6;
+  if (0x4E00 <= c && c <= 0x9F45) return [ret + c - 0x4E00, isSurrogate];
+  ret += 0x5146;
+  if (0xA000 <= c && c <= 0xA48C) return [ret + c - 0xA000, isSurrogate];
+  ret += 0x048D;
+  if (0x20000 <= c && c <= 0x2A6D6) return [ret + c - 0x20000, isSurrogate];
+  return [base.indexOf(x), isSurrogate];
+}
+
+window.exportSequence = function(rawList, useIDN=false) {
+  let list = [...rawList];
+  let veri = list[0].indexOf('_');
+  let version = list[0].slice(0, veri);
+  list = list.map(x => deserializePuzzlePre(x.slice(veri + 1)));
+  let len = list.map(x => x.length);
+  let ret = (useIDN ? 'vs2i_' : 'vs2_') + version + '_';
+  let res = "";
+  res += String.fromCharCode((len.length & 0xFF00) >> 8) + String.fromCharCode(len.length & 0xFF);
+  for (let k of len) { res += String.fromCharCode((k & 0xFF00) >> 8) + String.fromCharCode(k & 0xFF); }
+  for (let i = 0; i < Math.max(...len); i++)
+    for (let o of list) if (o[i] !== undefined) res += o[i];
+  if (useIDN) {
+    for (let i = 0; i < res.length; i += 2) {
+      ret += idn((isNaN(res.charCodeAt(i)) ? 0 : res.charCodeAt(i) << 8) + (isNaN(res.charCodeAt(i+1)) ? 0 : res.charCodeAt(i+1)));
+    }
+    ret = runLengthV2(ret);
+  }
+  else {
+    ret += runLengthV2(btoa(res).replace(/\+/g, '.').replace(/\//g, '-').replace(/\=/g, '_'));
+  }
+  return ret;
 }
 
 window.importSequence = function(string) {
@@ -853,12 +1058,59 @@ window.importSequence = function(string) {
   let version = string.slice(0, veri);
   string = string.slice(veri + 1);
   if (version == 'vs1') return importSequenceV1(string);
+  else if (version == 'vs2') return importSequenceV2(string);
+  else if (version == 'vs2i') return importSequenceV2I(string);
   else throw Error('unknown puzzle format');
 }
 
 function importSequenceV1(string) {
-  let res = string.split('~~').map(e => window.deserializePuzzle(e));
+  let res = string.split('~~');
   return res;
+}
+
+function importSequenceV2I(string) {
+  let veri = string.indexOf('_');
+  let version = string.slice(0, veri);
+  let str = derunLengthV2(string.slice(veri + 1));
+  string = "";
+  for (let i = 0; i < str.length; i++) {
+    let temp = deidn(str[i], str[i+1]);
+    if (temp[1]) i++;
+    string += String.fromCharCode((temp[0] & 0xFF00) >> 8) + String.fromCharCode(temp[0] & 0xFF);
+  }
+  return importSequenceV2Core(version, string);
+}
+
+function importSequenceV2(string) {
+  let veri = string.indexOf('_');
+  let version = string.slice(0, veri);
+  string = atob(derunLengthV2(string.slice(veri + 1)).replace(/\./g, '+').replace(/\-/g, '/').replace(/\_/g, '='));
+  return importSequenceV2Core(version, string);
+}
+
+function importSequenceV2Core(version, string) {
+  let ret = [];
+  let res = [];
+  let ptr = 0;
+  let puzzleLen = (string.charCodeAt(ptr) << 8) + string.charCodeAt(ptr + 1);
+  ptr += 2;
+  let lens = [];
+  for (let i = 0; i < puzzleLen; i++) {
+    ret.push(version + '_')
+    res.push('');
+    lens.push((string.charCodeAt(ptr) << 8) + string.charCodeAt(ptr + 1));
+    ptr += 2;
+  }
+  for (let i = 0; i < Math.max(...lens); i++) {
+    for (let j = 0; j < puzzleLen; j++) {
+      if (i < lens[j]) {
+        res[j] += string[ptr];
+        ptr++;
+      }
+    }
+  }
+  for (let i = 0; i < puzzleLen; i++) ret[i] += runLength(btoa(res[i]).replace(/\+/g, '.').replace(/\//g, '-').replace(/\=/g, '_'));
+  return ret;
 }
 
 })

@@ -58,7 +58,7 @@ window.onload = function() {
   let toLoad = (new URL(window.location.href).hash);
   code = toLoad.hashCode();
   if (toLoad) {
-    puzzles = importSequence(toLoad.slice(1));
+    puzzles = importSequence(decodeURIComponent(toLoad.slice(1))).map(e => window.deserializePuzzle(e));
     localStorage[`puzzleProgress_${code}`] ??= 0;
     currentPanel = Math.min(localStorage[`puzzleProgress_${code}`], puzzles.length - 1);
     reloadPanel();

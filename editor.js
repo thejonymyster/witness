@@ -324,7 +324,7 @@ window.onload = function() {
     reloadPuzzle();
     writePuzzle();
     document.getElementById('deleteButton').disabled = true
-  } else if (localStorage.puzzle !== null) {
+  } else if (localStorage.puzzle !== undefined) {
     window.puzzle = deserializePuzzle(localStorage.puzzle);
     applyThemeButton();
     applyImageButton();
@@ -391,7 +391,7 @@ let symbolData = {
   'dart': {'type':'dart', 'count': 1, 'rot': 0, 'title':'Dart'},
   'polynt': {'type':'polynt', 'title':'unsuspiciousperson\'s Antipolyomino'}, 
   'divdiamond': {'type':'divdiamond', 'count':1, 'title':'ItzShaun\'s Divided Diamond'}, 
-  'vtriangle': {'type':'vtriangle', 'title':'sus\' Tenuous Triangle'},
+  'vtriangle': {'type':'vtriangle', 'title':'sus\' Tents'},
   'x-lu': {'type':'x', 'spokes': 16, 'title':'ItzShaun\' Xs'},
   'x-ru': {'type':'x', 'spokes': 16, 'title':'ItzShaun\' Xs'},
   'x-ld': {'type':'x', 'spokes': 16, 'title':'ItzShaun\' Xs'},
