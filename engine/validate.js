@@ -1098,7 +1098,7 @@ const validate = [
                 let r = [ret(x-1, y), ret(x+1, y), ret(x, y-1), ret(x, y+1)];
                 for (let i = 0; i < 4; i++) {
                     let path = global.pathAll.find(x => x[0] == r[i]);
-                    if (!path) continue;
+                    if (!path?.[1]) continue;
                     if (path[1] != dir[i]) {
                         console.info('[!] Swirl fault at', xy(r[i]), 'goes', endEnum[path[1]], 'supposed to go', endEnum[dir[i]]);
                         global.regionData[regionNum].addInvalid(puzzle, c);
