@@ -58,6 +58,7 @@ window.draw = function(puzzle, target='puzzle') {
     var audio = new Audio(puzzle.image['background-music'].replace(/\\/g, ''));  
     audio.autoplay = true;
     audio.loop = true;
+    audio.volume = localStorage.volume;
     audio.addEventListener('play', () => { audioPlaying = true; });
   }
 
