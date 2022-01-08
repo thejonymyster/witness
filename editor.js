@@ -596,24 +596,13 @@ function drawSymbolButtons() {
 }
 
 window.seeMore = function() {
-  document.getElementById('colLess').style.visibility = 'collapse';
-  document.getElementById('colMore').style.visibility = 'visible';
-  document.getElementById('x-fakebutton').style.display = 'table-cell';
-  document.getElementById('nega').style.display = 'none';
-  document.getElementById('copier').parentNode.style.display = 'table-cell';
-  document.getElementById('more').style.display = 'none';
-  document.getElementById('less').style.display = 'unset';
+  document.querySelector(':root').style.setProperty('--more', 'table-cell');
+  document.querySelector(':root').style.setProperty('--less', 'none');
 }
 
 window.seeLess = function() {
-  document.getElementById('colLess').style.visibility = 'visible';
-  document.getElementById('colMore').style.visibility = 'collapse';
-  document.getElementById('x-fakebutton').style.display = 'none';
-  document.getElementById('copier').parentNode.style.display = 'none';
-  document.getElementById('nega').style.display = 'table-cell';
-  document.getElementById('more').style.display = 'unset';
-  document.getElementById('less').style.display = 'none';
-  
+  document.querySelector(':root').style.setProperty('--more', 'none');
+  document.querySelector(':root').style.setProperty('--less', 'table-cell');
 }
 
 function drawColorButtons() {

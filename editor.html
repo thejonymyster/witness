@@ -91,17 +91,13 @@
           </div>
           <div class="hlist editor-screen">
             <div class="symbolButtons-wrapper">
-              <table id="symbolButtons" style="padding: 5px; display:none" cellpadding="4" cellspacing="0">
-                <colgroup>
-                  <col span="4" id="colLess" style="visibility: visible;">
-                  <col span="4" id="colMore" style="visibility: collapse;">
-                </colgroup>
+              <table id="symbolButtons" style="padding: 5px;" cellpadding="4" cellspacing="0">
                 <tr>
                   <td><button id="start"></button></td>
                   <td><button id="end"></button></td>
                   <td><button id="gap"></button></td>
                   <td><button id="line"></button></td>
-                  <td id="x-fakebutton" style="display: none;">
+                  <td id="x-fakebutton">
                     <div id="x-fakewrapper">
                       <div id="x-fakesvg"></div>
                       <table>
@@ -151,11 +147,11 @@
                   <td><button id="none"></button></td>
                 </tr>
                 <tr>
-                  <td style="display: table-cell;"><button id="nega" disabled></button></td>
+                  <td><button id="nega" disabled></button></td>
                   <td><button id="bridge"></button></td>
                   <td><button id="portal"></button></td>
                   <td><button id="divdiamond"></button></td>
-                  <td style="display: none;"><button id="copier" disabled></button></td>
+                  <td><button id="copier" disabled></button></td>
                   <td><button id="celledhex"></button></td>
                   <td><button id="whiteAndBlackHole"></button></td>
                   <td><button id="none"></button></td>
@@ -171,8 +167,8 @@
                   <td><button id="twobytwo"></button></td>
                 </tr>
                 <tr>
-                  <td colspan="4"><div class="hlist"><button class="center" id="more" onclick="seeMore()" style="flex: 1 0 auto; display: unset;">See More</button></div></td>
-                  <td colspan="4"><div class="hlist"><button class="center" id="less" onclick="seeLess()" style="flex: 1 0 auto; display: none;">Back</button></div></td>
+                  <td id="more-wrapper" colspan="4"><div class="hlist"><button class="center" id="more" onclick="seeMore()" style="flex: 1 0 auto;">See More</button></div></td>
+                  <td id="less-wrapper" colspan="4"><div class="hlist"><button class="center" id="less" onclick="seeLess()" style="flex: 1 0 auto;">Back</button></div></td>
                 </tr>
               </table>
             </div>
