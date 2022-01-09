@@ -329,7 +329,7 @@ window.Puzzle = class {
     // Ending at a mid-segment endpoint
     if (this.endPoint != null && this.endPoint.x%2 !== this.endPoint.y%2) {
       // This segment is part of this region (acts as an empty cell)
-      this.grid[this.endPoint.x][this.endPoint.y] = MASKED_INB_NONCOUNT
+      this.grid[this._mod(this.endPoint.x)][this.endPoint.y] = MASKED_INB_NONCOUNT
     }
 
     // Mark all outside cells as 'not in any region' (aka null)
@@ -354,7 +354,6 @@ window.Puzzle = class {
   getRegions() {
     var regions = []
     var savedGrid = this.switchToMaskedGrid()
-
     for (var x=0; x<this.width; x++) {
       for (var y=0; y<this.height; y++) {
         if (this.grid[x][y] == MASKED_PROCESSED) continue;

@@ -19,8 +19,12 @@ var SYNC_THRESHOLD = 9 // Depth at which we switch to a synchronous solver (for 
 var percentages = []
 var NODE_DEPTH = 9
 var nodes = 0
+
+var count = 0
+
 function countNodes(x, y, depth) {
   // Check for collisions (outside, gap, self, other)
+  count++;
   var cell = puzzle.getCell(x, y)
   if (cell == null) return
   if (window.CUSTOM_LINE > cell.gap && cell.gap > window.GAP_NONE) return
@@ -59,6 +63,7 @@ function countNodes(x, y, depth) {
 // Generates a solution via DFS recursive backtracking
 window.solve = function(p, partialCallback, finalCallback) {
   var start = (new Date()).getTime()
+  count = 0;
 
   puzzle = p
   var startPoints = []
@@ -130,7 +135,7 @@ window.solve = function(p, partialCallback, finalCallback) {
 
   taskLoop(partialCallback, function() {
     var end = (new Date()).getTime()
-    console.log('Solved', puzzle, 'in', (end-start)/1000, 'seconds')
+    console.error('Solved', puzzle, 'in', (end-start)/1000, 'seconds, ', count, 'loops done')
     if (finalCallback) finalCallback(solutionPaths)
   })
   return solutionPaths
@@ -194,7 +199,13 @@ function solveLoop(x, y, numEndpoints, earlyExitData, depth) {
 
   // Check for collisions (outside, gap, self, other)
   var cell = puzzle.getCell(x, y)
-  // console.warn(path, cell?.line, cell?.gap);
+  // const _dir = [[0, 0], [-1, 0], [1, 0], [0, -1], [0, 1]];
+  // let pathPrint = [];
+  // const rdiv = (n, a) => ((n % a) + a) % a;
+  // const transpose = m => m[0].map((x,i) => m.map(x => x[i]))
+  // for (let i = 0; i < path.length; i++) pathPrint.push(typeof(path[i]) == 'object' ? [path[i].x, path[i].y] : [rdiv(pathPrint[i-1][0] + _dir[path[i]][0], puzzle.width), pathPrint[i-1][1] + _dir[path[i]][1]])
+  // if (path.length > 50)
+  //   console.warn(x, y, JSON.parse(JSON.stringify(transpose(puzzle.grid.map(x => x.map(y => y?.line ?? 9))))), pathPrint, cell, cell?.line, cell?.gap);
   if (cell == null) return
   if (window.CUSTOM_LINE > cell.gap && cell.gap > window.GAP_NONE) return
   if (cell.line !== window.LINE_NONE) return
