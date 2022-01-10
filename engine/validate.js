@@ -1003,43 +1003,47 @@ const validate = [
         '_name': 'ANTITRIANGLE CHECK',
         'or': ['atriangle'],
         'exec': function(puzzle, regionNum, global, quick) {
-            function checkCorner(x, y) {
-                let count = 0;
-                let end = endEnum.indexOf(puzzle.getCell(x, y)?.end); // top - right - left - bottom
-                if (puzzle.endPoint.x !== x || puzzle.endPoint.y !== y) end = -1;
-                if (matrix(puzzle, global, x, y-1) + matrix(puzzle, global, x-1, y) === 0) count++;
-                if (matrix(puzzle, global, x+1, y) + matrix(puzzle, global, x, y+1) === 0) count++;
-                if (matrix(puzzle, global, x, y-1) + matrix(puzzle, global, x+1, y) === 0) count++;
-                if (matrix(puzzle, global, x-1, y) + matrix(puzzle, global, x, y+1) === 0) count++;
-                return count;
-            };
-            function checkEdge(x, y, n) {
-                let count = 0;
-                let end = endEnum.indexOf(puzzle.getCell(x, y)?.end); // top - right - left - bottom
-                if (puzzle.endPoint.x !== x || puzzle.endPoint.y !== y) end = -1;
-                if (!matrix(puzzle, global, x, y) && (end == n)) count++;
-                end = endEnum.indexOf(puzzle.getCell((n%2 == 1 ? x+1 : x), (n%2 == 1 ? y : y+1))?.end); // top - right - left - bottom
-                if (puzzle.endPoint.x !== (n%2 == 1 ? x+1 : x) || puzzle.endPoint.y !== (n%2 == 1 ? y : y+1)) end = -1;
-                if (!matrix(puzzle, global, x, y) && (end == n)) count++;
-                end = endEnum.indexOf(puzzle.getCell((n%2 == 1 ? x-1 : x), (n%2 == 1 ? y : y-1))?.end); // top - right - left - bottom
-                if (puzzle.endPoint.x !== (n%2 == 1 ? x-1 : x) || puzzle.endPoint.y !== (n%2 == 1 ? y : y-1)) end = -1;
-                if (!matrix(puzzle, global, x, y) && (end == n)) count++;
-                return count;
-            }
+            const check = [
+                          [-1, -2],          [1, -2],          //  0 1
+                [-2, -1], [-1, -1], [0, -1], [1, -1], [2, -1], // 23456
+                          [-1,  0],          [1,  0],          //  7 8
+                [-2,  1], [-1,  1], [0,  1], [1,  1], [2,  1], // 9ABCD
+                          [-1,  2],          [1,  2]           //  E F
+            ];
+            const endOffset = [[0, -1], [1, 0], [-1, 0], [0, 1]];
+            const corners = [
+                0x032, 0x034, 0x237, 0x437,
+                0x154, 0x156, 0x458, 0x658,
+                0x9A7, 0xBA7, 0xEA9, 0xEAB,
+                0x8CB, 0x8CD, 0xFCB, 0xFCD
+            ];
             for (let c of global.regionCells.cell[regionNum]) {
                 let [x, y] = xy(c);
                 let cell = puzzle.getCell(x, y);
                 if (!this.or.includes(cell.type)) continue;
                 let count = 0 // undefined + undefined = NaN !== 0
-                // 1,0 -1,0 0,1 0,-1 -1,2, 1,2 2,-1 2,1 -1,-2 1,-2 -2,-1 -2,1
-                count += checkCorner(x+1, y+1);
-                count += checkCorner(x+1, y-1);
-                count += checkCorner(x-1, y+1);
-                count += checkCorner(x-1, y-1);
-                count += checkEdge(x-1, y, 2);
-                count += checkEdge(x+1, y, 1);
-                count += checkEdge(x, y-1, 0);
-                count += checkEdge(x, y+1, 3);
+                let coll = check.map(o => matrix(puzzle, global, x + o[0], y + o[1]) == 0);
+                // endpoint detection
+                let hasEnd = check.findIndex(o => o[0] === (puzzle.endPoint.x - x) && o[1] ===  (puzzle.endPoint.y - y));
+                if (hasEnd !== -1) {
+                    let offset = endOffset[endEnum.indexOf(puzzle.getCell(puzzle.endPoint.x, puzzle.endPoint.y).end)];
+                    let index = check.findIndex(o => o[0] === (check[hasEnd][0] + offset[0]) && o[1] === (check[hasEnd][1] + offset[1]));
+                    if (index !== -1) coll[index] = true;
+                    else if ([4, 7, 8, 11].includes(hasEnd)) count = 1;
+                }
+                for (let r of [...corners]) {
+                    found = true;
+                    for (let _ = 0; _ < 3; _++) {
+                        let k = r & 0xF;
+                        if (!coll[k]) {
+                            found = false;
+                            break;
+                        }
+                        r >>= 4;
+                    }
+                    if (found) count++
+                    if (quick && count > cell.count) break;
+                }
                 if (count != cell.count) {
                     console.info('[!] Anti-Triangle fault at', x, y, 'needs', cell.count, 'turns - actually has', count);
                     global.regionData[regionNum].addInvalid(puzzle, c);
