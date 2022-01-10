@@ -555,18 +555,21 @@ function drawSymbolButtons() {
         button.onpointerdown = function(event) { buttonBehaviour(event, this, (el) => {
           if (symbolData[activeParams.id].type == 'square') symbolData[activeParams.id] = symbolData['pentagon'];
           else symbolData[activeParams.id] = symbolData['square'];
+          el.params.type = symbolData[activeParams.id].type;
         }); }
         break;
       case 'whiteAndBlackHole':
         button.onpointerdown = function(event) { buttonBehaviour(event, this, (el) => {
           if (symbolData[activeParams.id].type == 'blackhole') symbolData[activeParams.id] = symbolData['whitehole'];
           else symbolData[activeParams.id] = symbolData['blackhole'];
+          el.params.type = symbolData[activeParams.id].type;
         }); }
         break;
       case 'CrossCurve':
         button.onpointerdown = function(event) { buttonBehaviour(event, this, (el) => {
           if (symbolData[activeParams.id].type == 'cross') symbolData[activeParams.id] = symbolData['curve'];
           else symbolData[activeParams.id] = symbolData['cross'];
+          el.params.type = symbolData[activeParams.id].type;
         }); }
         break;
       default:
