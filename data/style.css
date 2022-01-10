@@ -484,11 +484,11 @@ li button {
   --more: none;
 }
 
-#symbolButtons tr > td:nth-child(1), #symbolButtons tr > td:nth-child(2), #symbolButtons tr > td:nth-child(3), #symbolButtons tr > td:nth-child(4), #symbolButtons #more-wrapper {
+#symbolButtons > tbody > tr > td:nth-child(1), #symbolButtons > tbody > tr > td:nth-child(2), #symbolButtons > tbody > tr > td:nth-child(3), #symbolButtons > tbody > tr > td:nth-child(4), #symbolButtons #more-wrapper {
   display: var(--less);
 }
 
-#symbolButtons tr > td:nth-child(5), #symbolButtons tr > td:nth-child(6), #symbolButtons tr > td:nth-child(7), #symbolButtons tr > td:nth-child(8), #symbolButtons #less-wrapper {
+#symbolButtons > tbody > tr > td:nth-child(5), #symbolButtons > tbody > tr > td:nth-child(6), #symbolButtons > tbody > tr > td:nth-child(7), #symbolButtons > tbody > tr > td:nth-child(8), #symbolButtons #less-wrapper {
   display: var(--more);
 }
 
