@@ -255,31 +255,17 @@ function init(puzzle) { // initialize globals
     global.path = [];
     units.push(performance.now());
     names.push('deep copying grid');
-    // const __dir = [undefined, 0, 1, 0, 3];
+    const _dir = [[0, 0], [-1, 0], [1, 0], [0, -1], [0, 1]];
+    const pk = [null, 'left', 'right', 'top', 'bottom'];
     for (let o of puzzle.path) {
         let k, x, y;
         if (typeof(o) == 'object') global.path.push([ret(o.x, o.y)]);
         else {
             k = global.path.length - 1;
             [x, y] = xy(global.path[k]);
-            switch (o) {
-                case 1:
-                    global.path[k].push(0);
-                    global.path.push([ret(rdiv(x - 1, puzzle.width), y)]);
-                    break;
-                case 2:
-                    global.path[k].push(1);
-                    global.path.push([ret(rdiv(x + 1, puzzle.width), y)]);
-                    break;
-                case 3:
-                    global.path[k].push(0);
-                    global.path.push([ret(rdiv(x, puzzle.width), y - 1)]);
-                    break;
-                case 4:
-                    global.path[k].push(3);
-                    global.path.push([ret(rdiv(x, puzzle.width), y + 1)]);
-                    break;
-            }
+            if (!o) break;
+            global.path[k].push(endEnum.indexOf(pk[o]));
+            global.path.push([ret(rdiv(x + _dir[o][0], puzzle.width), y + _dir[o][1])]);
         }
     }
     global.pathSym = [];
@@ -342,46 +328,31 @@ function init(puzzle) { // initialize globals
     names.push('init symboltypes handling');
     const _EYEDIR = [[1234, 5678], [0, -1], [1, 0], [0, 1], [-1, 0]];
     const find = (x, c) => x[0] === c;
+    // const verts = (x, y, invert=false) => {
+    //     let res = ((x % 2) == invert) ? [[x, y], [x, y+1], [x, y-1]] : [[x, y], [x+1, y], [x-1, y]];
+    //     let ret = [];
+    //     if (puzzle.pillar) for (z of res) z[0] = rdiv(z[0], puzzle.width);
+    //     for (o of res) if (isBounded(puzzle, ...o)) ret.push(o);
+    //     return ret;
+    // }
     for (let o of eyes) {
         let found = false;
-        let loopover = puzzle.pillar && !(o[2] % 2);
         for (
-            let c = loopover ? retPillar(puzzle, o[0] + _EYEDIR[o[2]][0], o[1] + _EYEDIR[o[2]][1]) : ret(o[0], o[1]); 
-            loopover ? c != o[0] : isBounded(puzzle, ...xy(c)); 
-            c = retPillar(puzzle, xy(c)[0] + _EYEDIR[o[2]][0], xy(c)[1] + _EYEDIR[o[2]][1])
+            let [x, y] = [o[0] + _EYEDIR[o[2]][0], o[1] + _EYEDIR[o[2]][1]]; 
+            isBounded(puzzle, x, y) && (x != o[0] || y != o[1]); 
+            [x, y] = [puzzle.pillar ? (rdiv(x + _EYEDIR[o[2]][0], puzzle.width)) : (x + _EYEDIR[o[2]][0]), y + _EYEDIR[o[2]][1]]
         ) {
-            let k = global.path.findIndex(x => find(x, c));
+            let k = global.pathAll.findIndex(z => find(z, ret(x, y)));
             if (k !== -1) {
                 found = true;
-                let [x, y] = xy(global.path[k][0]);
-                for (let c of (x % 2 ? [ret(x, y), ret(x-1, y), ret(x+1, y)] : [ret(x, y), ret(x, y+1), ret(x, y-1)])) {
-                    let dothis = false;
-                    for (let m of x % 2 ? [c, c + puzzle.width, c - puzzle.width] : [c, c + 1, c - 1]) if (global.pathAll.findIndex(x => find(x, m)) == -1) dothis = true;
-                    if (!dothis) continue;
-                    global.pathAll.splice(global.pathAll.findIndex(x => find(x, c)), 1);
-                    const pi = global.path.findIndex(x => find(x, c));
-                    const psi = global.path.findIndex(x => find(x, c));
-                    if (pi !== -1) global.path.splice(pi, 1);
-                    if (psi !== -1) global.pathSym.splice(psi, 1);
-                    puzzle.getCell(...xy(c)).line = LINE_NONE;
-                }
-                break;
-            }
-            let k2 = global.pathSym.findIndex(x => find(x, c));
-            if (k2 !== -1) {
-                found = true;
-                let [x, y] = xy(global.pathSym[k2][0]);
-                for (let c of (x % 2 ? [ret(x, y), ret(x-1, y), ret(x+1, y)] : [ret(x, y), ret(x, y+1), ret(x, y-1)])) {
-                    let dothis = false;
-                    for (let m of x % 2 ? [c, c + puzzle.width, c - puzzle.width] : [c, c + 1, c - 1]) if (global.pathAll.findIndex(x => find(x, m)) == -1) dothis = true;
-                    if (!dothis) continue;
-                    global.pathAll.splice(global.pathAll.findIndex(x => find(x, c)), 1);
-                    const pi = global.path.findIndex(x => find(x, c));
-                    const psi = global.path.findIndex(x => find(x, c));
-                    if (pi !== -1) global.path.splice(pi, 1);
-                    if (psi !== -1) global.pathSym.splice(psi, 1);
-                    puzzle.getCell(...xy(c)).line = LINE_NONE;
-                }
+                let [x, y] = xy(global.pathAll[k][0]);
+                const c = ret(x, y);
+                global.pathAll.splice(global.pathAll.findIndex(x => find(x, c)), 1);
+                const pi = global.path.findIndex(x => find(x, c));
+                const psi = global.path.findIndex(x => find(x, c));
+                if (pi !== -1) global.path.splice(pi, 1);
+                if (psi !== -1) global.pathSym.splice(psi, 1);
+                puzzle.getCell(x, y).line = LINE_NONE;
                 break;
             }
         }
@@ -894,39 +865,41 @@ const lineValidate = [
         '_name': 'DOTS LINK',
         'or': ['dots'],
         'exec': function(puzzle, global, quick) {
-            let x, y, cell;
+            let x, y, cell, c;
             let q = -1;
             for (let o of global.path) {
                 [x, y] = xy(o[0]);
-                cell = puzzle.getCell(x, y);
-                if (!cell.dot) {
+                cell = cel(puzzle, o[0]);
+                if (!cell?.dot) {
                     if (q > -1) q -= 0.5;
                     continue;
                 } 
                 if (q > -1) {
-                    console.info('[line][!] dots length is smaller than necessary: ', x, y, 'dot: ', Math.floor((puzzle.getCell(x, y).dot - 4) / 7));
-                    global.regionData[0].addInvalid(puzzle, o[0]);
+                    console.info('[line][!] dots length is smaller than necessary: ', xy(c), 'dot: ', Math.floor((cel(puzzle, c).dot - 4) / 7));
+                    global.regionData[0].addInvalid(puzzle, c);
                     if (!puzzle.valid && quick) return;
                 }
                 if (window.CUSTOM_DOTS <= cell.dot && cell.dot < window.SOUND_DOT) {
                     q = Math.floor((cell.dot - 4) / 7) - 0.5;
+                    c = o[0];
                 }
             }
             q = -1;
             for (let o of global.pathSym) {
                 [x, y] = xy(o[0]);
-                cell = puzzle.getCell(x, y);
-                if (!cell.dot) {
+                cell = cel(puzzle, o[0]);
+                if (!cell?.dot) {
                     if (q > -1) q -= 0.5;
                     continue;
                 } 
                 if (q > -1) {
-                    console.info('[line][!] dots length is smaller than necessary: ', x, y, 'dot: ', Math.floor((puzzle.getCell(x, y).dot - 4) / 7));
-                    global.regionData[0].addInvalid(puzzle, o[0]);
+                    console.info('[line][!] dots length is smaller than necessary: ', xy(c), 'dot: ', Math.floor((cel(puzzle, c).dot - 4) / 7));
+                    global.regionData[0].addInvalid(puzzle, c);
                     if (!puzzle.valid && quick) return;
                 }
                 if (window.CUSTOM_DOTS <= cell.dot && cell.dot < window.SOUND_DOT) {
                     q = Math.floor((cell.dot - 4) / 7) - 0.5;
+                    c = o[0];
                 }
             }
         }
@@ -1143,15 +1116,16 @@ const validate = [
                 let [x, y] = xy(c);
                 let cell = puzzle.getCell(x, y);
                 if (!this.or.includes(cell.type)) continue;
-                let dir = cell.flip ? [0, 3, 1, 2] : [3, 0, 2, 1];
-                let r = [ret(x-1, y), ret(x+1, y), ret(x, y-1), ret(x, y+1)];
+                let dir = cell.flip ? ['right', 'bottom', 'top', 'left'] : ['left', 'top', 'bottom', 'right'];
+                let r = [ret(x, y-1), retPillar(x+1, y), ret(x-1, y), ret(x, y+1)];
                 for (let i = 0; i < 4; i++) {
                     let path = global.pathAll.find(x => x[0] == r[i]);
-                    if (!path?.[1]) continue;
-                    if (path[1] != dir[i]) {
-                        console.info('[!] Swirl fault at', xy(r[i]), 'goes', endEnum[path[1]], 'supposed to go', endEnum[dir[i]]);
+                    if (path?.[1] === undefined) continue;
+                    if (path[1] != endEnum.indexOf(dir[i])) {
+                        console.info('[!] Swirl fault at', xy(r[i]), 'goes', endEnum[path[1]], 'supposed to go', dir[i]);
                         global.regionData[regionNum].addInvalid(puzzle, c);
                         if (!puzzle.valid && quick) return;
+                        break;
                     }
                 }
             }
