@@ -1118,16 +1118,22 @@ const validate = [
                 if (!this.or.includes(cell.type)) continue;
                 let dir = cell.flip ? ['right', 'bottom', 'top', 'left'] : ['left', 'top', 'bottom', 'right'];
                 let r = [ret(x, y-1), retPillar(puzzle, x+1, y), ret(x-1, y), ret(x, y+1)];
-                console.info(r.map(x => xy(x)));
+                let count = 0;
                 for (let i = 0; i < 4; i++) {
                     let path = global.pathAll.find(x => x[0] == r[i]);
                     if (path?.[1] === undefined) continue;
+                    count++;
                     if (path[1] != endEnum.indexOf(dir[i])) {
-                        console.info('[!] Swirl fault at', xy(r[i]), 'goes', endEnum[path[1]], 'supposed to go', dir[i]);
+                        console.info('[!] Swirl fault at', x, y, 'goes', endEnum[path[1]], 'supposed to go', dir[i]);
                         global.regionData[regionNum].addInvalid(puzzle, c);
                         if (!puzzle.valid && quick) return;
                         break;
                     }
+                }
+                if (count === 0) {
+                    console.info('[!] Swirl fault at', x, y, 'no sides touching');
+                    global.regionData[regionNum].addInvalid(puzzle, c);
+                    if (!puzzle.valid && quick) return;
                 }
             }
         }
