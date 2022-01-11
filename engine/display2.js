@@ -261,7 +261,8 @@ function drawSymbols(puzzle, svg, target) {
         params.count = (cell.dot - 4);
         switch (params.count % 7) {
           case 1:
-            params.color = 'var(--line-default)';
+            if ((puzzle.theme['line-undone'] << 8) == puzzle.theme['line-default']) params.color = 'white'
+            else params.color = 'var(--line-default)'
             params.type = 'dotsHollow';
             break;
           case 2:
@@ -320,7 +321,8 @@ function drawSymbols(puzzle, svg, target) {
         }
         switch (cell.dot % 6) {
           case -1:
-            params.color = 'var(--line-default)';
+            if ((puzzle.theme['line-undone'] << 8) == puzzle.theme['line-default']) params.color = 'white'
+            else params.color = 'var(--line-default)'
             break;
           case -2:
             params.color = 'black';
