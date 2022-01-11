@@ -9,6 +9,12 @@ let listlength = 1;
 let list = [''];
 window.onload = function() {
     document.getElementById('list').append(emptyList(0));
+    list = importSequence(localStorage.getItem('merge'));
+    while (listlength < list.length) {
+        document.getElementById('list').append(emptyList(listlength));
+        listlength++;
+    }
+    updateElems();
 }
 
 function updateElems() {
@@ -17,6 +23,7 @@ function updateElems() {
     }
     if (list.join('~~').length > 2048) document.getElementById('warning').style.visibility = 'visible';
     else document.getElementById('warning').style.visibility = 'hidden';
+    localStorage.setItem('merge', exportSequence(list));
 }
 
 window.writeData = function(id, value) {
