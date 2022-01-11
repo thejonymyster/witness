@@ -1392,7 +1392,7 @@ const validate = [
             let cells = hasPortal ? global.portalData[global.portalRegion.indexOf(regionNum)].regions.cell : global.regions.cell[regionNum];
             let w = hasPortal ? global.portalData[global.portalRegion.indexOf(regionNum)].width : puzzle.width;
             let cs = [null, [], [], [], [], []];
-            const fn = [(x, y) => [x, y], (x, y) => [y, x], (x, y) => [x, -y], (x, y) => [-y, -x], (x, y) => [-x, y], (x, y) => [-x, -y]];
+            const fn = [(x, y) => [x, y], (x, y) => [-y, -x], (x, y) => [x, -y], (x, y) => [y, x], (x, y) => [-x, y], (x, y) => [-x, -y]];
             if (hasPortal) {
                 for (const o of Object.entries(global.portalData[global.portalRegion.indexOf(regionNum)].regionPosCell)) {
                     let cell = o[1].find(x => this.or.includes(x.type));

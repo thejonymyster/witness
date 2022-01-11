@@ -270,12 +270,14 @@ function drawSymbols(puzzle, svg, target) {
           case 3:
             params.type = 'dotsHollow';
           case 4:
-            params.color = 'var(--line-primary)';
+            if ((puzzle.theme['line-undone'] << 8) == puzzle.theme['line-primary']) params.color = '#88ffff'
+            else params.color = 'var(--line-primary)';
             break;
           case 5:
             params.type = 'dotsHollow';
           case 6:
-            params.color = 'var(--line-secondary)';
+            if ((puzzle.theme['line-undone'] << 8) == puzzle.theme['line-secondary']) params.color = '#ffff22'
+            else params.color = 'var(--line-secondary)';
             break;
           case 0:
             params.color = 'var(--line-undone)';
@@ -290,8 +292,14 @@ function drawSymbols(puzzle, svg, target) {
       } else if (cell.dot > window.DOT_NONE) {
         params.type = 'dot';
         if (cell.dot === window.DOT_BLACK) params.color = 'black'
-        else if (cell.dot === window.DOT_BLUE) params.color = 'var(--line-primary)'
-        else if (cell.dot === window.DOT_YELLOW) params.color = 'var(--line-secondary)'
+        else if (cell.dot === window.DOT_BLUE) {
+          if ((puzzle.theme['line-undone'] << 8) == puzzle.theme['line-primary']) params.color = '#88ffff'
+          else params.color = 'var(--line-primary)'
+        }
+        else if (cell.dot === window.DOT_YELLOW) {
+          if ((puzzle.theme['line-undone'] << 8) == puzzle.theme['line-secondary']) params.color = '#ffff22'
+          else params.color = 'var(--line-secondary)';
+        }
         else if (cell.dot === window.DOT_INVISIBLE) {
           params.color = 'var(--line-undone)'
           // This makes the invisible dots visible, but only while we're in the editor.
@@ -319,11 +327,13 @@ function drawSymbols(puzzle, svg, target) {
             break;
           case -3:
           case -4:
-            params.color = 'var(--line-primary)';
+            if ((puzzle.theme['line-undone'] << 8) == puzzle.theme['line-primary']) params.color = '#88ffff'
+            else params.color = 'var(--line-primary)'
             break;
           case -5:
           case 0:
-            params.color = 'var(--line-secondary)';
+            if ((puzzle.theme['line-undone'] << 8) == puzzle.theme['line-secondary']) params.color = '#ffff22'
+            else params.color = 'var(--line-secondary)';
             break;
         }
         if (cell.dot <= window.CUSTOM_X) {
