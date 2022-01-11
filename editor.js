@@ -1403,6 +1403,9 @@ function HSVtoRGB(h, s, v) {
   if (arguments.length === 1) {
       s = h.s, v = h.v, h = h.h;
   }
+  h = ((h % 1) + 1) % 1;
+  s = Math.max(Math.min(s, 1), 0);
+  v = Math.max(Math.min(v, 1), 0);
   i = Math.floor(h * 6);
   f = h * 6 - i;
   p = v * (1 - s);
