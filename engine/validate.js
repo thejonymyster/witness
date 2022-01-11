@@ -1014,7 +1014,7 @@ const validate = [
             const corners = [
                 0x032, 0x034, 0x237, 0x437,
                 0x154, 0x156, 0x458, 0x658,
-                0x9A7, 0xBA7, 0xEA9, 0xEAB,
+                0x7A9, 0x7AB, 0xEA9, 0xEAB,
                 0x8CB, 0x8CD, 0xFCB, 0xFCD
             ];
             for (let c of global.regionCells.cell[regionNum]) {
@@ -1029,7 +1029,7 @@ const validate = [
                     let offset = endOffset[endEnum.indexOf(puzzle.getCell(puzzle.endPoint.x, puzzle.endPoint.y).end)];
                     let index = check.findIndex(o => o[0] === (check[hasEnd][0] + offset[0]) && o[1] === (check[hasEnd][1] + offset[1]));
                     if (index !== -1) coll[index] = true;
-                    else if ([4, 7, 8, 11].includes(hasEnd)) count = 1;
+                    else if ([4, 7, 8, 11].includes(hasEnd) && (puzzle.endPoint.x !== puzzle.startPoint.x || puzzle.endPoint.y !== puzzle.startPoint.y)) count = 1;
                 }
                 for (let r of [...corners]) {
                     found = true;
@@ -1042,7 +1042,10 @@ const validate = [
                         r >>= 4;
                     }
                     if (found) count++
-                    if (quick && count > cell.count) break;
+                }
+                let hasStart = check.findIndex(o => o[0] === (puzzle.startPoint.x - x) && o[1] ===  (puzzle.startPoint.y - y));
+                if (hasStart !== -1) {
+                    
                 }
                 if (count != cell.count) {
                     console.info('[!] Anti-Triangle fault at', x, y, 'needs', cell.count, 'turns - actually has', count);
@@ -1434,14 +1437,15 @@ const validate = [
                     //* make adjacency graph
                     let adj = {};
                     function isCellBridgePathFriendly(x, y, color) { 
+                        if (puzzle.pillar) x = rdiv(x, puzzle.width);
+                        if ((x % 2 === 0) && (y % 2 === 0)) return false;
                         if (matrix(puzzle, global, x, y) !== regionNum) return false;
                         let cell = puzzle.getCell(x, y);
-                        return cell?.color == undefined || cell.color === color; 
+                        return cell?.color == undefined || cell.color == color; 
                     }
                     for (c of global.regions.all[regionNum]) {
                         adj[c] = [];
                         let [x, y] = xy(c);
-                        if (x % 2 === 0 && y % 2 === 0) continue;
                         if (!isCellBridgePathFriendly(x, y, color)) continue;
                         if (isCellBridgePathFriendly(x-1, y, color)) adj[c].push(ret(x-1, y));
                         if (isCellBridgePathFriendly(x+1, y, color)) adj[c].push(ret(x+1, y));
