@@ -1423,9 +1423,6 @@ const validate = [
         '_name': 'BRIDGE CHECK',
         'or': ['bridge'],
         'exec': function(puzzle, regionNum, global, quick) {
-            const isPortaled = (global.portalRegion != undefined) && (global.portalRegion.indexOf(regionNum) + 1);
-            let portals = [];
-            if (isPortaled) for (const c of global.regionCells.cell[regionNum]) if (cel(puzzle, c)?.type == 'portal') portals.push(c);
             for (const color of global.bridgeRegions[regionNum]) {
                 if (global.invalidBridges[color]) { // invalid
                     for (c of global.bridges[color]) {
@@ -1453,9 +1450,9 @@ const validate = [
                         if (isCellBridgePathFriendly(x, y+1, color)) adj[c].push(ret(x, y+1));
                     }
                     for (const color of Object.values(global.portalColorPos)) for (let i = 0; i < color.length; i++) for (let j = i+1; j < color.length; j++) {
-                        adj[color[i]].push(color[j]); adj[color[j]].push(color[i]);
+                        if (adj[color[i]] && adj[color[j]]) { adj[color[i]].push(color[j]); adj[color[j]].push(color[i]); }
                     }
-                    // for (i in adj) adj[i].sort((a, b) => a - b);
+                    // for (a of Object.entries(adj).sort((a, b) => a[0] - b[0])) for (b of a[1].sort((a, b) => a - b)) console.info(xy(a[0]), '=>', xy(b));
                     //* make tree
                     let seen = new Set();
                     let tree = new Set([global.bridges[color][0]]);
@@ -1469,10 +1466,6 @@ const validate = [
                         }
                     }
                     treeloop(global.bridges[color][0]);
-                    for (const el of tree) {
-                        let [x, y] = xy(el);
-                        if (x % 2 && y % 2 && tree.has(el+2) && tree.has(el+(puzzle.width*2)) && tree.has(el+(puzzle.width*2)+2) && matrix(puzzle, global, x+1, y+1) == 0) res = true;
-                    }
                     seen = new Set(tree);
                     //* check if tree is unique
                     function uniqueloop(from) {
