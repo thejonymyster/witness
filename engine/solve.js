@@ -345,6 +345,8 @@ window.drawPath = function(puzzle, path, target='puzzle') {
   // @Duplicated with trace2.clearGrid
   var puzzleElem = document.getElementById(target)
   window.deleteElementsByClassName(puzzleElem, 'cursor')
+  window.deleteElementsByClassName(puzzleElem, 'cursor-image')
+  for (let o of Array.from(document.getElementsByClassName('veil-image'))) o.style.opacity = 1;
   window.deleteElementsByClassName(puzzleElem, 'line-1')
   window.deleteElementsByClassName(puzzleElem, 'line-2')
   window.deleteElementsByClassName(puzzleElem, 'line-3')

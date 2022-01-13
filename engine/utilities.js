@@ -505,7 +505,7 @@ window.applyTheme = function(puzzle) {
 
 window.copyImage = function(puzzle) {
   puzzle.image = {};
-  for (entry of ['background-image', 'foreground-image', 'background-music']) {
+  for (entry of ['background-image', 'foreground-image', 'background-music', 'cursor-image', 'veil-image']) {
     let res = getComputedStyle(document.documentElement).getPropertyValue('--' + entry);
     if (res == 'none') puzzle.image[entry] = null;
     else puzzle.image[entry] = res.slice(4, -1);
@@ -522,7 +522,12 @@ window.applyImage = function(puzzle) {
 window.serializeTheme = function(puzzle) {
   let ints = [];
   for (const entry of themeArgs) ints.push(puzzle.theme[entry]);
-  return 'vt1_' + runLength(btoa(intToByte(...ints).join('') + (puzzle.image['background-image'] ?? '') + '\u0000' + (puzzle.image['foreground-image'] ?? '') + '\u0000' + (puzzle.image['background-music'] ?? '')).replace(/\+/g, '.').replace(/\//g, '-').replace(/=/g, '_'));
+  return 'vt1_' + runLength(btoa(intToByte(...ints).join('')
+    + (puzzle.image['background-image'] ?? '') + '\u0000'
+    + (puzzle.image['foreground-image'] ?? '') + '\u0000'
+    + (puzzle.image['background-music'] ?? '') + '\u0000'
+    + (puzzle.image['cursor-image'] ?? '') + '\u0000'
+    + (puzzle.image['veil-image'] ?? '')).replace(/\+/g, '.').replace(/\//g, '-').replace(/=/g, '_'));
 }
 
 window.deserializeTheme = function(puzzle, string) {
@@ -547,55 +552,60 @@ function deserializeThemeV1(puzzle, string) {
     puzzle.image['background-image'] = (entry[0]?.length ? entry[0] : null);
     puzzle.image['foreground-image'] = (entry[1]?.length ? entry[1] : null);
     puzzle.image['background-music'] = (entry[2]?.length ? entry[2] : null);
+    puzzle.image['cursor-image'] = (entry[3]?.length ? entry[3] : null);
+    puzzle.image['veil-image'] = (entry[4]?.length ? entry[4] : null);
   }
   window.puzzle = puzzle;
   applyTheme(puzzle);
   applyImage(puzzle);
 }
 
+const SCHEMA = new Map([
+  ['theme.background', 'int'],
+  ['theme.inner', 'int'],
+  ['theme.outer', 'int'],
+  ['theme.line-default', 'int'],
+  ['theme.line-primary', 'int'],
+  ['theme.line-secondary', 'int'],
+  ['theme.line-success', 'int'],
+  ['theme.line-undone', 'int'],
+  ['theme.text', 'int'],
+  ['sols', 'byte'],
+  ['symmetry', 'byte'], //* symmetry, symmetry?.x, symmetry?.y, pillar, perfect
+  ['height', 'byte'],
+  ['width', 'byte'],
+  ['defaultCorner', 'corner'], //* only if majority of corner is same dot/gap/start, else null
+  ['defaultCell', 'cell'],
+  ['corners', 'sparse[]<corner>'],
+  ['soundDots', '[]<byte>'],
+  ['cells', 'sparse[]<cell>'],
+  ['image.background-image', 'string'],
+  ['image.foreground-image', 'string'],
+  ['image.background-music', 'string'],
+  ['image.cursor-image', 'string'],
+  ['image.veil-image', 'string'],
+]);
+
+/**
+ *! Cell data structure
+ ** type: type,
+ ** color: byte,
+  // optional - count
+ ** ['triangle', 'arrow', 'dart', 'atriangle', 'divdiamond', 'dice', 'crystal', 'eye']: count: byte
+ ** ['arrow', 'dart']:: count += (4 * dir)
+  // optional - flip
+ ** ['scaler', 'swirl']: flip: byte
+  // optional - poly
+ ** ['poly', 'ylop', 'polynt', 'xvmino']: polyshape: int (canRotate built into cell type)!!
+ */
+
+/**
+ *! Corner data structure
+ ** dot: byte (dot, gap info)
+ ** start: byte (startx3, endx3 (direction + null));
+ */
+
 window.serializePuzzle = function(puzzle) {
-  const SCHEMA = new Map([
-    ['theme.background', 'int'],
-    ['theme.inner', 'int'],
-    ['theme.outer', 'int'],
-    ['theme.line-default', 'int'],
-    ['theme.line-primary', 'int'],
-    ['theme.line-secondary', 'int'],
-    ['theme.line-success', 'int'],
-    ['theme.line-undone', 'int'],
-    ['theme.text', 'int'],
-    ['sols', 'byte'],
-    ['symmetry', 'byte'], //* symmetry, symmetry?.x, symmetry?.y, pillar, perfect
-    ['height', 'byte'],
-    ['width', 'byte'],
-    ['defaultCorner', 'corner'], //* only if majority of corner is same dot/gap/start, else null
-    ['defaultCell', 'cell'],
-    ['corners', 'sparse[]<corner>'],
-    ['soundDots', '[]<byte>'],
-    ['cells', 'sparse[]<cell>'],
-    ['image.background-image', 'string'],
-    ['image.foreground-image', 'string'],
-  ]);
-
-  /**
-   *! Cell data structure
-   ** type: type,
-   ** color: byte,
-    // optional - count
-   ** ['triangle', 'arrow', 'dart', 'atriangle', 'divdiamond', 'dice', 'crystal', 'eye']: count: byte
-   ** ['arrow', 'dart']:: count += (4 * dir)
-    // optional - flip
-   ** ['scaler', 'swirl']: flip: byte
-    // optional - poly
-   ** ['poly', 'ylop', 'polynt', 'xvmino']: polyshape: int (canRotate built into cell type)!!
-   */
-
-  /**
-   *! Corner data structure
-   ** dot: byte (dot, gap info)
-   ** start: byte (startx3, endx3 (direction + null));
-   */
-
   let raw = "";
   //* header
   raw += String.fromCharCode(Math.min(0xff, puzzle.sols ?? 1));
@@ -659,15 +669,25 @@ window.serializePuzzle = function(puzzle) {
   raw += cell[1];
   raw += cell[2];
   //* image
-  let addedFirst = false;
+  let zeroes = 0;
   if (puzzle.image['foreground-image'])
     raw += puzzle.image['foreground-image'];
   if (puzzle.image['background-image']) {
-    raw += '\0' + puzzle.image['background-image'];
-    addedFirst = true;
+    while (zeroes < 1) { raw += '\0'; zeroes++; }
+    raw += puzzle.image['background-image'];
   }
-  if (puzzle.image['background-music'])
-    raw += (addedFirst ? '' : '\0') + '\0' + puzzle.image['background-music'];
+  if (puzzle.image['background-music']) {
+    while (zeroes < 2) { raw += '\0'; zeroes++; }
+    raw += puzzle.image['background-music'];
+  }
+  if (puzzle.image['cursor-image']) {
+    while (zeroes < 3) { raw += '\0'; zeroes++; }
+    raw += puzzle.image['cursor-image'];
+  }
+  if (puzzle.image['veil-image']) {
+    while (zeroes < 4) { raw += '\0'; zeroes++; }
+    raw += puzzle.image['veil-image'];
+  }
   return 'v5_' + runLength(btoa(raw).replace(/\+/g, '.').replace(/\//g, '-').replace(/\=/g, '_'));
 }
 
@@ -785,6 +805,8 @@ function deserializePuzzleV5(raw) {
   if (urls[0]?.length) puzzle.image['foreground-image'] = urls[0];
   if (urls[1]?.length) puzzle.image['background-image'] = urls[1];
   if (urls[2]?.length) puzzle.image['background-music'] = urls[2];
+  if (urls[3]?.length) puzzle.image['cursor-image'] = urls[3];
+  if (urls[4]?.length) puzzle.image['veil-image'] = urls[4];
   window.puzzle = puzzle;
   applyTheme(puzzle);
   applyImage(puzzle);
@@ -858,6 +880,8 @@ function deserializePuzzleV4(raw) {
   if (urls[0]?.length) puzzle.image['foreground-image'] = urls[0];
   if (urls[1]?.length) puzzle.image['background-image'] = urls[1];
   if (urls[2]?.length) puzzle.image['background-music'] = urls[2];
+  if (urls[3]?.length) puzzle.image['cursor-image'] = urls[3];
+  if (urls[4]?.length) puzzle.image['veil-image'] = urls[4];
   window.puzzle = puzzle;
   applyTheme(puzzle);
   applyImage(puzzle);

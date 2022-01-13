@@ -42,6 +42,19 @@ window.draw = function(puzzle, target='puzzle') {
   // Draw cell symbols after so they overlap the lines, if necessary
   drawSymbols(puzzle, svg, target)
   
+  if (puzzle.image['veil-image']) {
+    let veil = createElement('image')
+    veil.setAttribute('x', 0);
+    veil.setAttribute('y', 0);
+    veil.setAttribute('width', pixelWidth);
+    veil.setAttribute('height', pixelHeight);
+    veil.setAttribute('href', puzzle.image['veil-image'].replace(/\\/g, ''));
+    veil.setAttribute('pointer-events', 'none');
+    veil.setAttribute('preserveAspectRatio', 'none');
+    veil.setAttribute('class', 'veil-image');
+    svg.appendChild(veil);
+  }
+  
   if (puzzle.image['foreground-image']) {
     let foreground = createElement('image')
     foreground.setAttribute('x', 0);

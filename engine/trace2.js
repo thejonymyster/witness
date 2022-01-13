@@ -200,6 +200,10 @@ class PathSegment {
     var y = clamp(data.y, data.bbox.y1, data.bbox.y2)
     data.cursor.setAttribute('cx', x)
     data.cursor.setAttribute('cy', y)
+    if (data.cursorImage != null) {
+      data.cursorImage.setAttribute('x', x)
+      data.cursorImage.setAttribute('y', y)
+    }
     if (data.puzzle.symmetry != null) {
       data.symcursor.setAttribute('cx', this._reflX(x))
       data.symcursor.setAttribute('cy', this._reflY(y))
@@ -342,6 +346,8 @@ function clearGrid(svg, puzzle) {
   }
 
   window.deleteElementsByClassName(svg, 'cursor')
+  window.deleteElementsByClassName(svg, 'cursor-image')
+  for (let o of Array.from(document.getElementsByClassName('veil-image'))) o.style.opacity = 1;
   window.deleteElementsByClassName(svg, 'line-1')
   window.deleteElementsByClassName(svg, 'line-2')
   window.deleteElementsByClassName(svg, 'line-3')
@@ -406,6 +412,8 @@ window.trace = function(event, puzzle, pos, start, symStart=null) {
         } else {
           window.PLAY_SOUND('fail')
           document.getElementsByClassName('cursor')[0].style.opacity = 0;
+          if (puzzle.image['cursor-image']) document.getElementsByClassName('cursor-image')[0].style.opacity = 0;
+          for (let o of Array.from(document.getElementsByClassName('veil-image'))) o.style.opacity = 1;
           data.animations.insertRule('.' + data.svg.id + ' {animation: 1s 1 forwards line-fail !important}\n')
           // Get list of invalid elements
           if (!puzzle.disableFlash) {
@@ -456,6 +464,23 @@ window.onTraceStart = function(puzzle, pos, svg, start, symStart=null) {
   cursor.setAttribute('cx', x)
   cursor.setAttribute('cy', y)
   svg.insertBefore(cursor, svg.getElementById('cursorPos'))
+
+  if (puzzle.image['cursor-image']) {
+    let cursorImage = createElement('image')
+    cursorImage.setAttribute('x', x);
+    cursorImage.setAttribute('y', y);
+    cursorImage.setAttribute('width', (Number(svg.style.width.slice(0, -2)) * 2) + 'px');
+    cursorImage.setAttribute('height', (Number(svg.style.height.slice(0, -2)) * 2) + 'px');
+    cursorImage.setAttribute('href', puzzle.image['cursor-image'].replace(/\\/g, ''));
+    cursorImage.setAttribute('class', 'cursor-image')
+    cursorImage.setAttribute('pointer-events', 'none');
+    cursorImage.setAttribute('preserveAspectRatio', 'none');
+    cursorImage.style.transform = `translate(-${svg.style.width}, -${svg.style.height})`;
+    svg.insertBefore(cursorImage, svg.getElementById('cursorPos'))
+    data.cursorImage = cursorImage
+  }
+
+  for (let o of Array.from(document.getElementsByClassName('veil-image'))) o.style.opacity = 0;
 
   data.svg = svg
   data.cursor = cursor

@@ -1337,9 +1337,9 @@ function applyThemeButton() {
   }
 }
 function applyImageButton() {
-  for (const entry of ['background-image', 'foreground-image', 'background-music']) {
+  for (const entry of ['background-image', 'foreground-image', 'background-music', 'cursor-image', 'veil-image']) {
     let res = getComputedStyle(document.documentElement).getPropertyValue('--' + entry);
-    if (res == 'none')  document.getElementById(entry+'-input').value = "";
+    if (res == 'none') document.getElementById(entry+'-input').value = "";
     else document.getElementById(entry+'-input').value = res.slice(4, -1).replace(/\\/g, '');
   }
 }

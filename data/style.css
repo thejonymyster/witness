@@ -40,7 +40,7 @@ p, label, h2, a {
   color: var(--text);
 }
 
-line, circle, polygon {
+line, circle, polygon, image {
   transition: none;
 }
 
@@ -298,6 +298,9 @@ input[type="range"]::-ms-thumb {
   --border: transparent;
   --background-image:none;
   --foreground-image:none;
+  --background-music:none;
+  --cursor-image:none;
+  --veil-image:none;
 }
 
 .theme {
