@@ -41,39 +41,6 @@ window.draw = function(puzzle, target='puzzle') {
   drawStartAndEnd(puzzle, svg)
   // Draw cell symbols after so they overlap the lines, if necessary
   drawSymbols(puzzle, svg, target)
-  
-  if (puzzle.image['veil-image']) {
-    let veil = createElement('image')
-    veil.setAttribute('x', 0);
-    veil.setAttribute('y', 0);
-    veil.setAttribute('width', pixelWidth);
-    veil.setAttribute('height', pixelHeight);
-    veil.setAttribute('href', puzzle.image['veil-image'].replace(/\\/g, ''));
-    veil.setAttribute('pointer-events', 'none');
-    veil.setAttribute('preserveAspectRatio', 'none');
-    veil.setAttribute('class', 'veil-image');
-    svg.appendChild(veil);
-  }
-  
-  if (puzzle.image['foreground-image']) {
-    let foreground = createElement('image')
-    foreground.setAttribute('x', 0);
-    foreground.setAttribute('y', 0);
-    foreground.setAttribute('width', pixelWidth);
-    foreground.setAttribute('height', pixelHeight);
-    foreground.setAttribute('href', puzzle.image['foreground-image'].replace(/\\/g, ''));
-    foreground.setAttribute('pointer-events', 'none');
-    foreground.setAttribute('preserveAspectRatio', 'none');
-    svg.appendChild(foreground);
-  }
-
-  if (!audioPlaying && puzzle.image['background-music']) {
-    var audio = new Audio(puzzle.image['background-music'].replace(/\\/g, ''));  
-    audio.autoplay = true;
-    audio.loop = true;
-    audio.volume = localStorage.volume;
-    audio.addEventListener('play', () => { audioPlaying = true; });
-  }
 
   // For pillar puzzles, add faders for the left and right sides
   if (puzzle.pillar === true) {
@@ -108,6 +75,39 @@ window.draw = function(puzzle, target='puzzle') {
     rightBox.setAttribute('fill', 'url(#fadeOutRight)')
     rightBox.setAttribute('style', 'pointer-events: none')
     svg.appendChild(rightBox)
+  }
+  
+  if (puzzle.image['veil-image']) {
+    let veil = createElement('image')
+    veil.setAttribute('x', 0);
+    veil.setAttribute('y', 0);
+    veil.setAttribute('width', pixelWidth);
+    veil.setAttribute('height', pixelHeight);
+    veil.setAttribute('href', puzzle.image['veil-image'].replace(/\\/g, ''));
+    veil.setAttribute('pointer-events', 'none');
+    veil.setAttribute('preserveAspectRatio', 'none');
+    veil.setAttribute('class', 'veil-image');
+    svg.appendChild(veil);
+  }
+  
+  if (puzzle.image['foreground-image']) {
+    let foreground = createElement('image')
+    foreground.setAttribute('x', 0);
+    foreground.setAttribute('y', 0);
+    foreground.setAttribute('width', pixelWidth);
+    foreground.setAttribute('height', pixelHeight);
+    foreground.setAttribute('href', puzzle.image['foreground-image'].replace(/\\/g, ''));
+    foreground.setAttribute('pointer-events', 'none');
+    foreground.setAttribute('preserveAspectRatio', 'none');
+    svg.appendChild(foreground);
+  }
+
+  if (!audioPlaying && puzzle.image['background-music']) {
+    var audio = new Audio(puzzle.image['background-music'].replace(/\\/g, ''));  
+    audio.autoplay = true;
+    audio.loop = true;
+    audio.volume = localStorage.volume;
+    audio.addEventListener('play', () => { audioPlaying = true; });
   }
 }
 

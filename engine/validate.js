@@ -1460,7 +1460,7 @@ const validate = [
                         const from = fromparam;
                         if (global.bridges[color].includes(from)) tree.add(from);
                         seen.add(from);
-                        for (const child of adj[from]) if (!seen.has(child)) {
+                        if (adj[from]) for (const child of adj[from]) if (!seen.has(child)) {
                             treeloop(child);
                             if (tree.has(child)) tree.add(from);
                         }
@@ -1471,7 +1471,7 @@ const validate = [
                     function uniqueloop(from) {
                         seen.add(from);
                         let reachableTreeNode = null;
-                        for (const child of adj[from]) {
+                        if (adj[from]) for (const child of adj[from]) {
                             const candidate = tree.has(child) ? child : (seen.has(child) ? null : uniqueloop(child));
                             if (candidate !== null && candidate !== reachableTreeNode) {
                                 if (reachableTreeNode === null) reachableTreeNode = candidate;

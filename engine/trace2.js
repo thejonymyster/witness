@@ -476,7 +476,7 @@ window.onTraceStart = function(puzzle, pos, svg, start, symStart=null) {
     cursorImage.setAttribute('pointer-events', 'none');
     cursorImage.setAttribute('preserveAspectRatio', 'none');
     cursorImage.style.transform = `translate(-${svg.style.width}, -${svg.style.height})`;
-    svg.insertBefore(cursorImage, svg.getElementById('cursorPos'))
+    svg.appendChild(cursorImage);
     data.cursorImage = cursorImage
   }
 
