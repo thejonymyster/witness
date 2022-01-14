@@ -1406,7 +1406,7 @@ const validate = [
             }
             for (const c of cells) {
                 let [x, y] = xy(c, w);
-                for (let q = 1; q <= 4; q++) for (let cc of cs[q]) {
+                for (let q = 1; q <= 5; q++) for (let cc of cs[q]) {
                     let [cx, cy] = xy(cc, w);
                     let [xx, yy] = fn[q](x - cx, y - cy);
                     xx += cx; yy += cy;
