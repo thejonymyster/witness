@@ -28,7 +28,7 @@ window.onload = function() {
   code = toLoad.hashCode();
   if (toLoad) {
     puzzles = importSequence(decodeURIComponent(toLoad.slice(1))).map(e => window.deserializePuzzle(e));
-    localStorage[code] ??= '\0';
+    if (localStorage[code]?.length) localStorage[code] = '\0';
     currentPanel = Math.min(localStorage[code].length, puzzles.length) - 1;
     reloadPanel();
   } else window.location.replace('prodzpod.github.io/witness');
