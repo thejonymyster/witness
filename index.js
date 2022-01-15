@@ -136,20 +136,21 @@ window.onSolvedPuzzle = function() {
 }
 
 window.checkProgress = function(hash) {
-    let progress = localStorage.getItem(hash);
-    if (localStorage.getItem('puzzleProgress_' + hash)) {
-        let temp = '';
-        for (let i = 0; i < Number(localStorage.getItem('puzzleProgress_' + hash)); i++) {
-            localStorage.setItem(hash + '_' + i, localStorage.getItem('puzzleProgress_' + hash + '_' + i))
-            localStorage.removeItem('puzzleProgress_' + hash + '_' + i)
-            temp += String.fromCharCode(i);
-        }
-        localStorage.removeItem('puzzleProgress_' + hash);
-        localStorage.setItem(hash, temp);
-        progress = temp;
+  let progress = localStorage.getItem(hash);
+  if (localStorage.getItem('puzzleProgress_' + hash)) {
+    let temp = '';
+    for (let i = 0; i < Number(localStorage.getItem('puzzleProgress_' + hash)); i++) {
+      localStorage.setItem(hash + '_' + i, localStorage.getItem('puzzleProgress_' + hash + '_' + i))
+      localStorage.removeItem('puzzleProgress_' + hash + '_' + i)
+      temp += String.fromCharCode(i);
     }
-    if (!progress) return -1;
-    return progress.charCodeAt(progress.length - 1);
+    localStorage.removeItem('puzzleProgress_' + hash);
+    if (temp?.length) temp = '\0';
+    localStorage.setItem(hash, temp);
+    progress = temp;
+  }
+  if (!progress) return -1;
+  return progress.charCodeAt(progress.length - 1);
 }
 
 const dontReset = ['puzzle', 'merge', 'sensitivity', 'symbolTheme', 'volume', 'expandSettings', ...PROGRESS.map(x => x.hash.toString())];
