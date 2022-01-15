@@ -44,6 +44,7 @@ window.checkProgress = function(hash) {
       temp += String.fromCharCode(i);
     }
     localStorage.removeItem('puzzleProgress_' + hash);
+    if (temp?.length) temp = '\0';
     localStorage.setItem(hash, temp);
     progress = temp;
   }
