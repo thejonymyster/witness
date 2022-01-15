@@ -61,6 +61,8 @@ function drawPuzzle() {
   }
 }
 
+const puzzleCheckbox = ['makePerfect', 'disableFlash', 'makeOptional'];
+
 function reloadPuzzle() {
   // Disable the Solve (manually) button, clear lines, and redraw the puzzle
   document.getElementById('solveMode').checked = true;
@@ -71,17 +73,32 @@ function reloadPuzzle() {
   save.innerText = 'Get URL';
   save.onpointerdown = exportPuzzle;
 
-  let puzzleStyle = document.getElementById('puzzleStyle');
   puzzleStyle.value = symmetryModes(puzzle.symmetry, puzzle.pillar);
+  if (puzzle.grid.filter(x => x.filter(y => y?.type == 'vtriangle').length).length) document.getElementById('show-if-tent').style.display = 'flex';
+  else {
+    document.getElementById('show-if-tent').style.display = 'none';
+    puzzle.sols = Math.max(puzzle.sols, 1);
+  }
+  document.getElementById('makePerfect').checked = (puzzle.sols == 0);
   document.getElementById('sols').value = puzzle.sols;
-  document.getElementById('makePerfect').checked = puzzle.perfect;
+  if (puzzle.sols == 0) document.getElementById('set-sols').style.display = 'none';
+  else document.getElementById('set-sols').style.display = 'unset';
+  document.getElementById('trX').value = puzzle.transform.translate[0];
+  document.getElementById('trY').value = puzzle.transform.translate[1];
+  document.getElementById('perspective').value = puzzle.transform.translate[2];
+  document.getElementById('rtX').value = puzzle.transform.rotate[0];
+  document.getElementById('rtY').value = puzzle.transform.rotate[1];
+  document.getElementById('rtZ').value = puzzle.transform.rotate[2];
+  document.getElementById('scX').value = puzzle.transform.scale[0];
+  document.getElementById('scY').value = puzzle.transform.scale[1];
+  document.getElementById('skX').value = puzzle.transform.skew[0];
+  document.getElementById('skY').value = puzzle.transform.skew[1];
+  document.getElementById('epA').value = puzzle.endDest[0];
+  document.getElementById('epB').value = puzzle.endDest[1];
+  document.getElementById('epC').value = puzzle.endDest[2];
   document.getElementById('disableFlash').checked = puzzle.disableFlash;
   document.getElementById('makeOptional').checked = puzzle.optional;
-  document.getElementById('makePerfect').style.background = (document.getElementById('makePerfect').checked ? 'var(--text)' : 'var(--background)')
-  document.getElementById('disableFlash').style.background = (document.getElementById('disableFlash').checked ? 'var(--text)' : 'var(--background)')
-  document.getElementById('makeOptional').style.background = (document.getElementById('makeOptional').checked ? 'var(--text)' : 'var(--background)')
-  if (puzzle.grid.filter(x => x.filter(y => y?.type == 'vtriangle').length).length) document.getElementById('show-if-tent').style.display = 'flex';
-  else document.getElementById('show-if-tent').style.display = 'none';
+  for (let o of puzzleCheckbox.map(x => document.getElementById(x))) o.style.background = o.checked ? 'var(--text)' : 'var(--background)';
   //* sound ui
   let sounds = puzzle.grid.flat().filter(x => x?.dot >= 40).map(x => x.dot - 39).sort((a, b) => a - b);
   temp = [...puzzle.soundDots];
@@ -246,7 +263,17 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
     break;
   }
 
-  newPuzzle.sols = document.getElementById('sols').value;
+  newPuzzle.sols = document.getElementById('makePerfect').checked ? 1 : Number(document.getElementById('sols').value);
+  document.getElementById('makePerfect').checked = false;
+  newPuzzle.transform = {
+    'translate': [Number(document.getElementById('trX').value), Number(document.getElementById('trY').value), Number(document.getElementById('perspective').value)],
+    'rotate': [Number(document.getElementById('rtX').value), Number(document.getElementById('rtY').value), Number(document.getElementById('rtZ').value)],
+    'scale': [Number(document.getElementById('scX').value), Number(document.getElementById('scY').value)],
+    'skew' : [Number(document.getElementById('skX').value), Number(document.getElementById('skY').value)]
+  }
+  for (let o of ['epA', 'epB', 'epC']) document.getElementById(o).value = 0;
+  newPuzzle.disableFlash = !!document.getElementById('disableFlash').checked;
+  newPuzzle.optional = !!document.getElementById('makeOptional').checked;
   copyTheme(newPuzzle);
   copyImage(newPuzzle);
 
@@ -264,6 +291,7 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
 
 window.setSolveMode = function(value) {
   document.getElementById('solveMode').checked = value
+  document.getElementById('solveMode').style.background = (document.getElementById('solveMode').checked ? 'var(--text)' : 'var(--background)')
   if (value === true) {
     window.TRACE_COMPLETION_FUNC = function(solution, path) {
       puzzle = solution
@@ -279,31 +307,55 @@ window.setSolveMode = function(value) {
   }
 }
 
-window.changeSols = function(value) {
-  puzzle.sols = document.getElementById('sols').value;
-  reloadPuzzle();
-  writePuzzle();
-}
-
-window.makePerfect = function(value) {
+window.makePerfect = function() {
+  let value = !document.getElementById('makePerfect').checked;
   document.getElementById('makePerfect').checked = value
-  puzzle.perfect = value;
+  document.getElementById('makePerfect').style.background = (value ? 'var(--text)' : 'var(--background)');
+  if (value) puzzle.sols = 0;
+  else puzzle.sols = 1;
   reloadPuzzle();
   writePuzzle();
 }
 
-window.disableFlash = function(value) {
-  document.getElementById('disableFlash').checked = value
-  puzzle.disableFlash = value;
+window.applyChange = function(src, value, dest) {
+  if (typeof(src) == 'string') src = document.getElementById(src);
+  if (value === null) value = !src.checked;
+  if (typeof(value) == 'boolean') { 
+    src.checked = value; 
+    src.style.background = (src.checked ? 'var(--text)' : 'var(--background)')
+  }
+  if (!isNaN(value)) value = Number(value);
+  if (!Array.isArray(dest)) dest = [dest];
+  let cur = puzzle; for (o of dest.slice(0, -1)) cur = cur[o];
+  cur[dest[dest.length - 1]] = value;
   reloadPuzzle();
   writePuzzle();
 }
 
-window.makeOptional = function(value) {
-  document.getElementById('makeOptional').checked = value
-  puzzle.optional = value;
-  reloadPuzzle();
-  writePuzzle();
+let puzzleStyleExpand = true;
+let puzzleStyleBusy = false;
+window.togglePuzzleStyle = function() {
+  if (puzzleStyleBusy) return;
+  puzzleStyleExpand = !puzzleStyleExpand;
+  puzzleStyleBusy = true;
+  let button = document.getElementById('expandPuzzleStyle');
+  let list = document.getElementById('puzzle-style');
+  for (let o of Array.from(list.childNodes)) {
+    if (o === button || !o?.style) continue;
+    if (puzzleStyleExpand) o.style.display = 'block';
+    o.style.opacity = Number(puzzleStyleExpand)
+  }
+  list.style.height = puzzleStyleExpand ? '711px' : '38px'; 
+  list.style.borderColor = puzzleStyleExpand ? 'var(--text)' : 'transparent'; 
+  list.style.padding = puzzleStyleExpand ? '16px' : '0 16px'; 
+  button.innerHTML = puzzleStyleExpand ? '-' : '+';
+  setTimeout(() => {
+    if (!puzzleStyleExpand) for (let o of Array.from(list.childNodes)) { 
+      if (o === button || !o?.style) continue;
+      o.style.display = 'none';
+    }
+    puzzleStyleBusy = false;
+  }, 500);
 }
 
 //** End of user interaction points
@@ -371,7 +423,7 @@ window.onSolvedPuzzle = function(paths) {
 
 let symbolData = {
   'start': {'type':'start', 'title':'Start point'},
-  'end': {'type':'end', 'y': 18, 'dir':'top', 'title':'End point'},
+  'end': {'type':'end', 'endType': 0, 'y': 18, 'dir':'top', 'title':'End point'},
   'gap': {'type':'gap', 'title':'Line break'},
   'dot': {'type':'dot', 'sound': 0, 'title':'Dot'},
   'square': {'type':'square', 'title':'Square'},
@@ -480,6 +532,15 @@ function drawSymbolButtons() {
       case 'xvmino':
         button.params.polyshape = activeParams.polyshape
         button.onpointerdown = function(event) { buttonBehaviour(event, this, (el) => { shapeChooser(); })}
+        break;
+      case 'end':
+        button.onpointerdown = function(event) { buttonBehaviour(event, this, (el) => {
+          let endType = symbolData[activeParams.id].endType
+          if (endType == undefined) endType = 0
+          endType = (endType + (event.isRightClick() ? 2 : 1)) % 3;
+          symbolData[activeParams.id].endType = endType
+          activeParams.endType = endType
+        })}
         break;
       case 'divdiamond':
       case 'dice':
@@ -789,8 +850,9 @@ function onElementClicked(event, x, y, update=true) {
     // If (x, y) is an endpoint, loop to the next direction
     // If the direction loops past the end (or there are no valid directions),
     // remove the endpoint by setting to null.
-    let dir = getNextValue(validDirs, puzzle.grid[x][y].end)
+    let dir = (puzzle.grid[x][y].endType === activeParams.endType) ? getNextValue(validDirs, puzzle.grid[x][y].end) : validDirs[0];
     puzzle.grid[x][y].end = dir
+    puzzle.grid[x][y].endType = activeParams.endType
     if (puzzle.symmetry != null) {
       let sym = puzzle.getSymmetricalPos(x, y)
       if (sym.x === x && sym.y === y) {
@@ -1337,7 +1399,7 @@ function applyThemeButton() {
   }
 }
 function applyImageButton() {
-  for (const entry of ['background-image', 'foreground-image', 'background-music', 'cursor-image', 'veil-image']) {
+  for (const entry of imageArgs) {
     let res = getComputedStyle(document.documentElement).getPropertyValue('--' + entry);
     if (res == 'none') document.getElementById(entry+'-input').value = "";
     else document.getElementById(entry+'-input').value = res.slice(4, -1).replace(/\\/g, '');

@@ -30,7 +30,6 @@ window.Region = class {
 // Corners and edges will have a value of true if the line passes through them
 // Cells will contain an object if there is an element in them
 window.Puzzle = class {
-
   constructor(width, height, pillar=false) {
     let json;
     if (!height) {
@@ -46,8 +45,16 @@ window.Puzzle = class {
     }
     this.pillar = pillar;
     this.sols = 1;
-    this.perfect = false;
     this.soundDots = [];
+    this.theme = Object.fromEntries(themeArgs.map(x => [x, undefined]));
+    this.image = Object.fromEntries(imageArgs.map(x => [x, undefined]));
+    this.transform = {
+      'translate': [0, 0, 100],
+      'rotate': [0, 0, 0],
+      'scale': [100, 100],
+      'skew': [0, 0]
+    }
+    this.endDest = [0, 0, 0]
     if (json) {
       this.perfect = json.perfect;
       this.grid = json.grid;

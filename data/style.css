@@ -407,7 +407,7 @@ li button {
 }
 
 .sols.active {
-  background-color: var(--line-default);
+  background-color: var(--line-success);
 }
 
 .sols.perfect {
@@ -421,7 +421,7 @@ li button {
 
 .sols.perfect.active {
   background-color: transparent;
-  border-bottom-color: var(--line-default);
+  border-bottom-color: var(--line-success);
 }
 
 #anchor {
@@ -496,5 +496,31 @@ li button {
 }
 
 .main > .hlist {
-  margin: 16px;
+  margin: 0 16px;
+}
+
+#puzzle-style {
+  border: 3px solid var(--text);
+  border-radius: 8px;
+  padding: 16px;
+  color: var(--text);
+  background-color: var(--background);
+}
+
+#puzzle-style > .block {
+  margin: 1px;
+}
+
+#puzzle-style label, #puzzle-style select, #puzzle-style option, #puzzle-style input {
+  font-size: 16px;
+  border-radius: 2px;
+}
+
+#puzzle-style .block > * {
+  margin: 4px;
+}
+
+#puzzle-style .checkbox {
+  width: 10px;
+  height: 10px;
 }

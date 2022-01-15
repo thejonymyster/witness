@@ -80,6 +80,8 @@ window.symbols = ['square', 'star', 'pentagon', 'triangle', 'arrow', 'dart', 'at
 window.polyominoes = ['poly', 'ylop', 'polynt', 'xvmino'];
 window.endEnum = ['top', 'right', 'left', 'bottom'];
 window.themeArgs = ['background', 'outer', 'inner', 'text', 'line-undone', 'line-default', 'line-success', 'line-primary', 'line-secondary'];
+window.imageArgs = ['background-image', 'foreground-image', 'background-music', 'cursor-image', 'veil-image'];
+let swappedImageArgs = [imageArgs[1], imageArgs[0], ...imageArgs.slice(2)];
 window.symbolColors = ["#000000ff", "#00000080", "#00000000", "#ffffffff", "#ffffff80", "#ccccccff", "#ff0000ff", "#ff66b3ff", "#800000ff", "#ffa500ff", "#fa8f04ff", "#ff6666ff", "#ffff00ff", "#ffff80ff", "#cccc44ff", "#008000ff", "#b0ffb0ff",  "#3cd4d9ff", "#0000ffff", "#6867fdff", "#80ffffff", "#800080ff", "#8101ffff", "#ff07ffff", "#55556cff", "#b4b4c4ff", "#aa0000ff", "#ff4000ff", "#ffc900ff", "#00ff00ff", "#76a856ff", "#aa00aaff"];
 window.symmetryModes = function(symmetry, pillar) {
   if (pillar) {
@@ -271,17 +273,27 @@ window.readBitSwitch = function (bs) {
   return res;
 }
 
-window.intToByte = function(...num) {
-  return num.map(n => String.fromCharCode(((n & 0xff000000) >>> 24), ((n & 0x00ff0000) >>> 16), ((n & 0x0000ff00) >>> 8), n & 0x000000ff))};
+window.intToByte = function(n) {
+  return String.fromCharCode(((n & 0xff000000) >>> 24), ((n & 0x00ff0000) >>> 16), ((n & 0x0000ff00) >>> 8), n & 0x000000ff);
+}
 
-window.byteToInt = function(...byte) {
-  return byte.map(b => ((b.charCodeAt(0) << 24 >>> 0) + (b.charCodeAt(1) << 16 >>> 0) + (b.charCodeAt(2) << 8 >>> 0) + (b.charCodeAt(3) >>> 0)));
+window.byteToInt = function(b, signed) {
+  let i = (b.charCodeAt(0) << 24 >>> 0) + (b.charCodeAt(1) << 16 >>> 0) + (b.charCodeAt(2) << 8 >>> 0) + (b.charCodeAt(3) >>> 0);
+  if ((i & 0x80000000) && signed) return i - 0x100000000;
+  else return i;
+}
+
+window.div = function(n, a) {
+  return ((n - (n % a)) / a);
 }
 
 window.rdiv = function(n, a) {
   return ((n % a) + a) % a;
 }
 
+window.mdiv = function(n, a) {
+  return n - (n % a);
+}
 const _keyStr = " 123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.-0"
 
 window.runLength = function(str) {
@@ -396,13 +408,6 @@ window.derunLengthV2 = function(str) {
   return res;
 }
 
-window.checkboxToggle = function(id, fn) {
-  let checkbox = document.getElementById(id);
-  checkbox.checked = !checkbox.checked
-  checkbox.style.background = (checkbox.checked ? 'var(--text)' : 'var(--background)')
-  if (fn) fn(checkbox.checked)
-}
-
 // ---------------------------------------------------------------------------------------------------- //
 //* puzzle stuff
 // ---------------------------------------------------------------------------------------------------- //
@@ -491,7 +496,6 @@ function showSolution(puzzle, paths, num) {
 }
 
 window.copyTheme = function(puzzle) {
-  puzzle.theme = {};
   for (entry of themeArgs) {
     puzzle.theme[entry] = hexToInt(getComputedStyle(document.documentElement).getPropertyValue('--' + entry));
   }
@@ -505,7 +509,7 @@ window.applyTheme = function(puzzle) {
 
 window.copyImage = function(puzzle) {
   puzzle.image = {};
-  for (entry of ['background-image', 'foreground-image', 'background-music', 'cursor-image', 'veil-image']) {
+  for (entry of imageArgs) {
     let res = getComputedStyle(document.documentElement).getPropertyValue('--' + entry);
     if (res == 'none') puzzle.image[entry] = null;
     else puzzle.image[entry] = res.slice(4, -1);
@@ -522,12 +526,7 @@ window.applyImage = function(puzzle) {
 window.serializeTheme = function(puzzle) {
   let ints = [];
   for (const entry of themeArgs) ints.push(puzzle.theme[entry]);
-  return 'vt1_' + runLength(btoa(intToByte(...ints).join('')
-    + (puzzle.image['background-image'] ?? '') + '\u0000'
-    + (puzzle.image['foreground-image'] ?? '') + '\u0000'
-    + (puzzle.image['background-music'] ?? '') + '\u0000'
-    + (puzzle.image['cursor-image'] ?? '') + '\u0000'
-    + (puzzle.image['veil-image'] ?? '')).replace(/\+/g, '.').replace(/\//g, '-').replace(/=/g, '_'));
+  return 'vt1_' + runLength(btoa(themeArgs.map(x => intToByte(puzzle.theme[x])).join('') + imageArgs.map(x => (puzzle.image[x] ?? '')).join('\u0000')).replace(/\+/g, '.').replace(/\//g, '-').replace(/=/g, '_'));
 }
 
 window.deserializeTheme = function(puzzle, string) {
@@ -540,27 +539,35 @@ window.deserializeTheme = function(puzzle, string) {
 
 function deserializeThemeV1(puzzle, string) {
   let raw = atob(derunLength(string).replace(/\./g, '+').replace(/-/g, '/').replace(/_/g, '='));
-  puzzle.theme = {};
   let i = 0;
   for (const entry of themeArgs) {
-    let char = byteToInt(raw.slice(i, i+4))[0];
-    puzzle.theme[entry] = char;
+    puzzle.theme[entry] = byteToInt(raw.slice(i, i+4));
     i += 4;
   }
-  for (const entry of raw.slice(i).split('\u0000')) {
-    puzzle.image = {};
-    puzzle.image['background-image'] = (entry[0]?.length ? entry[0] : null);
-    puzzle.image['foreground-image'] = (entry[1]?.length ? entry[1] : null);
-    puzzle.image['background-music'] = (entry[2]?.length ? entry[2] : null);
-    puzzle.image['cursor-image'] = (entry[3]?.length ? entry[3] : null);
-    puzzle.image['veil-image'] = (entry[4]?.length ? entry[4] : null);
-  }
+  let entry = raw.slice(i).split('\u0000');
+  for (let i = 0; i < imageArgs.length; i++) puzzle.image[imageArgs[i]] = (entry[i]?.length ? entry[i] : undefined);
   window.puzzle = puzzle;
   applyTheme(puzzle);
   applyImage(puzzle);
 }
 
 const SCHEMA = new Map([
+  ['width', 'byte'],
+  ['height', 'byte'],
+  ['sols', 'byte'], //* if sols=0, perfect=true
+  ['flags', 'byte'], //* pillar.x, pillar.y, disableFlash, optional
+  ['translateX', 'int'], //* in pixel
+  ['translateY', 'int'], //* in pixel
+  ['rotateX', 'byte'], //* -45 to 45, in degree
+  ['rotateY', 'byte'], //* -45 to 45, in degree
+  ['rotateZ', 'int'], //* in pixel
+  ['scaleX', 'int'], //* in %
+  ['scaleY', 'int'], //* in %
+  ['skewX', 'byte'], //* -90 to 90, in degree
+  ['skewY', 'byte'], //* -90 to 90, in degree
+  ['endA', 'byte'], //* if 0, next puzzle
+  ['endB', 'byte'], //* if 0, next puzzle
+  ['endC', 'byte'], //* if 0, next puzzle
   ['theme.background', 'int'],
   ['theme.inner', 'int'],
   ['theme.outer', 'int'],
@@ -570,10 +577,6 @@ const SCHEMA = new Map([
   ['theme.line-success', 'int'],
   ['theme.line-undone', 'int'],
   ['theme.text', 'int'],
-  ['sols', 'byte'],
-  ['symmetry', 'byte'], //* symmetry, symmetry?.x, symmetry?.y, pillar, perfect
-  ['height', 'byte'],
-  ['width', 'byte'],
   ['defaultCorner', 'corner'], //* only if majority of corner is same dot/gap/start, else null
   ['defaultCell', 'cell'],
   ['corners', 'sparse[]<corner>'],
@@ -601,20 +604,23 @@ const SCHEMA = new Map([
 
 /**
  *! Corner data structure
- ** dot: byte (dot, gap info)
- ** start: byte (startx3, endx3 (direction + null));
+ ** dot: byte (dot info)
+ ** start: byte (startx3, endx3 (direction + null), gap, endType<A, B, C>);
  */
 
 window.serializePuzzle = function(puzzle) {
   let raw = "";
   //* header
-  raw += String.fromCharCode(Math.min(0xff, puzzle.sols ?? 1));
-  raw += String.fromCharCode(makeBitSwitch(puzzle.symmetry, puzzle.symmetry?.x, puzzle.symmetry?.y, puzzle.pillar, puzzle.perfect, puzzle.disableFlash, puzzle.optional));
   raw += String.fromCharCode(Math.floor(puzzle.width / 2));
   raw += String.fromCharCode(Math.floor(puzzle.height / 2));
-  let ints = [];
-  for (const entry of themeArgs) ints.push(puzzle.theme[entry]);
-  raw += intToByte(...ints).join('');
+  raw += String.fromCharCode(makeBitSwitch(puzzle.disableFlash, puzzle.optional, puzzle.symmetry, puzzle.symmetry?.x, puzzle.symmetry?.y, puzzle.pillar));
+  raw += String.fromCharCode(Math.min(0xff, puzzle.sols ?? 1));
+  for (let k of ['translate', 'rotate', 'scale', 'skew']) {
+    raw += puzzle.transform[k].map(x => intToByte(x)).join('');
+  }
+  raw += puzzle.endDest.map(x => String.fromCharCode(x)).join('');
+  //* theme
+  raw += themeArgs.map(x => intToByte(puzzle.theme[x])).join('');
   //* defaultCorner
   let med = {};
   for (let i = 0; i < puzzle.width / 2; i++) for (let j = 0; j < puzzle.height / 2; j++) {
@@ -670,25 +676,11 @@ window.serializePuzzle = function(puzzle) {
   raw += cell[2];
   //* image
   let zeroes = 0;
-  if (puzzle.image['foreground-image'])
-    raw += puzzle.image['foreground-image'];
-  if (puzzle.image['background-image']) {
-    while (zeroes < 1) { raw += '\0'; zeroes++; }
-    raw += puzzle.image['background-image'];
+  for (let i = 0; i < imageArgs.length; i++) if (puzzle.image[imageArgs[i]]) {
+    while (zeroes < i) { raw += '\0'; zeroes++; }
+    raw += puzzle.image[imageArgs[i]];
   }
-  if (puzzle.image['background-music']) {
-    while (zeroes < 2) { raw += '\0'; zeroes++; }
-    raw += puzzle.image['background-music'];
-  }
-  if (puzzle.image['cursor-image']) {
-    while (zeroes < 3) { raw += '\0'; zeroes++; }
-    raw += puzzle.image['cursor-image'];
-  }
-  if (puzzle.image['veil-image']) {
-    while (zeroes < 4) { raw += '\0'; zeroes++; }
-    raw += puzzle.image['veil-image'];
-  }
-  return 'v5_' + runLength(btoa(raw).replace(/\+/g, '.').replace(/\//g, '-').replace(/\=/g, '_'));
+  return 'v6_' + runLength(btoa(raw).replace(/\+/g, '.').replace(/\//g, '-').replace(/\=/g, '_'));
 }
 
 function getCellData(cell) {
@@ -714,7 +706,7 @@ function getCellData(cell) {
 function getCornerData(cell) {
   if (cell == null) return "\0\0";
   let dot = cell.dot ? cell.dot + 29 : 0;
-  let start = endEnum.indexOf(cell.end) + 1 + (!!cell.start << 3) + ((cell.gap ?? 0) << 4);
+  let start = endEnum.indexOf(cell.end) + 1 + (!!cell.start << 3) + ((cell.gap ?? 0) << 4) + ((cell.endType ?? 0) << 6);
   return String.fromCharCode(dot) + String.fromCharCode(start);
 }
 
@@ -730,11 +722,50 @@ window.deserializePuzzle = function(string) {
   else if (version == 'v3') return deserializePuzzleV3(deserializePuzzlePre(string));
   else if (version == 'v4') return deserializePuzzleV4(deserializePuzzlePre(string));
   else if (version == 'v5') return deserializePuzzleV5(deserializePuzzlePre(string));
+  else if (version == 'v6') return deserializePuzzleV6(deserializePuzzlePre(string));
   else throw Error('unknown puzzle format');
 }
 
 function deserializePuzzlePre(string) {
   return atob(derunLength(string).replace(/\./g, '+').replace(/\-/g, '/').replace(/\_/g, '='));
+}
+
+function deserializePuzzleV6(raw) {
+  let ptr = 0;
+  //* header
+  let char = readBitSwitch(raw.charCodeAt(ptr+2));
+  let puzzle = new Puzzle(raw.charCodeAt(ptr), raw.charCodeAt(ptr+1), char[5]);
+  ptr += 3;
+  if (char[0]) puzzle.disableFlash = true;
+  if (char[1]) puzzle.optional = true;
+  if (char[2]) puzzle.symmetry = {'x': char[3], 'y': char[4]};
+  puzzle.sols = raw.charCodeAt(ptr);
+  ptr++;
+  puzzle.transform.translate = [byteToInt(raw.slice(ptr, ptr + 4), true), byteToInt(raw.slice(ptr + 4, ptr + 8), true), byteToInt(raw.slice(ptr + 8, ptr + 12), true)];
+  ptr += 12;
+  puzzle.transform.rotate = [byteToInt(raw.slice(ptr, ptr + 4), true), byteToInt(raw.slice(ptr + 4, ptr + 8), true), byteToInt(raw.slice(ptr + 8, ptr + 12), true)];
+  ptr += 12;
+  puzzle.transform.scale = [byteToInt(raw.slice(ptr, ptr + 4), true), byteToInt(raw.slice(ptr + 4, ptr + 8), true)];
+  ptr += 8;
+  puzzle.transform.skew = [byteToInt(raw.slice(ptr, ptr + 4), true), byteToInt(raw.slice(ptr + 4, ptr + 8), true)];
+  ptr += 8;
+  puzzle.endDest = [raw.charCodeAt(ptr), raw.charCodeAt(ptr + 1), raw.charCodeAt(ptr + 2)];
+  ptr += 3;
+  //* style
+  for (const entry of themeArgs) {
+    char = byteToInt(raw.slice(ptr, ptr + 4));
+    puzzle.theme[entry] = char;
+    ptr += 4;
+  }
+  [puzzle, ptr] = deserializePuzzleV4Core(raw, ptr, puzzle);
+  //* image
+  let urls = raw.slice(ptr).split('\0');
+  for (let i = 0; i < imageArgs.length; i++) 
+    if (urls[i]?.length) puzzle.image[imageArgs[i]] = urls[i];
+  window.puzzle = puzzle;
+  applyTheme(puzzle);
+  applyImage(puzzle);
+  return puzzle;
 }
 
 function deserializePuzzleV5(raw) {
@@ -745,68 +776,20 @@ function deserializePuzzleV5(raw) {
   puzzle.sols = raw.charCodeAt(ptr);
   ptr += 4;
   if (char[0]) puzzle.symmetry = {'x': char[1], 'y': char[2]};
-  if (char[4]) puzzle.perfect = true;
+  if (char[4]) puzzle.sols = 0;
   if (char[5]) puzzle.disableFlash = true;
   if (char[6]) puzzle.optional = true;
   //* style
-  puzzle.theme = {};
   for (const entry of themeArgs) {
-    char = byteToInt(raw.slice(ptr, ptr + 4))[0];
+    char = byteToInt(raw.slice(ptr, ptr + 4));
     puzzle.theme[entry] = char;
     ptr += 4;
   }
-  //* defaults
-  let defCorner = raw.charCodeAt(ptr);
-  if (defCorner) for (let i = 0; i < puzzle.width / 2; i++) for (let j = 0; j < puzzle.height / 2; j++) puzzle.grid[i*2][j*2] = cornerData(defCorner, 0);
-  ptr++;
-  let defCell = raw.charCodeAt(ptr);
-  if (defCell) {
-    ptr++;
-    let temp = cellData(defCell, raw.charCodeAt(ptr), raw.charCodeAt(ptr + 1), raw.charCodeAt(ptr + 2));
-    for (let i = 0; i < puzzle.width / 2; i++) for (let j = 0; j < puzzle.height / 2; j++) {
-      if (puzzle.grid[i*2+1]?.[j*2+1] === undefined) continue;
-      puzzle.grid[i*2+1][j*2+1] = temp[0];
-    } 
-    ptr += temp[1];
-  }
-  ptr++;
-  //* corners
-  let x = [], y = [];
-  let lenCorner = (raw.charCodeAt(ptr) >> 8) + (raw.charCodeAt(ptr + 1));
-  ptr += 2;
-  for (let i = 0; i < lenCorner; i++) { y.push(raw.charCodeAt(ptr)); ptr++; }
-  for (let i = 0; i < lenCorner; i++) { x.push(raw.charCodeAt(ptr)); ptr++; }
-  for (let i = 0; i < lenCorner; i++) { 
-    puzzle.grid[y[i]][x[i]] = cornerData(raw.charCodeAt(ptr), raw.charCodeAt(ptr + 1));
-    ptr += 2; 
-  }
-  //* soundData
-  puzzle.soundDots = [];
-  let lenSoundDots = raw.charCodeAt(ptr);
-  ptr++;
-  for (let i = 0; i < lenSoundDots; i++) {
-    puzzle.soundDots.push(raw.charCodeAt(ptr));
-    ptr++;
-  }
-  //* cells
-  x = []; y = [];
-  let lenCell = (raw.charCodeAt(ptr) >> 8) + (raw.charCodeAt(ptr + 1));
-  ptr += 2;
-  for (let i = 0; i < lenCell; i++) { y.push(raw.charCodeAt(ptr)); ptr++; }
-  for (let i = 0; i < lenCell; i++) { x.push(raw.charCodeAt(ptr)); ptr++; }
-  for (let i = 0; i < lenCell; i++) { 
-    let temp = cellData(raw.charCodeAt(ptr), raw.charCodeAt(ptr + 1), raw.charCodeAt(ptr + 2), raw.charCodeAt(ptr + 3));
-    puzzle.grid[y[i]*2+1][x[i]*2+1] = temp[0];
-    ptr += 2 + temp[1]; 
-  }
+  [puzzle, ptr] = deserializePuzzleV4Core(raw, ptr, puzzle);
   //* image
   let urls = raw.slice(ptr).split('\0');
-  puzzle.image = {};
-  if (urls[0]?.length) puzzle.image['foreground-image'] = urls[0];
-  if (urls[1]?.length) puzzle.image['background-image'] = urls[1];
-  if (urls[2]?.length) puzzle.image['background-music'] = urls[2];
-  if (urls[3]?.length) puzzle.image['cursor-image'] = urls[3];
-  if (urls[4]?.length) puzzle.image['veil-image'] = urls[4];
+  for (let i = 0; i < swappedImageArgs.length; i++) 
+    if (urls[i]?.length) puzzle.image[swappedImageArgs[i]] = urls[i];
   window.puzzle = puzzle;
   applyTheme(puzzle);
   applyImage(puzzle);
@@ -819,10 +802,28 @@ function deserializePuzzleV4(raw) {
   let puzzle = new Puzzle(raw.charCodeAt(2), raw.charCodeAt(3), char[3]);
   puzzle.sols = raw.charCodeAt(0);
   if (char[0]) puzzle.symmetry = {'x': char[1], 'y': char[2]};
-  if (char[4]) puzzle.perfect = true;
+  if (char[4]) puzzle.sols = 0;
   if (char[5]) puzzle.disableFlash = true;
   if (char[6]) puzzle.optional = true;
   let ptr = 4;
+  [puzzle, ptr] = deserializePuzzleV4Core(raw, ptr, puzzle);
+  //* style
+  for (const entry of themeArgs) {
+    char = byteToInt(raw.slice(ptr, ptr + 4));
+    puzzle.theme[entry] = char;
+    ptr += 4;
+  }
+  //* image
+  let urls = raw.slice(ptr).split('\0');
+  for (let i = 0; i < swappedImageArgs.length; i++) 
+    if (urls[i]?.length) puzzle.image[swappedImageArgs[i]] = urls[i];
+  window.puzzle = puzzle;
+  applyTheme(puzzle);
+  applyImage(puzzle);
+  return puzzle;
+}
+
+function deserializePuzzleV4Core(raw, ptr, puzzle) {  
   //* defaults
   let defCorner = raw.charCodeAt(ptr);
   if (defCorner) for (let i = 0; i < puzzle.width / 2; i++) for (let j = 0; j < puzzle.height / 2; j++) puzzle.grid[i*2][j*2] = cornerData(defCorner, 0);
@@ -867,25 +868,7 @@ function deserializePuzzleV4(raw) {
     puzzle.grid[y[i]*2+1][x[i]*2+1] = temp[0];
     ptr += 2 + temp[1]; 
   }
-  //* style
-  puzzle.theme = {};
-  for (const entry of themeArgs) {
-    char = byteToInt(raw.slice(ptr, ptr + 4))[0];
-    puzzle.theme[entry] = char;
-    ptr += 4;
-  }
-  //* image
-  let urls = raw.slice(ptr).split('\0');
-  puzzle.image = {};
-  if (urls[0]?.length) puzzle.image['foreground-image'] = urls[0];
-  if (urls[1]?.length) puzzle.image['background-image'] = urls[1];
-  if (urls[2]?.length) puzzle.image['background-music'] = urls[2];
-  if (urls[3]?.length) puzzle.image['cursor-image'] = urls[3];
-  if (urls[4]?.length) puzzle.image['veil-image'] = urls[4];
-  window.puzzle = puzzle;
-  applyTheme(puzzle);
-  applyImage(puzzle);
-  return puzzle;
+  return [puzzle, ptr];
 }
 
 function cellData(type, color, data1, data2) {
@@ -931,8 +914,9 @@ function cornerData(dot, start) {
   let ret = {'type': 'line', 'line': 0};
   if (dot) ret.dot = dot - 29;
   if (start & 0x7) ret.end = endEnum[(start & 0x7) - 1]
-  if ((start & 0x8) >> 3) ret.start = true;
-  if (start >> 4) ret.gap = (start >> 4);
+  if ((start & 0xF) >> 3) ret.start = true;
+  if ((start & 0x3F) >> 4) ret.gap = ((start & 0x3F) >> 4);
+  if (start >> 6) ret.endType = (start >> 6);
   return ret;
 }
 
@@ -944,10 +928,7 @@ function deserializePuzzleV2(raw, sols=1) {
   let i = 2;
   let char = readBitSwitch(raw.charCodeAt(i));
   let puzzle = new Puzzle(raw.charCodeAt(0), raw.charCodeAt(1), char[3]);
-  if (sols > 1) {
-    puzzle.perfect = true;
-    puzzle.sols = sols;
-  } else puzzle.perfect = false;
+  puzzle.sols = sols;
   if (char[0]) puzzle.symmetry = {'x': char[1], 'y': char[2]};
   let x = -1; y = 0;
   while (true) {
@@ -977,7 +958,7 @@ function deserializePuzzleV2(raw, sols=1) {
     }
     cell.type = symbols[char - 1];
     i++;
-    cell.color = symbolColors.indexOf('#' + Number(byteToInt(raw.slice(i, i+4))[0]).toString(16).padStart(8, '0'));
+    cell.color = symbolColors.indexOf('#' + Number(byteToInt(raw.slice(i, i+4))).toString(16).padStart(8, '0'));
     i += 4; char = raw.charCodeAt(i);
     switch (cell.type) {
       case 'arrow':
@@ -995,7 +976,7 @@ function deserializePuzzleV2(raw, sols=1) {
       case 'poly':
       case 'ylop':
       case 'polynt':
-        cell.polyshape = byteToInt(raw.slice(i, i+4))[0];
+        cell.polyshape = byteToInt(raw.slice(i, i+4));
         i += 3;
         break;
       default:
@@ -1004,9 +985,8 @@ function deserializePuzzleV2(raw, sols=1) {
     }
     puzzle.grid[x][y] = cell;
   }
-  puzzle.theme = {};
   for (const entry of themeArgs) {
-    char = byteToInt(raw.slice(i+1, i+5))[0];
+    char = byteToInt(raw.slice(i+1, i+5));
     puzzle.theme[entry] = char;
     i += 4;
   }

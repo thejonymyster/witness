@@ -83,16 +83,17 @@ window.solve = function(p, partialCallback, finalCallback) {
     }
   }
 
-  // Puzzles which are small enough should be solved synchronously, since the cost of asynchronizing
-  // is greater than the cost of the puzzle.
-  SOLVE_SYNC = false
-  if (puzzle.symmetry != null) { // 5x5 is the max for symmetry puzzles
-    if (puzzle.width * puzzle.height <= 121) SOLVE_SYNC = true
-  } else if (puzzle.pillar === true) { // 4x5 is the max for non-symmetry, pillar puzzles
-    if (puzzle.width * puzzle.height <= 108) SOLVE_SYNC = true
-  } else { // 5x5 is the max for non-symmetry, non-pillar puzzles
-    if (puzzle.width * puzzle.height <= 121) SOLVE_SYNC = true
-  }
+  //// Puzzles which are small enough should be solved synchronously, since the cost of asynchronizing
+  //// is greater than the cost of the puzzle.
+  //* cancel solving does not seem to work so why not sync for now
+  SOLVE_SYNC = true
+  // if (puzzle.symmetry != null) { // 5x5 is the max for symmetry puzzles
+  //   if (puzzle.width * puzzle.height <= 121) SOLVE_SYNC = true
+  // } else if (puzzle.pillar === true) { // 4x5 is the max for non-symmetry, pillar puzzles
+  //   if (puzzle.width * puzzle.height <= 108) SOLVE_SYNC = true
+  // } else { // 5x5 is the max for non-symmetry, non-pillar puzzles
+  //   if (puzzle.width * puzzle.height <= 121) SOLVE_SYNC = true
+  // }
   console.log('Puzzle is a', puzzle.width, 'by', puzzle.height, 'solving ' + (SOLVE_SYNC ? 'sync' : 'async'))
 
   // We pre-traverse the grid (only considering obvious failure states like going out of bounds),

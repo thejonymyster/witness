@@ -24,6 +24,8 @@ window.draw = function(puzzle, target='puzzle') {
   svg.setAttribute('viewbox', '0 0 ' + pixelWidth + ' ' + pixelHeight)
   svg.style.width = pixelWidth + 'px'
   svg.style.height = pixelHeight + 'px'
+  svg.style.transition = 'all 0s';
+  svg.style.transform = `perspective(${puzzle.transform.translate[2]}px) rotateX(${puzzle.transform.rotate[0]}deg) rotateY(${puzzle.transform.rotate[1]}deg) skew(${puzzle.transform.skew[0]}deg, ${puzzle.transform.skew[1]}deg) rotateZ(${puzzle.transform.rotate[2]}deg) scale(${Number(puzzle.transform.scale[0]) / 100}, ${Number(puzzle.transform.scale[1]) / 100}) translate(${puzzle.transform.translate[0]}px, ${puzzle.transform.translate[1]}px)`
 
   var rect = createElement('rect')
   svg.appendChild(rect)
@@ -390,6 +392,7 @@ function drawStartAndEnd(puzzle, svg) {
           'width': 58,
           'height': 58,
           'dir': cell.end,
+          'endType': cell.endType,
           'x': x*41 + 23,
           'y': y*41 + 23,
         })

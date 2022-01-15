@@ -19,7 +19,7 @@
   <script async type="text/javascript" src="./engine/display2.js"></script>
   <script async type="text/javascript" src="./engine/trace2.js"></script>
   <script async type="text/javascript" src="./editor.js"></script>
-  <title>Looksy Editor v2.2.1</title>
+  <title>Looksy Editor v2.3.0</title>
 </head>
 
 <body>
@@ -59,39 +59,142 @@
               <button id="loadButton" onpointerdown="importPuzzle()">Load from Clipboard</button>
             </div>
             <div class="spacer"></div>
-            <label for="puzzleStyle" style="margin-left: 10px">Puzzle Style: </label>
-            <select id="puzzleStyle"
-              onchange="createEmptyPuzzle(Math.floor(puzzle.width / 2), Math.floor(puzzle.height / 2))">
-              <option>Default</option>
-              <option>Horizontal Symmetry</option>
-              <option>Vertical Symmetry</option>
-              <option>Rotational Symmetry</option>
-              <option>Two Lines</option>
-              <option>Pillar</option>
-              <option>Pillar (H Symmetry)</option>
-              <option>Pillar (V Symmetry)</option>
-              <option>Pillar (R Symmetry)</option>
-              <option>Pillar (Two Lines)</option>
-            </select>
-          </div>
-          <div class="hlist">
-            <div class="spacer"></div>
-            <label style="margin-right: 8px">Required Solutions:</label>
-            <input type="number" min="1" step="1" value="1" id="sols" onchange="changeSols()"></input>
-            <div class="spacer"></div>
-          </div>
-          <div class="hlist">
-            <div class="spacer"></div>
-            <div onpointerdown="checkboxToggle('disableFlash', disableFlash)" class="checkbox" id="disableFlash"></div>
-            <label onpointerdown="checkboxToggle('disableFlash', disableFlash)" style="margin-right: 8px">Disable Flash</label>
-            <div onpointerdown="checkboxToggle('makeOptional', makeOptional)" class="checkbox" id="makeOptional"></div>
-            <label onpointerdown="checkboxToggle('makeOptional', makeOptional)" style="margin-right: 8px">Optional</label>
-            <div id="show-if-tent" style="display: none;">
-              <div class="spacer"></div>
-              <div onpointerdown="checkboxToggle('makePerfect', makePerfect)" class="checkbox" id="makePerfect"></div>
-              <label onpointerdown="checkboxToggle('makePerfect', makePerfect)" style="margin-right: 8px">Make Perfect</label>
+            <div class="vlist" style="width: 50%; height: 679px;" id="puzzle-style">
+              <h1>Puzzle Style</h1>
+              <div class="block">
+                <div id="set-sols" class="hlist">
+                  <label style="margin-right: 8px">Solutions:</label>
+                  <input type="number" min="1" step="1" value="1" id="sols" onchange="applyChange(this, this.value, ['sols'])"></input>
+                  <div class="spacer"></div>
+                </div>
+                <div id="show-if-tent" style="display: none;">
+                  <div onpointerdown="makePerfect()" class="checkbox" id="makePerfect"></div>
+                  <label onpointerdown="makePerfect()" style="margin-right: 8px">Make Perfect</label>
+                  <div class="spacer"></div>
+                </div>
+              </div>
+              <div class="block">
+                <h1>Symmetry Setting</h1>
+              </div>
+              <div class="block">
+                <select id="puzzleStyle" onchange="createEmptyPuzzle(div(puzzle.width, 2), div(puzzle.height, 2))">
+                  <option>Default</option>
+                  <option>Horizontal Symmetry</option>
+                  <option>Vertical Symmetry</option>
+                  <option>Rotational Symmetry</option>
+                  <option>Pillar</option>
+                  <option>Pillar (H Symmetry)</option>
+                  <option>Pillar (V Symmetry)</option>
+                  <option>Pillar (R Symmetry)</option>
+                  <option>Pillar (Two Lines)</option>
+                </select>
+              </div>
+              <div class="block">
+                <h1>Puzzle Transform</h1>
+              </div>
+              <div class="block">
+                <label style="margin-right: 8px">Translate</label>
+                <div class="hlist">
+                  <label style="margin-right: 8px">X:</label>
+                  <input type="number" step="1" value="0" id="trX" onchange="applyChange(this, this.value, ['transform', 'translate', '0'])"></input>
+                  <label>px</label>
+                  <div class="spacer"></div>
+                </div>
+                <div class="hlist">
+                  <label style="margin-right: 8px">Y:</label>
+                  <input type="number" step="1" value="0" id="trY" onchange="applyChange(this, this.value, ['transform', 'translate', '1'])"></input>
+                  <label>px</label>
+                  <div class="spacer"></div>
+                </div>
+                <div class="hlist">
+                  <label style="margin-right: 8px">Z:</label>
+                  <input type="number" step="1" value="100" id="perspective" onchange="applyChange(this, this.value, ['transform', 'translate', '2'])"></input>
+                  <label>px</label>
+                  <div class="spacer"></div>
+                </div>
+                <label style="margin-right: 8px">Rotate:</label>
+                <div class="hlist">
+                  <label style="margin-right: 8px">X:</label>
+                  <input type="number" step="1" value="0" id="rtX" onchange="applyChange(this, this.value, ['transform', 'rotate', '0'])"></input>
+                  <label>˚</label>
+                  <div class="spacer"></div>
+                </div>
+                <div class="hlist">
+                  <label style="margin-right: 8px">Y:</label>
+                  <input type="number" step="1" value="0" id="rtY" onchange="applyChange(this, this.value, ['transform', 'rotate', '1'])"></input>
+                  <label>˚</label>
+                  <div class="spacer"></div>
+                </div>
+                <div class="hlist">
+                  <label style="margin-right: 8px">Z:</label>
+                  <input type="number" step="1" value="0" id="rtZ" onchange="applyChange(this, this.value, ['transform', 'rotate', '2'])"></input>
+                  <label>˚</label>
+                  <div class="spacer"></div>
+                </div>
+                <label style="margin-right: 8px">Scale</label>
+                <div class="hlist">
+                  <label style="margin-right: 8px">X:</label>
+                  <input type="number" step="1" value="100" id="scX" onchange="applyChange(this, this.value, ['transform', 'scale', '0'])"></input>
+                  <label>%</label>
+                  <div class="spacer"></div>
+                </div>
+                <div class="hlist">
+                  <label style="margin-right: 8px">Y:</label>
+                  <input type="number" step="1" value="100" id="scY" onchange="applyChange(this, this.value, ['transform', 'scale', '1'])"></input>
+                  <label>%</label>
+                  <div class="spacer"></div>
+                </div>
+                <label style="margin-right: 8px">Skew</label>
+                <div class="hlist">
+                  <label style="margin-right: 8px">X:</label>
+                  <input type="number" step="1" value="0" id="skX" onchange="applyChange(this, this.value, ['transform', 'skew', '0'])"></input>
+                  <label>˚</label>
+                  <div class="spacer"></div>
+                </div>
+                <div class="hlist">
+                  <label style="margin-right: 8px">Y:</label>
+                  <input type="number" step="1" value="0" id="skY" onchange="applyChange(this, this.value, ['transform', 'skew', '1'])"></input>
+                  <label>˚</label>
+                  <div class="spacer"></div>
+                </div>
+              </div>
+              <div class="block">
+                <h1>Other</h1>
+              </div>
+              <div class="block">
+                <h2>※ Set endpoint to 0 for "Next Puzzle"</h2>
+                <div class="hlist">
+                  <label style="margin-right: 8px">Endpoint A: puzzle</label>
+                  <input type="number" min="0" max="255" step="1" value="0" id="epA" onchange="applyChange(this, this.value, ['endDest', '0'])"></input>
+                  <div class="spacer"></div>
+                </div>
+                <div class="hlist">
+                  <label style="margin-right: 8px">Endpoint B: puzzle</label>
+                  <input type="number" min="0" max="255" step="1" value="0" id="epB" onchange="applyChange(this, this.value, ['endDest', '1'])"></input>
+                  <div class="spacer"></div>
+                </div>
+                <div class="hlist">
+                  <label style="margin-right: 8px">Endpoint C: puzzle</label>
+                  <input type="number" min="0" max="255" step="1" value="0" id="epC" onchange="applyChange(this, this.value, ['endDest', '2'])"></input>
+                  <div class="spacer"></div>
+                </div>
+                <div class="hlist">
+                  <div onpointerdown="applyChange('disableFlash', null, 'disableFlash')" class="checkbox" id="disableFlash"></div>
+                  <label onpointerdown="applyChange('disableFlash', null, 'disableFlash')" style="margin-right: 8px">Disable Flash</label>
+                  <div class="spacer"></div>
+                </div>
+                <div class="hlist">
+                  <div onpointerdown="applyChange('makeOptional', null, 'optional')" class="checkbox" id="makeOptional"></div>
+                  <label onpointerdown="applyChange('makeOptional', null, 'optional')" style="margin-right: 8px">Optional</label>
+                  <div class="spacer"></div>
+                </div>
+              </div>
+              <div id="hide-if-sound-dots" class="block sound-dots-wrapper vlist">
+                <h2>Sound Dots (Drag)</h2>
+                <div id="sound-dots" class="hlist"></div>
+              </div>
+              <button id="expandPuzzleStyle" onclick="togglePuzzleStyle()">-</button>
             </div>
-            <div class="spacer"></div>
           </div>
           <div class="hlist editor-screen">
             <div class="symbolButtons-wrapper">
@@ -253,8 +356,8 @@
             </table>
           </div>
           <div>
-            <div onpointerdown="checkboxToggle('solveMode', setSolveMode)" class="checkbox" id="solveMode"></div>
-            <label onpointerdown="checkboxToggle('solveMode', setSolveMode)" id="solveManual"
+            <div onpointerdown="setSolveMode(!this.checked)" class="checkbox" id="solveMode"></div>
+            <label onpointerdown="setSolveMode(!document.getElementById('solveMode').checked)" id="solveManual"
               style="margin-right: 8px">Solve (manually)</label>
             <button onpointerdown="solvePuzzle()" id="solveAuto" style="margin-right: 8px">Solve
               (automatically)</button>
@@ -271,10 +374,6 @@
             </div>
             <button id="save" onpointerdown="exportPuzzle()">Get URL</button>
             <a href="https://prodzpod.github.io/witness/merge.html"><button>Merge Levels</button></a>
-          </div>
-          <div id="hide-if-sound-dots" class="sound-dots-wrapper vlist">
-            <h2>Sound Dots (Drag)</h2>
-            <div id="sound-dots" class="hlist"></div>
           </div>
           <div class="theme">
             <h1>Theme Setting</h1>

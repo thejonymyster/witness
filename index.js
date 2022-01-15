@@ -68,6 +68,12 @@ const PROGRESS = [
         'endPoint': [9, 12],
         'URL': "https://prodzpod.github.io/witness#vs2_v5_AA0APAA8AEEARABOAEoAXwBfAHUAdAB3AKkArw~4EBAQG~2AgIC~2goKCAAQEBAwMDBAUEBQUIAgEBBAMDAwQEBAUFCAI~~HA~3TExMTEw4TE~3tLS0tLOEt~3HR0dHRzhH~~HA~3KioqKioiq~3ioqKioqIq~4oqKiKq~~HAC~3oqKioqJS~4oqKiU~4qKiolKg~~HA~3ZGRkZGRrZF~3paWlpaa1o~38PDw8PGs8~~HA~4GRkZmR~3aWlpaWmZa~3PDw8PDxmP~~HAC~35ubm5uf.5~3gICAgID-gO~37u7u7u-.4~~HA~3ioqKior-ii~3srKysr-yv~3j4.Pj4--j~~HA~4IiIiIj~~Y-w~~GAD~~Y-y~4IiIiI~~qACAgIEBAMCBwUCAwUG~~IAICAgMCBQgCBAoFCAECAggEBAYIBQQKCggCAAAABgYGAAUEAAoIAgAAAAYGAAAFCAAGEAMICAgEAwAICAQIAAgE~~5AQMAAAo~~5ABAICAgAACAIABAEICAI~~9ABggAHhABAAAACAgQAAIEAAAIAwEBAgAAAAgEAA0AAAIAAAAQEAIABgMAAQM~~BAY~~6ACAgABAQAAEAAQAAAQgWFgIAAAMBAAAACwAAAQAgAgIBAgEIAQAIIBYAAAECAAAC~~5AQAAAQMIBAIBBCAgAQMAAwAAAgEAABYBAQEAEAIDAQIgAAIBAgIAAAQCAAAgASABEAAEAwAgFgAWAwAKBAMTAAEBAQAQAAQDAAECIAIAAAAEAAAgFgEIAAEEAAAWAAMAAQIBAQEBICABAgQCAQAgFhYAAgQAAQEWAQEAAgADAiAAIAQDAgQCFiAWAgMEAAMAFgECAwAABGgBIAIAAAIEdBYCAgIEBHQAAAMDAwVwIAECBAQFcxYCACAgBVwAAwEWFgY6ICADAQEGXBYWAAMcBy8BAAIWDAdcICADIAAALxYWIBYXA2MAARYBIAZkICABIBYCbhYWBRYABVwAAAkBHAcuICACAwwBZBYWIBYAA2kBARYgEwZzARYgAGMgARYCbxYgAQdyABYcAGQFAQwEYQkgAAZwAhYHAnAgASAFXBYDFgUuABYBB2MgIBwcbxYWDAxtAQEAAVwgIBMxLxYWICBhAQEWFnQgAwABdBYWIBxhACAWDGMFFgEAaAkBHCdtAwwcZQAMbgcAdA9zIFwWLwA1IDEWNQA2IDcWOAA5IDEWNAEzIDEWNgE4HDYMMQI0MjUgMRZcAS8cOQwzADBxMCA3FjkAOCAxFjcBOSA4FjAAOCAzFjcBORwwDDgAXDMvIGkWbQBhHGcMZQBfcTQyXC5wbmc_"
     }, {
+        '_name': 'crystal',
+        'hash': 1479665056,
+        'puzzles': 13,
+        'endPoint': [4, 6],
+        'URL': "https://prodzpod.github.io/witness#vs2_v5_AA0ARABEAE4AWABYAEYAYwBMAEwAXABEAEQAXw~4EBAQGDg4ODhYCAgICAh4CAAQMDBQU~2DBQMFBQICAgQF~2AwUDBQU~~0A~~MAE~CJCQkJCQg~~GA~DBwcH~~IA~~q-~~HA~DCQkJ~~HAC~C-v7.-v78~~HA~D6Ojo~~HA~4IiIiIj~~Y-w~~GAD~~Y-y~4IiIiI~~qAEBAQEBAIIBgYFBAQC~~MAQABgIBAQAAAAoCBgYGCgYDAgIBBgoKAgYGCgoAAwQECAYK~~6AgAAAQFBQoABQAEBAQACggKBgYHBgoI~~6AQACgYGCgAAAAQEBAgGAgoEBAoGAwI~~8AKBQUF~~5AQEBCAgACQEBAAMQ~~9AwgCAgAAAAgICAgBCAAKAAAQCAg~~8ACCQ~~8AEBAQECAgAICAgIAgE~~7AED~~7ABCAgICAIABxAQEAIQAg~~7AQ~~8AI~~6ABsIEBAQAAAEAQEDBQUD~~6AEBBAABAAAABBAQEAIBAgABAQEBARs~~6AQIDGxsCAgIDEBAQABsb~2AAMDB~~5AUDAwQEBAEEBBsQAgEABQUDAAIDAw~~5AEGwEEAhAAAAEAAwMCAAEBAQMEAQACAQEDGxsCAQABAQADAxsbEBsbBAIE~2AwMAGxsEAhABAwMDAxsbAAICBAMDABsbBAIEAwMbGwECBAMDAhsbBAQEAwMbGwQBAgMDBBsbBAIBAwMbGwEEBQMDAxsbBAIbAwMDAQUEGxsbAwMDAgQEGxsDAwICGwMC"
+    }, {
         '_name': 'editor',
         'hash': 0,
         'puzzles': -1,
@@ -106,7 +112,7 @@ window.onload = function() {
         );
         reloadPanel();
     }
-    for (let o of PROGRESS) if (localStorage.getItem('puzzleProgress_' + o.hash) == o.puzzles) {
+    for (let o of PROGRESS) if (checkProgress(o.hash) === o.puzzles - 1) {
         const params = {
           'type': 'flower',
           'width': 58,
@@ -127,6 +133,31 @@ window.reloadSymbolTheme = function() {
 window.onSolvedPuzzle = function() {
     let temp = PROGRESS.find(x => x.endPoint[0] == puzzle.endPoint.x && x.endPoint[1] == puzzle.endPoint.y);
     if (temp) window.location.href = temp.URL;
+}
+
+window.checkProgress = function(hash) {
+    let progress = localStorage.getItem(hash);
+    if (localStorage.getItem('puzzleProgress_' + hash)) {
+        let temp = '';
+        for (let i = 0; i < Number(localStorage.getItem('puzzleProgress_' + hash)); i++) {
+            localStorage.setItem(hash + '_' + i, localStorage.getItem('puzzleProgress_' + hash + '_' + i))
+            localStorage.removeItem('puzzleProgress_' + hash + '_' + i)
+            temp += String.fromCharCode(i);
+        }
+        localStorage.removeItem('puzzleProgress_' + hash);
+        localStorage.setItem(hash, temp);
+        progress = temp;
+    }
+    if (!progress) return -1;
+    return progress.charCodeAt(progress.length - 1);
+}
+
+const dontReset = ['puzzle', 'merge', 'sensitivity', 'symbolTheme', 'volume', 'expandSettings', ...PROGRESS.map(x => x.hash.toString())];
+window.resetProgress = function() {
+    for (let k in localStorage) {
+        if (dontReset.includes(k.split('_')[0])) continue;
+        localStorage.removeItem(k);
+    }
 }
 
 function HSVtoRGB(h, s, v) {
