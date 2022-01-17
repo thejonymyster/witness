@@ -153,10 +153,32 @@ window.checkProgress = function(hash) {
   return progress.charCodeAt(progress.length - 1);
 }
 
+let sr = 2; hr = 4;
+window.toggleReset = function(hard=false) {
+    let button = document.getElementById(hard ? 'hardReset' : 'softReset');
+    if (hard) {
+        hr--;
+        button.innerHTML = 'This will delete EVERYTHING. Continue by pressing ' + hr + ' times.'
+        if (!hr) {
+            resetProgress(true);
+            button.innerHTML = 'Reset Progress';
+            hr = 4;
+        }
+    } else {
+        sr--;
+        button.innerHTML = 'This will delete non-main page puzzle\'s progress. Continue?'
+        if (!sr) {
+            resetProgress();
+            button.innerHTML = 'Clear Cache';
+            sr = 2;
+        }
+    }
+}
+
 const dontReset = ['puzzle', 'merge', 'sensitivity', 'symbolTheme', 'volume', 'expandSettings', ...PROGRESS.map(x => x.hash.toString())];
-window.resetProgress = function() {
+window.resetProgress = function(hard=false) {
     for (let k in localStorage) {
-        if (dontReset.includes(k.split('_')[0])) continue;
+        if (!hard && dontReset.includes(k.split('_')[0])) continue;
         localStorage.removeItem(k);
     }
 }

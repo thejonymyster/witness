@@ -7,7 +7,51 @@ let dragging = null
 // write a singular puzzle for reload purposes
 function writePuzzle() {
   console.log('Writing puzzle', puzzle)
+  for (let i = 9; i; i--) sessionStorage['undo-' + (i + 1)] = sessionStorage['undo-' + i];
+  sessionStorage['undo-1'] = localStorage.puzzle;
+  for (let i = 1; i <= 10; i++) delete sessionStorage['redo-' + i];
   localStorage.puzzle = serializePuzzle(puzzle);
+}
+
+window.undo = function() {
+  if (!sessionStorage['undo-1'] || sessionStorage['undo-1'] === 'undefined') return;
+  for (let i = 9; i; i--) sessionStorage['redo-' + (i + 1)] = sessionStorage['redo-' + i];
+  sessionStorage['redo-1'] = localStorage.puzzle;
+  deserializePuzzle(sessionStorage['undo-1']);
+  applyThemeButton();
+  applyImageButton();
+  updateSoundDotsList();
+  reloadPuzzle();
+  localStorage.puzzle = sessionStorage['undo-1']; // dont call writepuzzle
+  for (let i = 1; i < 10; i++) sessionStorage['undo-' + i] = sessionStorage['undo-' + (i + 1)];
+  delete sessionStorage['undo-10'];
+}
+
+window.redo = function() {
+  if (!sessionStorage['redo-1'] || sessionStorage['redo-1'] === 'undefined') return;
+  for (let i = 9; i; i--) sessionStorage['undo-' + (i + 1)] = sessionStorage['undo-' + i];
+  sessionStorage['undo-1'] = localStorage.puzzle;
+  deserializePuzzle(sessionStorage['redo-1']);
+  applyThemeButton();
+  applyImageButton();
+  updateSoundDotsList();
+  reloadPuzzle();
+  localStorage.puzzle = sessionStorage['redo-1']; // dont call writepuzzle
+  for (let i = 1; i < 10; i++) sessionStorage['redo-' + i] = sessionStorage['redo-' + (i + 1)];
+  delete sessionStorage['redo-10'];
+}
+
+window.backup = function() {
+  localStorage['puzzle-' + document.getElementById('backupName').value] = serializePuzzle(puzzle);
+}
+
+window.load = function() {
+  deserializePuzzle(localStorage['puzzle-' + document.getElementById('loadName').value]);
+  applyThemeButton();
+  applyImageButton();
+  updateSoundDotsList();
+  reloadPuzzle();
+  writePuzzle();
 }
 
 // Delete the active puzzle then read the next one.

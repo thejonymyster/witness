@@ -524,3 +524,11 @@ li button {
   width: 10px;
   height: 10px;
 }
+
+.resetButtons button {
+  background-color: #005721;
+}
+
+.utils input {
+  font-size: 24px;
+}

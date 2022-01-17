@@ -2,14 +2,20 @@
 
 <head>
   <meta charset="utf-8">
+  <meta property="og:site_name" content="Looksy">
+  <title>Looksy Editor v2.3.1</title>
+  <meta property="og:title" content="Looksy Editor v2.3.1">
   <meta name="description" content="Looksy - Modded Witness Editor">
+  <meta property="og:description" content="Modded Witness Editor">
+  <meta property="og:type" content="Game">
+  <meta property="og:url" content="prodzpod.github.io/witness/editor">
+  <link rel="icon" type="image/png" href="./data/favicon.png">
+  <meta property="og:image" content="./data/favicon_black.png">
   <meta name="author" content="prod">
   <meta name="robots" content="nosnippet" />
   <link rel="stylesheet" type="text/css" href="./data/reset.css" id="stylesheet">
   <link rel="stylesheet" type="text/css" href="./data/style.css" id="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css" ie-ignore>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
-  <link rel="icon" type="image/png" href="./data/favicon.png">
   <script type="text/javascript" src="./engine/utilities.js"></script>
   <script type="text/javascript" src="./engine/svg.js"></script>
   <script async type="text/javascript" src="./engine/puzzle.js"></script>
@@ -19,7 +25,6 @@
   <script async type="text/javascript" src="./engine/display2.js"></script>
   <script async type="text/javascript" src="./engine/trace2.js"></script>
   <script async type="text/javascript" src="./editor.js"></script>
-  <title>Looksy Editor v2.3.0</title>
 </head>
 
 <body>
@@ -196,6 +201,14 @@
               <button id="expandPuzzleStyle" onclick="togglePuzzleStyle()">-</button>
             </div>
           </div>
+          <div class="hlist utils">
+            <button onpointerdown="undo()">Undo</button>
+            <button onpointerdown="redo()">Redo</button>
+            <button onpointerdown="backup()">Backup as</button>
+            <input id="backupName">
+            <button onpointerdown="load()">Load</button>
+            <input id="loadName">
+          </div>
           <div class="hlist editor-screen">
             <div class="symbolButtons-wrapper">
               <table id="symbolButtons" style="padding: 5px;" cellpadding="4" cellspacing="0">
@@ -309,49 +322,49 @@
                 <td><button id="#000000ff"></button></td>
                 <td><button id="#00000080"></button></td>
                 <td><button id="#00000000"></button></td>
-                <td><button id="#55556cff"></button></td>
+                <td><button id="var(--background)"></button></td>
               </tr>
               <tr>
                 <td><button id="#ffffffff"></button></td>
                 <td><button id="#ffffff80"></button></td>
                 <td><button id="#ccccccff"></button></td>
-                <td><button id="#b4b4c4ff"></button></td>
+                <td><button id="var(--outer)"></button></td>
               </tr>
               <tr>
                 <td><button id="#ff0000ff"></button></td>
                 <td><button id="#ff66b3ff"></button></td>
                 <td><button id="#800000ff"></button></td>
-                <td><button id="#aa0000ff"></button></td>
+                <td><button id="var(--line-undone)"></button></td>
               </tr>
               <tr>
                 <td><button id="#ffa500ff"></button></td>
-                <td><button id="#fa8f04ff"></button></td>
                 <td><button id="#ff6666ff"></button></td>
                 <td><button id="#ff4000ff"></button></td>
+                <td><button id="var(--text)"></button></td>
               </tr>
               <tr>
                 <td><button id="#ffff00ff"></button></td>
                 <td><button id="#ffff80ff"></button></td>
-                <td><button id="#cccc44ff"></button></td>
                 <td><button id="#ffc900ff"></button></td>
+                <td><button id="var(--line-default)"></button></td>
               </tr>
               <tr>
                 <td><button id="#008000ff"></button></td>
                 <td><button id="#b0ffb0ff"></button></td>
-                <td><button id="#76a856ff"></button></td>
                 <td><button id="#00ff00ff"></button></td>
+                <td><button id="var(--line-primary)"></button></td>
               </tr>
               <tr>
                 <td><button id="#0000ffff"></button></td>
                 <td><button id="#6867fdff"></button></td>
                 <td><button id="#80ffffff"></button></td>
-                <td><button id="#3cd4d9ff"></button></td>
+                <td><button id="var(--line-secondary)"></button></td>
               </tr>
               <tr>
                 <td><button id="#800080ff"></button></td>
                 <td><button id="#8101ffff"></button></td>
                 <td><button id="#ff07ffff"></button></td>
-                <td><button id="#aa00aaff"></button></td>
+                <td><button id="var(--line-success)"></button></td>
               </tr>
             </table>
           </div>

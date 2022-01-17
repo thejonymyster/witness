@@ -81,8 +81,7 @@ window.polyominoes = ['poly', 'ylop', 'polynt', 'xvmino'];
 window.endEnum = ['top', 'right', 'left', 'bottom'];
 window.themeArgs = ['background', 'outer', 'inner', 'text', 'line-undone', 'line-default', 'line-success', 'line-primary', 'line-secondary'];
 window.imageArgs = ['background-image', 'foreground-image', 'background-music', 'cursor-image', 'veil-image'];
-let swappedImageArgs = [imageArgs[1], imageArgs[0], ...imageArgs.slice(2)];
-window.symbolColors = ["#000000ff", "#00000080", "#00000000", "#ffffffff", "#ffffff80", "#ccccccff", "#ff0000ff", "#ff66b3ff", "#800000ff", "#ffa500ff", "#fa8f04ff", "#ff6666ff", "#ffff00ff", "#ffff80ff", "#cccc44ff", "#008000ff", "#b0ffb0ff",  "#3cd4d9ff", "#0000ffff", "#6867fdff", "#80ffffff", "#800080ff", "#8101ffff", "#ff07ffff", "#55556cff", "#b4b4c4ff", "#aa0000ff", "#ff4000ff", "#ffc900ff", "#00ff00ff", "#76a856ff", "#aa00aaff"];
+window.symbolColors = ["#000000ff", "#00000080", "#00000000", "#ffffffff", "#ffffff80", "#ccccccff", "#ff0000ff", "#ff66b3ff", "#800000ff", "#ffa500ff", "#fa8f04ff", "#ff6666ff", "#ffff00ff", "#ffff80ff", "#cccc44ff", "#008000ff", "#b0ffb0ff",  "#3cd4d9ff", "#0000ffff", "#6867fdff", "#80ffffff", "#800080ff", "#8101ffff", "#ff07ffff", "#55556cff", "#b4b4c4ff", "#aa0000ff", "#ff4000ff", "#ffc900ff", "#00ff00ff", "#76a856ff", "#aa00aaff", "var(--background)", "var(--outer)", "var(--line-undone)", "var(--text)", "var(--line-default)", "var(--line-primary)", "var(--line-secondary)", "var(--line-success)"];
 window.symmetryModes = function(symmetry, pillar) {
   if (pillar) {
     if (!symmetry) return 'Pillar';
@@ -225,8 +224,7 @@ window.deleteElementsByClassName = function(rootElem, className) {
 
 window.pathsToDir = function(rawPath) {  
   let res = "", path = [...rawPath];
-  res += String.fromCharCode(path[0].x);
-  res += String.fromCharCode(path[0].y);
+  res += String.fromCharCode(path[0].x, path[0].y);
   path[path.length - 1] = ['', 'left', 'right', 'top', 'bottom'].indexOf(puzzle.getCell(puzzle.endPoint.x, puzzle.endPoint.y).end);
   for (let i = 1; i < path.length; i += 4) {
     res += String.fromCharCode(
@@ -277,9 +275,19 @@ window.intToByte = function(n) {
   return String.fromCharCode(((n & 0xff000000) >>> 24), ((n & 0x00ff0000) >>> 16), ((n & 0x0000ff00) >>> 8), n & 0x000000ff);
 }
 
+window.intToShort = function(n) {
+  return String.fromCharCode(((n & 0xFF00) >>> 8), n & 0xFF);
+}
+
 window.byteToInt = function(b, signed) {
   let i = (b.charCodeAt(0) << 24 >>> 0) + (b.charCodeAt(1) << 16 >>> 0) + (b.charCodeAt(2) << 8 >>> 0) + (b.charCodeAt(3) >>> 0);
   if ((i & 0x80000000) && signed) return i - 0x100000000;
+  else return i;
+}
+
+window.shortToInt = function(b, signed) {
+  let i = (b.charCodeAt(0) << 8 >>> 0) + (b.charCodeAt(1) >>> 0);
+  if ((i & 0x8000) && signed) return i - 0x10000;
   else return i;
 }
 
@@ -525,8 +533,8 @@ window.applyImage = function(puzzle) {
 
 window.serializeTheme = function(puzzle) {
   let ints = [];
-  for (const entry of themeArgs) ints.push(puzzle.theme[entry]);
-  return 'vt1_' + runLength(btoa(themeArgs.map(x => intToByte(puzzle.theme[x])).join('') + imageArgs.map(x => (puzzle.image[x] ?? '')).join('\u0000')).replace(/\+/g, '.').replace(/\//g, '-').replace(/=/g, '_'));
+  for (const entry of ['background', 'outer', 'inner', 'text', 'line-undone', 'line-default', 'line-success', 'line-primary', 'line-secondary']) ints.push(puzzle.theme[entry]);
+  return 'vt1_' + runLength(btoa(['background', 'outer', 'inner', 'text', 'line-undone', 'line-default', 'line-success', 'line-primary', 'line-secondary'].map(x => intToByte(puzzle.theme[x])).join('') + imageArgs.map(x => (puzzle.image[x] ?? '')).join('\u0000')).replace(/\+/g, '.').replace(/\//g, '-').replace(/=/g, '_'));
 }
 
 window.deserializeTheme = function(puzzle, string) {
@@ -540,7 +548,7 @@ window.deserializeTheme = function(puzzle, string) {
 function deserializeThemeV1(puzzle, string) {
   let raw = atob(derunLength(string).replace(/\./g, '+').replace(/-/g, '/').replace(/_/g, '='));
   let i = 0;
-  for (const entry of themeArgs) {
+  for (const entry of ['background', 'outer', 'inner', 'text', 'line-undone', 'line-default', 'line-success', 'line-primary', 'line-secondary']) {
     puzzle.theme[entry] = byteToInt(raw.slice(i, i+4));
     i += 4;
   }
@@ -554,8 +562,8 @@ function deserializeThemeV1(puzzle, string) {
 const SCHEMA = new Map([
   ['width', 'byte'],
   ['height', 'byte'],
-  ['sols', 'byte'], //* if sols=0, perfect=true
   ['flags', 'byte'], //* pillar.x, pillar.y, disableFlash, optional
+  ['sols', 'byte'], //* if sols=0, perfect=true
   ['translateX', 'int'], //* in pixel
   ['translateY', 'int'], //* in pixel
   ['rotateX', 'byte'], //* -45 to 45, in degree
@@ -608,19 +616,30 @@ const SCHEMA = new Map([
  ** start: byte (startx3, endx3 (direction + null), gap, endType<A, B, C>);
  */
 
-window.serializePuzzle = function(puzzle) {
-  let raw = "";
+window.serializePuzzle = function(puzzle, asObject=false) {
+  let raw = {
+    'size': '',
+    'header': '',
+    'theme': '',
+    'defaultCorner': '',
+    'defaultCell': '',
+    'corner': '',
+    'soundData': '',
+    'cell': '',
+    'image': [],
+  };
+
   //* header
-  raw += String.fromCharCode(Math.floor(puzzle.width / 2));
-  raw += String.fromCharCode(Math.floor(puzzle.height / 2));
-  raw += String.fromCharCode(makeBitSwitch(puzzle.disableFlash, puzzle.optional, puzzle.symmetry, puzzle.symmetry?.x, puzzle.symmetry?.y, puzzle.pillar));
-  raw += String.fromCharCode(Math.min(0xff, puzzle.sols ?? 1));
+  raw.size += String.fromCharCode(Math.floor(puzzle.width / 2));
+  raw.size += String.fromCharCode(Math.floor(puzzle.height / 2));
+  raw.size += String.fromCharCode(makeBitSwitch(puzzle.disableFlash, puzzle.optional, puzzle.symmetry, puzzle.symmetry?.x, puzzle.symmetry?.y, puzzle.pillar));
+  raw.header += String.fromCharCode(Math.min(0xff, puzzle.sols ?? 1));
   for (let k of ['translate', 'rotate', 'scale', 'skew']) {
-    raw += puzzle.transform[k].map(x => intToByte(x)).join('');
+    raw.header += puzzle.transform[k].map(x => intToByte(x)).join('');
   }
-  raw += puzzle.endDest.map(x => String.fromCharCode(x)).join('');
+  raw.header += puzzle.endDest.map(x => String.fromCharCode(x)).join('');
   //* theme
-  raw += themeArgs.map(x => intToByte(puzzle.theme[x])).join('');
+  raw.theme += ['background', 'outer', 'inner', 'text', 'line-undone', 'line-default', 'line-success', 'line-primary', 'line-secondary'].map(x => intToByte(puzzle.theme[x])).join('');
   //* defaultCorner
   let med = {};
   for (let i = 0; i < puzzle.width / 2; i++) for (let j = 0; j < puzzle.height / 2; j++) {
@@ -631,7 +650,7 @@ window.serializePuzzle = function(puzzle) {
   }
   let defCorner = "\0\0";
   for (let k in med) if (med[k] >= (puzzle.width * puzzle.height / 8)) defCorner = k;
-  raw += defCorner[0];
+  raw.defaultCorner += defCorner[0];
   //* defaultCell
   med = {};
   for (let i = 0; i < puzzle.width / 2; i++) for (let j = 0; j < puzzle.height / 2; j++) {
@@ -641,7 +660,7 @@ window.serializePuzzle = function(puzzle) {
   }
   let defCell = "\0";
   for (let k in med) if (med[k] >= (puzzle.height * puzzle.width / 8)) defCell = k;
-  raw += defCell;
+  raw.defaultCell += defCell;
   //* corners
   let corner = ["", "", ""];
   for (let i = 0; i < puzzle.width; i++) for (let j = 0; j < puzzle.height; j++) {
@@ -653,13 +672,13 @@ window.serializePuzzle = function(puzzle) {
     corner[1] += String.fromCharCode(j);
     corner[2] += data;
   }
-  raw += String.fromCharCode((corner[0].length & 0xFF00) << 8) + String.fromCharCode(corner[0].length & 0xFF);
-  raw += corner[0];
-  raw += corner[1];
-  raw += corner[2];
+  raw.corner += intToShort(corner[0].length);
+  raw.corner += corner[0];
+  raw.corner += corner[1];
+  raw.corner += corner[2];
   //* soundData
-  raw += String.fromCharCode(puzzle.soundDots.length);
-  for (let i = 0; i < puzzle.soundDots.length; i++) raw += String.fromCharCode(puzzle.soundDots[i]);
+  raw.soundData += String.fromCharCode(puzzle.soundDots.length);
+  for (let i = 0; i < puzzle.soundDots.length; i++) raw.soundData += String.fromCharCode(puzzle.soundDots[i]);
   //* cells
   let cell = ["", "", ""];
   for (let i = 0; i < puzzle.width / 2; i++) for (let j = 0; j < puzzle.height / 2; j++) {
@@ -670,17 +689,22 @@ window.serializePuzzle = function(puzzle) {
     cell[1] += String.fromCharCode(j);
     cell[2] += data;
   }
-  raw += String.fromCharCode((cell[0].length & 0xFF00) << 8) + String.fromCharCode(cell[0].length & 0xFF);
-  raw += cell[0];
-  raw += cell[1];
-  raw += cell[2];
+  raw.cell += intToShort(cell[0].length);
+  raw.cell += cell[0];
+  raw.cell += cell[1];
+  raw.cell += cell[2];
   //* image
   let zeroes = 0;
-  for (let i = 0; i < imageArgs.length; i++) if (puzzle.image[imageArgs[i]]) {
-    while (zeroes < i) { raw += '\0'; zeroes++; }
-    raw += puzzle.image[imageArgs[i]];
+  for (let i = 0; i < ['background-image', 'foreground-image', 'background-music', 'cursor-image', 'veil-image'].length; i++) if (puzzle.image[['background-image', 'foreground-image', 'background-music', 'cursor-image', 'veil-image'][i]]) {
+    while (zeroes < i) { if (!raw.image[zeroes]) raw.image.push(''); zeroes++; }
+    raw.image.push(puzzle.image[['background-image', 'foreground-image', 'background-music', 'cursor-image', 'veil-image'][i]]);
   }
-  return 'v6_' + runLength(btoa(raw).replace(/\+/g, '.').replace(/\//g, '-').replace(/\=/g, '_'));
+  if (asObject) return raw;
+  return serializePuzzlePost(raw);
+}
+
+function serializePuzzlePost(raw) {
+  return 'v6_' + runLength(btoa(raw.size + raw.header + raw.theme + raw.defaultCorner + raw.defaultCell + raw.corner + raw.soundData + raw.cell + raw.image.join('\0')).replace(/\+/g, '.').replace(/\//g, '-').replace(/\=/g, '_'));
 }
 
 function getCellData(cell) {
@@ -696,10 +720,7 @@ function getCellData(cell) {
   if (['arrow', 'dart'].includes(cell.type)) count = count * 8 + cell.rot;
   if (['scaler', 'swirl'].includes(cell.type)) raw += String.fromCharCode(!!cell.flip);
   if (count) raw += String.fromCharCode(count);
-  if (polyominoes.includes(cell.type)) {
-    raw += String.fromCharCode((cell.polyshape & 0xFF00) >> 8);
-    raw += String.fromCharCode((cell.polyshape & 0xFF));
-  }
+  if (polyominoes.includes(cell.type)) raw += intToShort(cell.polyshape);
   return raw;
 }
 
@@ -707,7 +728,7 @@ function getCornerData(cell) {
   if (cell == null) return "\0\0";
   let dot = cell.dot ? cell.dot + 29 : 0;
   let start = endEnum.indexOf(cell.end) + 1 + (!!cell.start << 3) + ((cell.gap ?? 0) << 4) + ((cell.endType ?? 0) << 6);
-  return String.fromCharCode(dot) + String.fromCharCode(start);
+  return String.fromCharCode(dot, start);
 }
 
 window.readRawArray = function(str) {
@@ -752,7 +773,7 @@ function deserializePuzzleV6(raw) {
   puzzle.endDest = [raw.charCodeAt(ptr), raw.charCodeAt(ptr + 1), raw.charCodeAt(ptr + 2)];
   ptr += 3;
   //* style
-  for (const entry of themeArgs) {
+  for (const entry of ['background', 'outer', 'inner', 'text', 'line-undone', 'line-default', 'line-success', 'line-primary', 'line-secondary']) {
     char = byteToInt(raw.slice(ptr, ptr + 4));
     puzzle.theme[entry] = char;
     ptr += 4;
@@ -760,8 +781,8 @@ function deserializePuzzleV6(raw) {
   [puzzle, ptr] = deserializePuzzleV4Core(raw, ptr, puzzle);
   //* image
   let urls = raw.slice(ptr).split('\0');
-  for (let i = 0; i < imageArgs.length; i++) 
-    if (urls[i]?.length) puzzle.image[imageArgs[i]] = urls[i];
+  for (let i = 0; i < ['background-image', 'foreground-image', 'background-music', 'cursor-image', 'veil-image'].length; i++) 
+    if (urls[i]?.length) puzzle.image[['background-image', 'foreground-image', 'background-music', 'cursor-image', 'veil-image'][i]] = urls[i];
   window.puzzle = puzzle;
   applyTheme(puzzle);
   applyImage(puzzle);
@@ -780,7 +801,7 @@ function deserializePuzzleV5(raw) {
   if (char[5]) puzzle.disableFlash = true;
   if (char[6]) puzzle.optional = true;
   //* style
-  for (const entry of themeArgs) {
+  for (const entry of ['background', 'outer', 'inner', 'text', 'line-undone', 'line-default', 'line-success', 'line-primary', 'line-secondary']) {
     char = byteToInt(raw.slice(ptr, ptr + 4));
     puzzle.theme[entry] = char;
     ptr += 4;
@@ -788,8 +809,8 @@ function deserializePuzzleV5(raw) {
   [puzzle, ptr] = deserializePuzzleV4Core(raw, ptr, puzzle);
   //* image
   let urls = raw.slice(ptr).split('\0');
-  for (let i = 0; i < swappedImageArgs.length; i++) 
-    if (urls[i]?.length) puzzle.image[swappedImageArgs[i]] = urls[i];
+  for (let i = 0; i < ['foreground-image', 'background-image', 'background-music', 'cursor-image', 'veil-image'].length; i++) 
+    if (urls[i]?.length) puzzle.image[['foreground-image', 'background-image', 'background-music', 'cursor-image', 'veil-image'][i]] = urls[i];
   window.puzzle = puzzle;
   applyTheme(puzzle);
   applyImage(puzzle);
@@ -808,15 +829,15 @@ function deserializePuzzleV4(raw) {
   let ptr = 4;
   [puzzle, ptr] = deserializePuzzleV4Core(raw, ptr, puzzle);
   //* style
-  for (const entry of themeArgs) {
+  for (const entry of ['background', 'outer', 'inner', 'text', 'line-undone', 'line-default', 'line-success', 'line-primary', 'line-secondary']) {
     char = byteToInt(raw.slice(ptr, ptr + 4));
     puzzle.theme[entry] = char;
     ptr += 4;
   }
   //* image
   let urls = raw.slice(ptr).split('\0');
-  for (let i = 0; i < swappedImageArgs.length; i++) 
-    if (urls[i]?.length) puzzle.image[swappedImageArgs[i]] = urls[i];
+  for (let i = 0; i < ['foreground-image', 'background-image', 'background-music', 'cursor-image', 'veil-image'].length; i++) 
+    if (urls[i]?.length) puzzle.image[['foreground-image', 'background-image', 'background-music', 'cursor-image', 'veil-image'][i]] = urls[i];
   window.puzzle = puzzle;
   applyTheme(puzzle);
   applyImage(puzzle);
@@ -841,7 +862,7 @@ function deserializePuzzleV4Core(raw, ptr, puzzle) {
   ptr++;
   //* corners
   let x = [], y = [];
-  let lenCorner = (raw.charCodeAt(ptr) >> 8) + (raw.charCodeAt(ptr + 1));
+  let lenCorner = shortToInt(raw.slice(ptr, ptr + 2));
   ptr += 2;
   for (let i = 0; i < lenCorner; i++) { y.push(raw.charCodeAt(ptr)); ptr++; }
   for (let i = 0; i < lenCorner; i++) { x.push(raw.charCodeAt(ptr)); ptr++; }
@@ -859,7 +880,7 @@ function deserializePuzzleV4Core(raw, ptr, puzzle) {
   }
   //* cells
   x = []; y = [];
-  let lenCell = (raw.charCodeAt(ptr) >> 8) + (raw.charCodeAt(ptr + 1));
+  let lenCell = shortToInt(raw.slice(ptr, ptr + 2));
   ptr += 2;
   for (let i = 0; i < lenCell; i++) { y.push(raw.charCodeAt(ptr)); ptr++; }
   for (let i = 0; i < lenCell; i++) { x.push(raw.charCodeAt(ptr)); ptr++; }
@@ -985,7 +1006,7 @@ function deserializePuzzleV2(raw, sols=1) {
     }
     puzzle.grid[x][y] = cell;
   }
-  for (const entry of themeArgs) {
+  for (const entry of ['background', 'outer', 'inner', 'text', 'line-undone', 'line-default', 'line-success', 'line-primary', 'line-secondary']) {
     char = byteToInt(raw.slice(i+1, i+5));
     puzzle.theme[entry] = char;
     i += 4;
@@ -1033,18 +1054,155 @@ function deidn(x, y) {
   return [base.indexOf(x), isSurrogate];
 }
 
+window.zip = function(str, varlen=false) {
+  let len = Math.max(...str.map(x => x.length));
+  let res = '';
+  if (varlen) {
+    res += String.fromCharCode(str.length);
+    for (let o of str.map(x => x.length)) res += intToShort(o); 
+  }
+  for (let i = 0; i < len; i++) for (let o of str) {
+    if (o[i] === undefined) continue;
+    res += o[i];
+  }
+  return res;
+}
+
+window.unzip = function(str, ptr=0, zlen=null, len=null) {
+  let list = [];
+  let lens = [];
+  if (zlen === null) {
+    zlen = str.charCodeAt(ptr);
+    ptr++;
+  }
+  for (let i = 0; i < zlen; i++) {
+    list.push('');
+    if (len !== null) lens.push(len);
+  }
+  if (len === null) {
+    for (let i = 0; i < list.length; i++) {
+      lens.push(shortToInt(str.slice(ptr, ptr+2)));
+      ptr += 2;
+    }
+  }
+  let m = Math.max(...lens);
+  for (let i = 0; i < m; i++) for (let k in list) {
+    if (lens[k] > i) {
+      list[k] += str[ptr];
+      ptr++;
+    }
+  }
+  return [list, ptr];
+}
+
+function listSparse(list, prop) {
+  let total = 0;
+  let res = '';
+  for (let k in list) if (list[k][prop] !== undefined) {
+    total++;
+    res += String.fromCharCode(k);
+  }
+  return String.fromCharCode(total) + res;
+}
+
+function readSparse(str, ptr) {
+  let total = str.charCodeAt(ptr);
+  let list = [];
+  for (let i = 1; i <= total; i++) list.push(str.charCodeAt(ptr + i));
+  return [list, ptr + total + 1];
+}
+
+function listDense(list, prop) {
+  let total = 0;
+  let cur = list[0][prop];
+  let res = String.fromCharCode(cur);
+  for (let k in list) if (list[k][prop] !== cur) {
+    cur = list[k][prop];
+    res += String.fromCharCode(k, cur);
+    total++;
+  }
+  return String.fromCharCode(total) + res;
+}
+
+function applyDense(str, ptr, list, prop=null, h=null) {
+  if (h === null) {
+    h = str.charCodeAt(ptr); ptr++;
+  }
+  let i = 0, c = str.charCodeAt(ptr);
+  ptr++;
+  while (h) {
+    let newI = str.charCodeAt(ptr), newC = str.charCodeAt(ptr + 1);
+    ptr += 2;
+    for (; i < newI; i++) {
+      if (prop === null) list[i] = c;
+      else list[i][prop] = c;
+    }
+    i = newI; c = newC; h--;
+  }
+  for (; i < list.length; i++) {
+    if (prop === null) list[i] = c;
+    else list[i][prop] = c;
+  }
+  return [list, ptr];
+}
+
 window.exportSequence = function(rawList, useIDN=false) {
   let list = [...rawList];
   let veri = list[0].indexOf('_');
   let version = list[0].slice(0, veri);
-  list = list.map(x => deserializePuzzlePre(x.slice(veri + 1)));
-  let len = list.map(x => x.length);
-  let ret = (useIDN ? 'vs2i_' : 'vs2_') + version + '_';
-  let res = "";
-  res += String.fromCharCode((len.length & 0xFF00) >> 8) + String.fromCharCode(len.length & 0xFF);
-  for (let k of len) { res += String.fromCharCode((k & 0xFF00) >> 8) + String.fromCharCode(k & 0xFF); }
-  for (let i = 0; i < Math.max(...len); i++)
-    for (let o of list) if (o[i] !== undefined) res += o[i];
+  list = list.map(x => serializePuzzle(deserializePuzzleV6(deserializePuzzlePre(x.slice(veri + 1))), true));
+  let ret = (useIDN ? 'vs3i_' : 'vs3_') + version + '_';
+  let res = String.fromCharCode(list.length);
+  /**
+   ** Size: dense
+   ** Header: sparse with default ("\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000d\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000d\u0000\u0000\u0000d\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000")
+   ** Theme: dense
+   ** DefaultCorner: sparse with default ("\0")
+   ** DefaultCell: sparse with default ("\0")
+   ** SoundData: sparse with default ("\0")
+   ** Corner: unique
+   ** Cell: unique
+   ** Image: sparse/dense with default (special mode, "")
+   */
+  let size = [], theme = [], image = [''];
+  for (let o of list) {
+    if (!size.includes(o.size)) size.push(o.size);
+    o.size = size.indexOf(o.size);
+    if (o.header === "\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000d\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000d\u0000\u0000\u0000d\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000") delete o.header;
+    if (!theme.includes(o.theme)) theme.push(o.theme);
+    o.theme = theme.indexOf(o.theme);
+    if (o.defaultCorner === "\0") delete o.defaultCorner;
+    if (o.defaultCell === "\0") delete o.defaultCell;
+    if (o.soundData === "\0") delete o.soundData;
+    for (let k in o.image) {
+      if (!image.includes(o.image[k])) image.push(o.image[k]);
+      o.image[k] = image.indexOf(o.image[k]);
+    }
+    if (!o.image.length) delete o.image;
+  }
+  //* encode
+  res += listDense(list, 'size');
+  res += listSparse(list, 'header') + zip(list.filter(x => x.header !== undefined).map(x => x.header));
+  res += listDense(list, 'theme');
+  res += listSparse(list, 'defaultCorner') + zip(list.filter(x => x.defaultCorner !== undefined).map(x => x.defaultCorner));
+  res += listSparse(list, 'defaultCell') + zip(list.filter(x => x.defaultCell !== undefined).map(x => x.defaultCell), true).slice(1);
+  res += listSparse(list, 'soundData') + zip(list.filter(x => x.soundData !== undefined).map(x => x.soundData), true).slice(1);
+  res += zip(list.map(x => x.corner), true).slice(1);
+  res += zip(list.map(x => x.cell), true).slice(1);
+  for (let i = 0; i < ['background-image', 'foreground-image', 'background-music', 'cursor-image', 'veil-image'].length; i++) {
+    let temp = '';
+    let total = 0;
+    for (let k in list) if (list[k].image?.[i]) {
+      total++;
+      temp += String.fromCharCode(k, list[k].image[i]);
+    }
+    res += String.fromCharCode(total) + temp;
+  }
+  res += zip(size);
+  res += zip(theme);
+  res += zip(image.slice(1), true).slice(1);
+  console.info('encoding', res.length, 'bytes of data...');
+  // post
   if (useIDN) {
     for (let i = 0; i < res.length; i += 2) {
       ret += idn((isNaN(res.charCodeAt(i)) ? 0 : res.charCodeAt(i) << 8) + (isNaN(res.charCodeAt(i+1)) ? 0 : res.charCodeAt(i+1)));
@@ -1064,6 +1222,8 @@ window.importSequence = function(string) {
   if (version == 'vs1') return importSequenceV1(string);
   else if (version == 'vs2') return importSequenceV2(string);
   else if (version == 'vs2i') return importSequenceV2I(string);
+  else if (version == 'vs3') return importSequenceV2(string, 3);
+  else if (version == 'vs3i') return importSequenceV2I(string, 3);
   else throw Error('unknown puzzle format');
 }
 
@@ -1072,7 +1232,7 @@ function importSequenceV1(string) {
   return res;
 }
 
-function importSequenceV2I(string) {
+function importSequenceV2I(string, vs=2) {
   let veri = string.indexOf('_');
   let version = string.slice(0, veri);
   let str = derunLengthV2(string.slice(veri + 1));
@@ -1080,29 +1240,94 @@ function importSequenceV2I(string) {
   for (let i = 0; i < str.length; i++) {
     let temp = deidn(str[i], str[i+1]);
     if (temp[1]) i++;
-    string += String.fromCharCode((temp[0] & 0xFF00) >> 8) + String.fromCharCode(temp[0] & 0xFF);
+    string += intToShort(temp[0]);
   }
+  if (vs === 3) return importSequenceV3Core(version, string);
   return importSequenceV2Core(version, string);
 }
 
-function importSequenceV2(string) {
+function importSequenceV2(string, vs=2) {
   let veri = string.indexOf('_');
   let version = string.slice(0, veri);
   string = atob(derunLengthV2(string.slice(veri + 1)).replace(/\./g, '+').replace(/\-/g, '/').replace(/\_/g, '='));
+  if (vs === 3) return importSequenceV3Core(version, string);
   return importSequenceV2Core(version, string);
+}
+
+function importSequenceV3Core(version, string) {
+  if (version !== 'v6') throw Error('Uh oh! tell prod to update the sequence importer');
+  let ptr = 0;
+  let puzzles = [];
+  for (let i = 0; i < string.charCodeAt(ptr); i++) puzzles.push({});
+  ptr++;
+  [puzzles, ptr] = applyDense(string, ptr, puzzles, 'size'); puzzles; ptr;
+  let headerI, headerC;
+  [headerI, ptr] = readSparse(string, ptr); headerI; ptr; 
+  [headerC, ptr] = unzip(string, ptr, headerI.length, 44); headerC; ptr;
+  for (let i = 0; i < headerI.length; i++) puzzles[headerI[i]].header = headerC[i];
+  [puzzles, ptr] = applyDense(string, ptr, puzzles, 'theme'); puzzles; ptr;
+  let defaultCornerI, defaultCornerC;
+  [defaultCornerI, ptr] = readSparse(string, ptr); defaultCornerI; ptr; 
+  [defaultCornerC, ptr] = unzip(string, ptr, defaultCornerI.length, 1); defaultCornerC; ptr;
+  for (let i = 0; i < defaultCornerI.length; i++) puzzles[defaultCornerI[i]].defaultCorner = defaultCornerC[i];
+  let defaultCellI, defaultCellC;
+  [defaultCellI, ptr] = readSparse(string, ptr); defaultCellI; ptr; 
+  [defaultCellC, ptr] = unzip(string, ptr, defaultCellI.length); defaultCellC; ptr;
+  for (let i = 0; i < defaultCellI.length; i++) puzzles[defaultCellI[i]].defaultCell = defaultCellC[i];
+  let soundDataI, soundDataC;
+  [soundDataI, ptr] = readSparse(string, ptr); soundDataI; ptr; 
+  [soundDataC, ptr] = unzip(string, ptr, soundDataI.length); soundDataC; ptr;
+  for (let i = 0; i < soundDataI.length; i++) puzzles[soundDataI[i]].soundData = soundDataC[i];
+  let corner, cell;
+  [corner, ptr] = unzip(string, ptr, puzzles.length); corner; ptr;
+  [cell, ptr] = unzip(string, ptr, puzzles.length); cell; ptr;
+  for (let i = 0; i < puzzles.length; i++) {
+    puzzles[i].corner = corner[i];
+    puzzles[i].cell = cell[i];
+    puzzles[i].image = [];
+  }
+  let mimg = 0;
+  for (let i = 0; i < ['background-image', 'foreground-image', 'background-music', 'cursor-image', 'veil-image'].length; i++) {
+    let len = string.charCodeAt(ptr);
+    ptr++
+    for (let _ = 0; _ < len; _++) {
+      let img = string.charCodeAt(ptr+1); mimg = Math.max(mimg, img);
+      puzzles[string.charCodeAt(ptr)].image[i] = img;
+      ptr += 2;
+    }
+  }
+  let size = [], theme = [], image = [];
+  [size, ptr] = unzip(string, ptr, Math.max(...puzzles.map(x => x.size)) + 1, 3); size; ptr;
+  [theme, ptr] = unzip(string, ptr, Math.max(...puzzles.map(x => x.theme)) + 1, 36); theme; ptr;
+  [image, ptr] = unzip(string, ptr, mimg); image; ptr;
+  image = ['', ...image];
+  for (let i = 0; i < puzzles.length; i++) {
+    puzzles[i].size = size[puzzles[i].size];
+    if (puzzles[i].header === undefined) puzzles[i].header = "\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000d\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000d\u0000\u0000\u0000d\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000";
+    puzzles[i].theme = theme[puzzles[i].theme];
+    if (puzzles[i].defaultCorner === undefined) puzzles[i].defaultCorner = "\0";
+    if (puzzles[i].defaultCell === undefined) puzzles[i].defaultCell = "\0";
+    if (puzzles[i].soundData === undefined) puzzles[i].soundData = "\0";
+    for (let k in puzzles[i].image) {
+      puzzles[i].image[k] = image[puzzles[i].image[k] ?? 0];
+    }
+    puzzles[i] = serializePuzzlePost(puzzles[i]);
+  }
+  if (ptr !== string.length) throw Error('Invalid String');
+  return puzzles
 }
 
 function importSequenceV2Core(version, string) {
   let ret = [];
   let res = [];
   let ptr = 0;
-  let puzzleLen = (string.charCodeAt(ptr) << 8) + string.charCodeAt(ptr + 1);
+  let puzzleLen = shortToInt(string.slice(ptr, ptr + 2));
   ptr += 2;
   let lens = [];
   for (let i = 0; i < puzzleLen; i++) {
     ret.push(version + '_')
     res.push('');
-    lens.push((string.charCodeAt(ptr) << 8) + string.charCodeAt(ptr + 1));
+    lens.push(shortToInt(string.slice(ptr, ptr + 2)));
     ptr += 2;
   }
   for (let i = 0; i < Math.max(...lens); i++) {
