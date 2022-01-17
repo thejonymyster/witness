@@ -392,7 +392,7 @@ window.togglePuzzleStyle = function() {
   list.style.height = puzzleStyleExpand ? '711px' : '38px'; 
   list.style.borderColor = puzzleStyleExpand ? 'var(--text)' : 'transparent'; 
   list.style.padding = puzzleStyleExpand ? '16px' : '0 16px'; 
-  button.innerHTML = puzzleStyleExpand ? '-' : '+';
+  button.innerHTML = puzzleStyleExpand ? '-' : 'Puzzle Style (+)';
   setTimeout(() => {
     if (!puzzleStyleExpand) for (let o of Array.from(list.childNodes)) { 
       if (o === button || !o?.style) continue;
@@ -413,6 +413,7 @@ window.onload = function() {
   let toLoad = (new URL(window.location.href).hash);
   drawSymbolButtons()
   drawColorButtons()
+  togglePuzzleStyle();
   if (toLoad) {
     deserializePuzzle(toLoad.slice(1));
     applyThemeButton();
