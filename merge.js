@@ -75,7 +75,7 @@ window.importSequence2 = function() {
 
 window.exportSequence2 = function(useIDN = false) {
     updateList(); // make sure all versions are the same
-    navigator.clipboard.writeText('https://prodzpod.github.io/witness#' + exportSequence(list, useIDN));
+    navigator.clipboard.writeText('http://looksy.kro.kr#' + exportSequence(list, useIDN));
 }
 
 window.updateList = function() {

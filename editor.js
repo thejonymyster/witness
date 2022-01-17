@@ -1528,7 +1528,7 @@ function HSVtoRGB(h, s, v) {
   return parseInt(`${Math.round(r * 255).toString(16).padStart(2, '0')}${Math.round(g * 255).toString(16).padStart(2, '0')}${Math.round(b * 255).toString(16).padStart(2, '0')}`, 16);
 }
 
-window.exportPuzzle = function() { navigator.clipboard.writeText('https://prodzpod.github.io/witness#' + serializePuzzle(puzzle)).then(); }
+window.exportPuzzle = function() { navigator.clipboard.writeText('http://looksy.kro.kr#' + serializePuzzle(puzzle)).then(); }
 
 window.importPuzzle = function() {
   navigator.clipboard.readText().then(clipText => {
