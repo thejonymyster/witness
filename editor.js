@@ -1533,7 +1533,7 @@ window.exportPuzzle = function() { navigator.clipboard.writeText('http://looksy.
 
 window.importPuzzle = function() {
   navigator.clipboard.readText().then(clipText => {
-    deserializePuzzle(clipText.replace(/https:.+?#/, ''));
+    deserializePuzzle(clipText.replace(/https?:.+?#/, ''));
     applyThemeButton();
     applyImageButton();
     updateSoundDotsList();

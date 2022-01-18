@@ -27,7 +27,7 @@ function updateElems() {
 }
 
 window.writeData = function(id, value) {
-    list[id] = value.replace(/https:.+?#/, '');
+    list[id] = value.replace(/https?:.+?#/, '');
     updateElems();
 }
 
@@ -60,7 +60,7 @@ window.insertData = function(id) {
 
 window.importSequence2 = function() {
     navigator.clipboard.readText().then(clipText => {
-        list = importSequence(clipText.replace(/https:.+?#/, ''));
+        list = importSequence(clipText.replace(/https?:.+?#/, ''));
         while (listlength < list.length) {
             document.getElementById('list').append(emptyList(listlength));
             listlength++;
