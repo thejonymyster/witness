@@ -1313,7 +1313,7 @@ function importSequenceV3Core(version, string) {
     }
     puzzles[i] = serializePuzzlePost(puzzles[i]);
   }
-  if (ptr !== string.length) throw Error('Invalid String');
+  if (ptr > string.length) throw Error('Invalid String');
   return puzzles
 }
 

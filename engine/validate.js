@@ -823,23 +823,23 @@ const lineValidate = [
         '_name': 'CROSS N CURVES',
         'or': ['cross', 'curve'],
         'exec': function(puzzle, global, quick) {
-            const isCross = function(x, y, end, n) {
-                if (puzzle.pillar) x = (x + puzzle.width) % puzzle.width; // pillary boys, i hate pillary boys
-                if (end == n && puzzle.endPoint.x == x + (n==2?1:(n==1?-1:0)) && puzzle.endPoint.y == y + (n==0?1:(n==3?-1:0))) return true;
-                return matrix(puzzle, global, x, y) === 0;
-            }
+            const check = [[0, -1], [1, 0], [-1, 0], [0, 1]];
+            const corner = [[6, 9], [3, 5, 10, 12]];
             for (let c of global.regionCells.corner[0]) {
                 let [x, y] = xy(c);
                 let cell = puzzle.getCell(x, y);
-                let end = endEnum.indexOf(cell?.end);
-                if (!cell.dot || cell.dot >= window.DOT_NONE) continue;
-                if ((cell.dot > window.CUSTOM_CURVE) // CROSS;
-                ? (!(isCross(x-1,y,end,2) && isCross(x+1,y,end,1)) && !(isCross(x,y-1,end,0) && isCross(x,y+1,end,3)))
-                : ( (isCross(x-1,y,end,2) && isCross(x+1,y,end,1)) ||  (isCross(x,y-1,end,0) && isCross(x,y+1,end,3)))) { // thats a long list... 2!
-                    console.info('[line][!] Wrongly Crossed... well, Cross: ', x, y);
-                    global.regionData[0].addInvalid(puzzle, c);
-                    if (!puzzle.valid && quick) return;
-                }
+                if (DOT_NONE <= cell.dot || cell.dot <= CUSTOM_X) continue;
+                let coll = check.map(o => matrix(puzzle, global, x + o[0], y + o[1]) == 0);
+                // endpoint detection
+                let hasEnd = endEnum.indexOf(cell.end)
+                if (hasEnd !== -1) coll[hasEnd] = true;
+                coll = makeBitSwitch(...coll);
+                let found = false;
+                for (let o of (cell.dot > window.CUSTOM_CURVE ? corner[0] : corner[1])) if ((coll & o) === o) { found = true; break; }
+                if (found) continue;
+                console.info('[line][!] Wrongly Crossed... well, Cross: ', x, y);
+                global.regionData[0].addInvalid(puzzle, c);
+                if (!puzzle.valid && quick) return;
             }
         }
     }, {
@@ -1043,10 +1043,10 @@ const validate = [
                     }
                     if (found) count++
                 }
-                let hasStart = check.findIndex(o => o[0] === (puzzle.startPoint.x - x) && o[1] ===  (puzzle.startPoint.y - y));
-                if (hasStart !== -1) {
+                // let hasStart = check.findIndex(o => o[0] === (puzzle.startPoint.x - x) && o[1] ===  (puzzle.startPoint.y - y));
+                // if (hasStart !== -1) {
                     
-                }
+                // }
                 if (count != cell.count) {
                     console.info('[!] Anti-Triangle fault at', x, y, 'needs', cell.count, 'turns - actually has', count);
                     global.regionData[regionNum].addInvalid(puzzle, c);
