@@ -650,7 +650,8 @@ window.drawSymbolWithSvg = function(svg, params) {
       }
       break;
     case 'pentagon': //------------------------------------SHAUN'S PENTAGONS
-      simplePath(svg, params, 'M -6 13.4 Q -9 13.4 -10 11 L -13 0 Q -14 -2.5 -12 -4.5 L -2 -12.5 Q 0 -14 2 -12.5 L 12 -4.5 Q 14 -2.5 13 0 L 10 11 Q 9 13.4 6 13.5')
+      if (localStorage.symbolTheme == "Canonical") simplePoly(svg, params, '0 -14, 14 -2.5, 9 13.4, -9 13.4, -14 -2.5');
+      else simplePath(svg, params, 'M -6 13.4 Q -9 13.4 -10 11 L -13 0 Q -14 -2.5 -12 -4.5 L -2 -12.5 Q 0 -14 2 -12.5 L 12 -4.5 Q 14 -2.5 13 0 L 10 11 Q 9 13.4 6 13.5')
       break;
     case 'crystal':
       if (params.count == 5) {
