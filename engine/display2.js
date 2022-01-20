@@ -276,8 +276,7 @@ function drawSymbols(puzzle, svg, target) {
         params.count = (cell.dot - 4);
         switch (params.count % 7) {
           case 1:
-            if ((puzzle.theme['line-undone'] << 8) == puzzle.theme['line-default']) params.color = 'white'
-            else params.color = 'var(--line-default)'
+            params.color = '#' + puzzle.theme['line-default'].toString(16).slice(0, 6);
             params.type = 'dotsHollow';
             break;
           case 2:
@@ -286,14 +285,12 @@ function drawSymbols(puzzle, svg, target) {
           case 3:
             params.type = 'dotsHollow';
           case 4:
-            if ((puzzle.theme['line-undone'] << 8) == puzzle.theme['line-primary']) params.color = '#88ffff'
-            else params.color = 'var(--line-primary)';
+            params.color = '#' + puzzle.theme['line-primary'].toString(16).slice(0, 6);
             break;
           case 5:
             params.type = 'dotsHollow';
           case 6:
-            if ((puzzle.theme['line-undone'] << 8) == puzzle.theme['line-secondary']) params.color = '#ffff22'
-            else params.color = 'var(--line-secondary)';
+            params.color = '#' + puzzle.theme['line-secondary'].toString(16).slice(0, 6);
             break;
           case 0:
             params.color = 'var(--line-undone)';
@@ -309,12 +306,10 @@ function drawSymbols(puzzle, svg, target) {
         params.type = 'dot';
         if (cell.dot === window.DOT_BLACK) params.color = 'black'
         else if (cell.dot === window.DOT_BLUE) {
-          if ((puzzle.theme['line-undone'] << 8) == puzzle.theme['line-primary']) params.color = '#88ffff'
-          else params.color = 'var(--line-primary)'
+          params.color = '#' + puzzle.theme['line-primary'].toString(16).slice(0, 6);
         }
         else if (cell.dot === window.DOT_YELLOW) {
-          if ((puzzle.theme['line-undone'] << 8) == puzzle.theme['line-secondary']) params.color = '#ffff22'
-          else params.color = 'var(--line-secondary)';
+          params.color = '#' + puzzle.theme['line-secondary'].toString(16).slice(0, 6);
         }
         else if (cell.dot === window.DOT_INVISIBLE) {
           params.color = 'var(--line-undone)'
@@ -336,21 +331,18 @@ function drawSymbols(puzzle, svg, target) {
         }
         switch (cell.dot % 6) {
           case -1:
-            if ((puzzle.theme['line-undone'] << 8) == puzzle.theme['line-default']) params.color = 'white'
-            else params.color = 'var(--line-default)'
+            params.color = '#' + puzzle.theme['line-default'].toString(16).slice(0, 6);
             break;
           case -2:
             params.color = 'black';
             break;
           case -3:
           case -4:
-            if ((puzzle.theme['line-undone'] << 8) == puzzle.theme['line-primary']) params.color = '#88ffff'
-            else params.color = 'var(--line-primary)'
+            params.color = '#' + puzzle.theme['line-primary'].toString(16).slice(0, 6);
             break;
           case -5:
           case 0:
-            if ((puzzle.theme['line-undone'] << 8) == puzzle.theme['line-secondary']) params.color = '#ffff22'
-            else params.color = 'var(--line-secondary)';
+            params.color = '#' + puzzle.theme['line-secondary'].toString(16).slice(0, 6);
             break;
         }
         if (cell.dot <= window.CUSTOM_X) {
