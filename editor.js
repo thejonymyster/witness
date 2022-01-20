@@ -1133,7 +1133,7 @@ function resizePuzzle(dx, dy, id) {
   console.log('Resizing puzzle of size', puzzle.width, puzzle.height, 'to', newWidth, newHeight)
 
   if (newWidth <= 0 || newHeight <= 0) return false
-  if (newWidth > 21 || newHeight > 21) return false
+  if (newWidth > 51 || newHeight > 51) return false
   if (puzzle.symmetry != null) {
     if (puzzle.symmetry.x && newWidth <= 2) return false
     if (puzzle.symmetry.y && newHeight <= 2) return false
