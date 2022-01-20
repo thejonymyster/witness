@@ -1421,9 +1421,11 @@ function puzzleModified() {
   document.getElementById('deleteButton').disabled = false
 }
 
-window.changeColor = function (id, value) {
-  if ((id.indexOf('line') + 1) && value == getComputedStyle(document.documentElement).getPropertyValue('--line-undone')) value += '00';
-  document.documentElement.style.setProperty('--' + id.slice(0, -6), value);
+window.changeColor = function (id) {
+  let z = id.slice(0, id.indexOf('color'));
+  let value = document.getElementById(z + 'color').value + (Number(document.getElementById(z + 'color-alpha').value).toString(16).padStart(2, '0'));
+  document.documentElement.style.setProperty('--' + z.slice(0, -1), value);
+  if (z.includes('background')) document.documentElement.style.setProperty('--background-opacity', Number(document.getElementById(z + 'color-alpha').value)/255);
   copyTheme(puzzle);
   copyImage(puzzle);
   writePuzzle();
@@ -1440,7 +1442,9 @@ window.changeImage = function (id, value) {
 
 function applyThemeButton() {
   for (const entry of themeArgs) {
-    document.getElementById(entry+'-color').value = getComputedStyle(document.documentElement).getPropertyValue('--' + entry);
+    let color = getComputedStyle(document.documentElement).getPropertyValue('--' + entry);
+    document.getElementById(entry+'-color').value = color.slice(0, 7);
+    document.getElementById(entry+'-color-alpha').value = color.length < 8 ? 255 : parseInt(color.slice(7, 9), 16);
   }
 }
 function applyImageButton() {

@@ -293,6 +293,7 @@ input[type="range"]::-ms-thumb {
   --line-success:#ffffff;
   --line-primary:#88ffff;
   --line-secondary:#ffff22;
+  --background-opacity:1;
   /* CANNOT (SHOULD NOT) MODIFY */
   --line-failure: transparent;
   --border: transparent;
@@ -318,17 +319,21 @@ input[type="range"]::-ms-thumb {
   border: 1px #767676 solid;
 }
 
-body {
+.background {
   background-image: var(--background-image);
+  opacity: var(--background-opacity);
   background-size: cover;
   background-repeat: no-repeat;
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
 }
 
 #symboltheme {
   background-color: var(--inner) !important;
 }
 
-li button {
+li button, td button {
   background-color: var(--inner);
   display: inline-block;
   font-size: 18px;
@@ -531,4 +536,9 @@ li button {
 
 .utils input {
   font-size: 24px;
+}
+
+.theme-list > * {
+  margin: 0 16px;
+  width: 50% !important;
 }

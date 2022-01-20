@@ -28,6 +28,7 @@
 </head>
 
 <body>
+  <div class="background"></div>
   <div class="wrapper">
     <div class="hlist">
       <div class="spacer"></div>
@@ -391,75 +392,99 @@
           <div class="theme">
             <h1>Theme Setting</h1>
             <hr>
-            <ul>
-              <li>
-                <h2>Background</h2>
-                <input onchange="changeColor(this.id, this.value)" type="color" id="background-color" value="#ffffff" />
-              </li>
-              <li>
-                <h2>Puzzle Background</h2>
-                <input onchange="changeColor(this.id, this.value)" type="color" id="outer-color" value="#eeeeee" />
-              </li>
-              <li>
-                <h2>Puzzle Line</h2>
-                <input onchange="changeColor(this.id, this.value)" type="color" id="line-undone-color"
-                  value="#333333" />
-              </li>
-              <li>
-                <h2>Puzzle Cell</h2>
-                <input onchange="changeColor(this.id, this.value)" type="color" id="inner-color" value="#aaaaaa" />
-              </li>
-              <li>
-                <h2>Text</h2>
-                <input onchange="changeColor(this.id, this.value)" type="color" id="text-color" value="#000000" />
-              </li>
-              <li>
-                <h2>Line (Drawn)</h2>
-                <input onchange="changeColor(this.id, this.value)" type="color" id="line-default-color"
-                  value="#cccccc" />
-              </li>
-              <li>
-                <h2>Line (Primary Symmetry)</h2>
-                <input onchange="changeColor(this.id, this.value)" type="color" id="line-primary-color"
-                  value="#88ffff" />
-              </li>
-              <li>
-                <h2>Line (Secondary Symmetry)</h2>
-                <input onchange="changeColor(this.id, this.value)" type="color" id="line-secondary-color"
-                  value="#ffff22" />
-              </li>
-              <li>
-                <h2>Line (Success)</h2>
-                <input onchange="changeColor(this.id, this.value)" type="color" id="line-success-color"
-                  value="#ffffff" />
-              </li>
-              <li>
-                <h2>Background Image</h2>
-                <input onchange="changeImage(this.id, this.value)" type="text" id="background-image-input" />
-              </li>
-              <li>
-                <h2>Foreground Image</h2>
-                <input onchange="changeImage(this.id, this.value)" type="text" id="foreground-image-input" />
-              </li>
-              <li>
-                <h2>Background Music</h2>
-                <input onchange="changeImage(this.id, this.value)" type="text" id="background-music-input" />
-              </li>
-              <li>
-                <h2>Veil Image (disappears when drawing)</h2>
-                <input onchange="changeImage(this.id, this.value)" type="text" id="veil-image-input" />
-              </li>
-              <li>
-                <h2>Cursor Image</h2>
-                <input onchange="changeImage(this.id, this.value)" type="text" id="cursor-image-input" />
-              </li>
-              <li style="margin: 16px;">
-                <button id="export-theme" class="theme-button" onpointerdown="exportTheme()">Export to Clipboard</button>
-                <button id="import-theme" class="theme-button" onpointerdown="importTheme()">Import from Clipboard</button>
-                <button id="reset-theme" class="theme-button" onpointerdown="resetTheme()">Reset Theme</button>
-                <button id="random-theme" class="theme-button" onpointerdown="randomizeTheme()">I Feel Lucky</button>
-              </li>
-            </ul>
+            <table>
+              <tr>
+                <td><h2>Background</h2></td>
+                <td><div class="hlist theme-list">
+                  <input onchange="changeColor(this.id)" type="color" id="background-color" value="#ffffff" />
+                  <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="background-color-alpha">
+                </div></td>
+              </tr>
+              <tr>
+                <td><h2>Puzzle Background</h2></td>
+                <td><div class="hlist theme-list">
+                  <input onchange="changeColor(this.id)" type="color" id="outer-color" value="#eeeeee" />
+                  <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="outer-color-alpha">
+                </div></td>
+              </tr>
+              <tr>
+                <td><h2>Puzzle Line</h2></td>
+                <td><div class="hlist theme-list">
+                  <input onchange="changeColor(this.id)" type="color" id="line-undone-color" value="#333333" />
+                  <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="line-undone-color-alpha">
+                </div></td>
+              </tr>
+              <tr>
+                <td><h2>Puzzle Cell</h2></td>
+                <td><div class="hlist theme-list">
+                  <input onchange="changeColor(this.id)" type="color" id="inner-color" value="#aaaaaa" />
+                  <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="inner-color-alpha">
+                </div></td>
+              </tr>
+              <tr>
+                <td><h2>Text</h2></td>
+                <td><div class="hlist theme-list">
+                  <input onchange="changeColor(this.id)" type="color" id="text-color" value="#000000" />
+                  <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="text-color-alpha">
+                </div></td>
+              </tr>
+              <tr>
+                <td><h2>Line (Drawn)</h2></td>
+                <td><div class="hlist theme-list">
+                  <input onchange="changeColor(this.id)" type="color" id="line-default-color" value="#cccccc" />
+                  <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="line-default-color-alpha">
+                </div></td>
+              </tr>
+              <tr>
+                <td><h2>Line (Primary Symmetry)</h2></td>
+                <td><div class="hlist theme-list">
+                  <input onchange="changeColor(this.id)" type="color" id="line-primary-color" value="#88ffff" />
+                  <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="line-primary-color-alpha">
+                </div></td>
+              </tr>
+              <tr>
+                <td><h2>Line (Secondary Symmetry)</h2></td>
+                <td><div class="hlist theme-list">
+                  <input onchange="changeColor(this.id)" type="color" id="line-secondary-color" value="#ffff22" />
+                  <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="line-secondary-color-alpha">
+                </div></td>
+              </tr>
+              <tr>
+                <td><h2>Line (Success)</h2></td>
+                <td><div class="hlist theme-list">
+                  <input onchange="changeColor(this.id)" type="color" id="line-success-color" value="#ffffff" />
+                  <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="line-success-color-alpha">
+                </div></td>
+              </tr>
+              <tr>
+                <td><h2>Background Image</h2></td>
+                <td><input onchange="changeImage(this.id, this.value)" type="text" id="background-image-input" /></td>
+              </tr>
+              <tr>
+                <td><h2>Foreground Image</h2></td>
+                <td><input onchange="changeImage(this.id, this.value)" type="text" id="foreground-image-input" /></td>
+              </tr>
+              <tr>
+                <td><h2>Background Music</h2></td>
+                <td><input onchange="changeImage(this.id, this.value)" type="text" id="background-music-input" /></td>
+              </tr>
+              <tr>
+                <td><h2>Veil Image (disappears when drawing)</h2></td>
+                <td><input onchange="changeImage(this.id, this.value)" type="text" id="veil-image-input" /></td>
+              </tr>
+              <tr>
+                <td><h2>Cursor Image</h2></td>
+                <td><input onchange="changeImage(this.id, this.value)" type="text" id="cursor-image-input" /></td>
+              </tr>
+              <tr style="margin: 16px;">
+                <td colspan="2"><div class="hlist">
+                  <button id="export-theme" class="theme-button" onpointerdown="exportTheme()">Export to Clipboard</button>
+                  <button id="import-theme" class="theme-button" onpointerdown="importTheme()">Import from Clipboard</button>
+                  <button id="reset-theme" class="theme-button" onpointerdown="resetTheme()">Reset Theme</button>
+                  <button id="random-theme" class="theme-button" onpointerdown="randomizeTheme()">I Feel Lucky</button>
+                </div></td>
+              </tr>
+            </table>
           </div>
         </div>
       </div>
