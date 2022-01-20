@@ -246,7 +246,7 @@ window.hexToInt = function(hex) {
 }
 
 window.intToHex = function(int) {
-  return '#' + Number(int).toString(16).padStart(6, '0');
+  return '#' + Number(int).toString(16).padStart(8, '0');
 }
 
 window.makeBitSwitch = function (...bits) {
@@ -700,11 +700,11 @@ window.serializePuzzle = function(puzzle, asObject=false) {
     raw.image.push(puzzle.image[['background-image', 'foreground-image', 'background-music', 'cursor-image', 'veil-image'][i]]);
   }
   if (asObject) return raw;
-  return serializePuzzlePost(raw);
+  return serializePuzzlePost(raw, 'v7');
 }
 
-function serializePuzzlePost(raw) {
-  return 'v6_' + runLength(btoa(raw.size + raw.header + raw.theme + raw.defaultCorner + raw.defaultCell + raw.corner + raw.soundData + raw.cell + raw.image.join('\0')).replace(/\+/g, '.').replace(/\//g, '-').replace(/\=/g, '_'));
+function serializePuzzlePost(raw, version) {
+  return version + '_' + runLength(btoa(raw.size + raw.header + raw.theme + raw.defaultCorner + raw.defaultCell + raw.corner + raw.soundData + raw.cell + raw.image.join('\0')).replace(/\+/g, '.').replace(/\//g, '-').replace(/\=/g, '_'));
 }
 
 function getCellData(cell) {
@@ -744,6 +744,7 @@ window.deserializePuzzle = function(string) {
   else if (version == 'v4') return deserializePuzzleV4(deserializePuzzlePre(string));
   else if (version == 'v5') return deserializePuzzleV5(deserializePuzzlePre(string));
   else if (version == 'v6') return deserializePuzzleV6(deserializePuzzlePre(string));
+  else if (version == 'v7') return deserializePuzzleV7(deserializePuzzlePre(string));
   else throw Error('unknown puzzle format');
 }
 
@@ -751,7 +752,7 @@ function deserializePuzzlePre(string) {
   return atob(derunLength(string).replace(/\./g, '+').replace(/\-/g, '/').replace(/\_/g, '='));
 }
 
-function deserializePuzzleV6(raw) {
+function deserializePuzzleV7(raw) {
   let ptr = 0;
   //* header
   let char = readBitSwitch(raw.charCodeAt(ptr+2));
@@ -789,6 +790,45 @@ function deserializePuzzleV6(raw) {
   return puzzle;
 }
 
+function deserializePuzzleV6(raw) {
+  let ptr = 0;
+  //* header
+  let char = readBitSwitch(raw.charCodeAt(ptr+2));
+  let puzzle = new Puzzle(raw.charCodeAt(ptr), raw.charCodeAt(ptr+1), char[5]);
+  ptr += 3;
+  if (char[0]) puzzle.disableFlash = true;
+  if (char[1]) puzzle.optional = true;
+  if (char[2]) puzzle.symmetry = {'x': char[3], 'y': char[4]};
+  puzzle.sols = raw.charCodeAt(ptr);
+  ptr++;
+  puzzle.transform.translate = [byteToInt(raw.slice(ptr, ptr + 4), true), byteToInt(raw.slice(ptr + 4, ptr + 8), true), byteToInt(raw.slice(ptr + 8, ptr + 12), true)];
+  ptr += 12;
+  puzzle.transform.rotate = [byteToInt(raw.slice(ptr, ptr + 4), true), byteToInt(raw.slice(ptr + 4, ptr + 8), true), byteToInt(raw.slice(ptr + 8, ptr + 12), true)];
+  ptr += 12;
+  puzzle.transform.scale = [byteToInt(raw.slice(ptr, ptr + 4), true), byteToInt(raw.slice(ptr + 4, ptr + 8), true)];
+  ptr += 8;
+  puzzle.transform.skew = [byteToInt(raw.slice(ptr, ptr + 4), true), byteToInt(raw.slice(ptr + 4, ptr + 8), true)];
+  ptr += 8;
+  puzzle.endDest = [raw.charCodeAt(ptr), raw.charCodeAt(ptr + 1), raw.charCodeAt(ptr + 2)];
+  ptr += 3;
+  //* style
+  for (const entry of ['background', 'outer', 'inner', 'text', 'line-undone', 'line-default', 'line-success', 'line-primary', 'line-secondary']) {
+    char = byteToInt(raw.slice(ptr, ptr + 4));
+    if ((char & 0xFF000000) === 0) char = ((char << 8) + 0xFF);
+    puzzle.theme[entry] = char;
+    ptr += 4;
+  }
+  [puzzle, ptr] = deserializePuzzleV4Core(raw, ptr, puzzle);
+  //* image
+  let urls = raw.slice(ptr).split('\0');
+  for (let i = 0; i < ['background-image', 'foreground-image', 'background-music', 'cursor-image', 'veil-image'].length; i++) 
+    if (urls[i]?.length) puzzle.image[['background-image', 'foreground-image', 'background-music', 'cursor-image', 'veil-image'][i]] = urls[i];
+  window.puzzle = puzzle;
+  applyTheme(puzzle);
+  applyImage(puzzle);
+  return puzzle;
+}
+
 function deserializePuzzleV5(raw) {
   let ptr = 0;
   //* header
@@ -803,6 +843,7 @@ function deserializePuzzleV5(raw) {
   //* style
   for (const entry of ['background', 'outer', 'inner', 'text', 'line-undone', 'line-default', 'line-success', 'line-primary', 'line-secondary']) {
     char = byteToInt(raw.slice(ptr, ptr + 4));
+    if ((char & 0xFF000000) === 0) char = (char << 8 + 0xFF);
     puzzle.theme[entry] = char;
     ptr += 4;
   }
@@ -831,6 +872,7 @@ function deserializePuzzleV4(raw) {
   //* style
   for (const entry of ['background', 'outer', 'inner', 'text', 'line-undone', 'line-default', 'line-success', 'line-primary', 'line-secondary']) {
     char = byteToInt(raw.slice(ptr, ptr + 4));
+    if ((char & 0xFF000000) === 0) char = (char << 8 + 0xFF);
     puzzle.theme[entry] = char;
     ptr += 4;
   }
@@ -1008,6 +1050,7 @@ function deserializePuzzleV2(raw, sols=1) {
   }
   for (const entry of ['background', 'outer', 'inner', 'text', 'line-undone', 'line-default', 'line-success', 'line-primary', 'line-secondary']) {
     char = byteToInt(raw.slice(i+1, i+5));
+    if ((char & 0xFF000000) === 0) char = (char << 8 + 0xFF);
     puzzle.theme[entry] = char;
     i += 4;
   }
@@ -1150,7 +1193,7 @@ window.exportSequence = function(rawList, useIDN=false) {
   let list = [...rawList];
   let veri = list[0].indexOf('_');
   let version = list[0].slice(0, veri);
-  list = list.map(x => serializePuzzle(deserializePuzzleV6(deserializePuzzlePre(x.slice(veri + 1))), true));
+  list = list.map(x => serializePuzzle(deserializePuzzleV7(deserializePuzzlePre(x.slice(veri + 1))), true));
   let ret = (useIDN ? 'vs3i_' : 'vs3_') + version + '_';
   let res = String.fromCharCode(list.length);
   /**
@@ -1255,7 +1298,7 @@ function importSequenceV2(string, vs=2) {
 }
 
 function importSequenceV3Core(version, string) {
-  if (version !== 'v6') throw Error('Uh oh! tell prod to update the sequence importer');
+  if (version !== 'v6' && version !== 'v7') throw Error('Uh oh! tell prod to update the sequence importer');
   let ptr = 0;
   let puzzles = [];
   for (let i = 0; i < string.charCodeAt(ptr); i++) puzzles.push({});
@@ -1311,7 +1354,7 @@ function importSequenceV3Core(version, string) {
     for (let k in puzzles[i].image) {
       puzzles[i].image[k] = image[puzzles[i].image[k] ?? 0];
     }
-    puzzles[i] = serializePuzzlePost(puzzles[i]);
+    puzzles[i] = serializePuzzlePost(puzzles[i], version);
   }
   if (ptr > string.length) throw Error('Invalid String');
   return puzzles

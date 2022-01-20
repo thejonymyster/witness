@@ -1444,7 +1444,7 @@ function applyThemeButton() {
   for (const entry of themeArgs) {
     let color = getComputedStyle(document.documentElement).getPropertyValue('--' + entry);
     document.getElementById(entry+'-color').value = color.slice(0, 7);
-    document.getElementById(entry+'-color-alpha').value = color.length < 8 ? 255 : parseInt(color.slice(7, 9), 16);
+    document.getElementById(entry+'-color-alpha').value = parseInt(color.slice(7, 9), 16);
   }
 }
 function applyImageButton() {
@@ -1474,8 +1474,8 @@ window.resetTheme = function () {
 }
 
 window.randomizeTheme = function () {
-  puzzle.theme['line-primary'] = 8978431;
-  puzzle.theme['line-secondary'] = 16776994;
+  puzzle.theme['line-primary'] = 0x88FFFFFF;
+  puzzle.theme['line-secondary'] = 0xFFFF22FF;
   let invert = (Math.random() > 0.5);
   let hue = Math.random();
   let hueIncrement = (Math.random() - 0.5) / 12;
@@ -1486,7 +1486,7 @@ window.randomizeTheme = function () {
     saturationIncrement *= -1;
   }
   if (invert) {
-    puzzle.theme['line-success'] = 16777215;
+    puzzle.theme['line-success'] = 0xFFFFFFFF;
     puzzle.theme['background'] = HSVtoRGB(hue, saturation, 1 / 8);
     puzzle.theme['outer'] = HSVtoRGB(hue + (hueIncrement), saturation + (saturationIncrement), 1 / 4);
     puzzle.theme['line-undone'] = HSVtoRGB(hue + (hueIncrement * 2), saturation + (saturationIncrement), 1 / 2);
@@ -1494,7 +1494,7 @@ window.randomizeTheme = function () {
     puzzle.theme['line-default'] = HSVtoRGB(hue + (hueIncrement * 4), saturation + (saturationIncrement * 4), 3 / 4);
     puzzle.theme['text'] = HSVtoRGB(hue + (hueIncrement * 5), saturation + (saturationIncrement * 6), 7 / 8);
   } else {
-    puzzle.theme['text'] = 0;
+    puzzle.theme['text'] = 0x000000FF;
     puzzle.theme['line-default'] = HSVtoRGB(hue, saturation, 1 / 8);
     puzzle.theme['line-success'] = HSVtoRGB(hue + (hueIncrement), saturation + (saturationIncrement), 1 / 4);
     puzzle.theme['line-undone'] = HSVtoRGB(hue + (hueIncrement * 2), saturation + (saturationIncrement), 1 / 2);
@@ -1530,7 +1530,7 @@ function HSVtoRGB(h, s, v) {
       case 4: r = t, g = p, b = v; break;
       case 5: r = v, g = p, b = q; break;
   }
-  return parseInt(`${Math.round(r * 255).toString(16).padStart(2, '0')}${Math.round(g * 255).toString(16).padStart(2, '0')}${Math.round(b * 255).toString(16).padStart(2, '0')}`, 16);
+  return parseInt(`${Math.round(r * 255).toString(16).padStart(2, '0')}${Math.round(g * 255).toString(16).padStart(2, '0')}${Math.round(b * 255).toString(16).padStart(2, '0')}FF`, 16);
 }
 
 window.exportPuzzle = function() { navigator.clipboard.writeText('http://looksy.kro.kr#' + serializePuzzle(puzzle)).then(); }
