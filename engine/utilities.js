@@ -962,7 +962,7 @@ function cellData(type, color, data1, data2) {
     case '!ylop':
     case '!polynt':
     case '!xvmino':
-      ret.polyshape = (data1 << 8) | data2;
+      ret.polyshape = (data1 << 8 >>> 0) | data2;
       if (ret.type[0] == '!') {
         ret.type = ret.type.slice(1);
         ret.polyshape |= 1048576;
@@ -1050,7 +1050,7 @@ function deserializePuzzleV2(raw, sols=1) {
   }
   for (const entry of ['background', 'outer', 'inner', 'text', 'line-undone', 'line-default', 'line-success', 'line-primary', 'line-secondary']) {
     char = byteToInt(raw.slice(i+1, i+5));
-    if ((char & 0xFF000000) === 0) char = (char << 8) + 0xFF;
+    if ((char & 0xFF000000) === 0) char = (char << 8 >>> 0) + 0xFF;
     puzzle.theme[entry] = char;
     i += 4;
   }
