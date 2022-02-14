@@ -1050,7 +1050,7 @@ function deserializePuzzleV2(raw, sols=1) {
   }
   for (const entry of ['background', 'outer', 'inner', 'text', 'line-undone', 'line-default', 'line-success', 'line-primary', 'line-secondary']) {
     char = byteToInt(raw.slice(i+1, i+5));
-    if ((char & 0xFF000000) === 0) char = (char << 8 + 0xFF);
+    if ((char & 0xFF000000) === 0) char = (char << 8) + 0xFF;
     puzzle.theme[entry] = char;
     i += 4;
   }
