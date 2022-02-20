@@ -746,6 +746,12 @@ window.drawSymbolWithSvg = function(svg, params) {
           break;
       }
       break;
+    case 'drop':
+      let d = simplePath(svg, params, 'M 0 -14 L 6.6 4.67 A 7 7 0 1 1 -6.6 4.67');
+	  transform = rotate(90 * params.count)
+	  transform += ' translate(' + midx + ', ' + midy + ')'
+      d.setAttribute('transform', transform)
+      break;
     case 'flower':
       let scale = Math.random() + 0.5;
       for (let i = (Math.random() / 2); i < 5; i++)
