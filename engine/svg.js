@@ -746,9 +746,9 @@ window.drawSymbolWithSvg = function(svg, params) {
           break;
       }
       break;
-    case 'drop':
-      let d = simplePath(svg, params, 'M 0 -14 L 6.6 4.67 A 7 7 0 1 1 -6.6 4.67');
-	  transform = rotate(90 * params.count)
+    case 'drop': //------------------------------------MAILDROPFOLDER'S DROPLET
+      let d = simplePath(svg, params, 'M 0 -14 L 7.33 2.8 A 8 8 0 1 1 -7.33 2.8');
+	  transform = rotate(90 * (params.count - 1) )
 	  transform += ' translate(' + midx + ', ' + midy + ')'
       d.setAttribute('transform', transform)
       break;
