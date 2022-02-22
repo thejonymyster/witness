@@ -1500,62 +1500,42 @@ const validate = [
                 let cell = puzzle.getCell(sourcex, sourcey);
                 if (!this.or.includes(cell.type)) continue;
                 let pos = {'x':sourcex, 'y':sourcey}
-				let up = DIR[ (cell.count - 1) << 1 & 6];
-				let lf = DIR[ (cell.count + 2) << 1 & 6];
+				//let up = DIR[ (cell.count - 1) << 1 & 6]; may come in handy later
 				let rt = DIR[ (cell.count    ) << 1 & 6];
 				let dn = DIR[ (cell.count + 1) << 1 & 6];
+				let lf = DIR[ (cell.count + 2) << 1 & 6];
 				
-				function move(pos, dir){ pos.x += dir.x << 1; pos.y += dir.y << 1 }
-				function eval(pos, dir){ return( matrix(puzzle, global, pos.x + dir.x, pos.y + dir.y) !== 0 ); }
-				function cloneAt(filled, i, dir) {
+				function move(pos, dir){ pos.x += dir.x << 1; pos.y += dir.y << 1 }//move relative to drop orientation
+				function eval(pos, dir){ return( matrix(puzzle, global, pos.x + dir.x, pos.y + dir.y) !== 0 ); }//true if no line in indicated direction
+				function cloneAt(filled, i, dir) { //floodfill. Probably optimizable.
 					let newClone = {'x':filled[i].x + (dir.x << 1) , 'y':filled[i].y + (dir.y << 1)}
-					for (let clone of filled){
-						if (clone.x == newClone.x && clone.y == newClone.y)
-							return;
-					}
-					filled.push(newClone);
-				}
-				/*let flow = [{'lx':x, 'rx':x, 'ly':y, 'ry':y 'phase':1}];
-				while( flow.length > 0) {
-					let anchor = flow.pop()
-					let phase = anchor.phase
-					pos.x = lx; pos.y = ly;
-					
-					while(!phase) {
-						if() !== 0){
-							anchor.lx = pos.x; anchor.ly = pos.y
-							flow.push(anchor)
-							
+					if(!isBounded(puzzle, newClone.x, newClone.y)){
+						if(puzzle.pillar) {
+							newClone.x = (newClone.x + puzzle.width) % puzzle.width;
+							if(!isBounded(puzzle, newClone.x, newClone.y)){
+								pos = newClone;
+								return true;
+							}
+						}
+						else {
+							pos = newClone;
+							return true;
 						}
 					}
-					
-				}*/
+					for (let j = filled.length - 1; j >= 0; j--){//items close together in the puzzle tend to be close in the list, so searching back to front is more efficient.
+						if (filled[j].x == newClone.x && filled[j].y == newClone.y)
+							return false;
+					}
+					filled.push(newClone);
+					return false;
+				}
 				
 				let filled = [pos]
-				for( i = 0; i < filled.length; i++){
-					if (!isBounded(puzzle, filled[i].x, filled[i].y)){
-						pos = filled[i];
-						break;
-					}
-					if (eval(filled[i], dn)) cloneAt(filled, i, dn);
-					if (eval(filled[i], lf)) cloneAt(filled, i, lf);
-					if (eval(filled[i], rt)) cloneAt(filled, i, rt);
+				for(i = 0; i < filled.length; i++){//flood fill loop
+					if (eval(filled[i], dn) && cloneAt(filled, i, dn)) break; //make clone if direction is open, end loop if clone is out-of-bounds.
+					if (eval(filled[i], lf) && cloneAt(filled, i, lf)) break; // && shorts if eval is false, so clones are only made if eval passes.
+					if (eval(filled[i], rt) && cloneAt(filled, i, rt)) break;
 				}
-                /*for (let _ = 1; _ < puzzle.width * puzzle.height; _++) { // every square must be traveled if the loop gets to this point
-                    if (puzzle.pillar) x = (x + puzzle.width) % puzzle.width;
-                    if (!isBounded(puzzle, x, y)) break; 
-                    if (x == sourcex && y == sourcey) break; 
-                    if (matrix(puzzle, global, x, y) === 0) {
-                        count++;
-                        break;
-                    }
-                }*/
-				
-				/*let dirs = []
-				for (let _ = 3; _ < 7; _++) {
-					dirs.push( dr(  ( (cell.count+_) << 1 ) & 6  ) )//get orthogonal directions for movement
-				}
-				x += dirs[0][0]; y += dirs[0][1]; // move 'up'*/
 				
                 if ( !isBounded(puzzle, pos.x, pos.y) ) {
                     console.info('[!] drop fault at', sourcex, sourcey, 'leaking at', pos.x, pos.y);
