@@ -1467,7 +1467,7 @@ window.importTheme = function () {
 }
 
 window.resetTheme = function () {
-  deserializeTheme(puzzle, 'vt1_AP---wDW1tYAs7Oz~6ABwcHAAxMTEAP---wCI--8A--8iAA__');
+  deserializeTheme(puzzle, 'vt1_~5-9bW1v.zs7P-~4A-3BwcP-ExMT~6-4j~6-yL-~6A__');
   applyThemeButton();
   applyImageButton();
   writePuzzle();
