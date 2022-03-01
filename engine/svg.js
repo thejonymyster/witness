@@ -746,6 +746,12 @@ window.drawSymbolWithSvg = function(svg, params) {
           break;
       }
       break;
+    case 'drop': //------------------------------------MAILDROPFOLDER'S DROPLET
+      let d = simplePath(svg, params, 'M 0 -14 L 7.33 2.8 A 8 8 0 1 1 -7.33 2.8');
+	  transform = rotate(90 * (params.count - 1) )
+	  transform += ' translate(' + midx + ', ' + midy + ')'
+      d.setAttribute('transform', transform)
+      break;
     case 'flower':
       let scale = Math.random() + 0.5;
       for (let i = (Math.random() / 2); i < 5; i++)
