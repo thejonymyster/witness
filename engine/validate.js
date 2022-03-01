@@ -1499,26 +1499,28 @@ const validate = [
                 let [sourcex, sourcey] = xy(c);
                 let cell = puzzle.getCell(sourcex, sourcey);
                 if (!this.or.includes(cell.type)) continue;
-                let pos = {'x':sourcex, 'y':sourcey}
 				//let up = DIR[ (cell.count - 1) << 1 & 6]; may come in handy later
 				let rt = DIR[ (cell.count    ) << 1 & 6];
 				let dn = DIR[ (cell.count + 1) << 1 & 6];
 				let lf = DIR[ (cell.count + 2) << 1 & 6];
 				
+				//let hasPortal = global.portalRegion?.includes(regionNum);
+				
 				function move(pos, dir){ pos.x += dir.x << 1; pos.y += dir.y << 1 }//move relative to drop orientation
 				function eval(pos, dir){ return( matrix(puzzle, global, pos.x + dir.x, pos.y + dir.y) !== 0 ); }//true if no line in indicated direction
+				
 				function cloneAt(filled, i, dir) { //floodfill. Probably optimizable.
 					let newClone = {'x':filled[i].x + (dir.x << 1) , 'y':filled[i].y + (dir.y << 1)}
 					if(!isBounded(puzzle, newClone.x, newClone.y)){
 						if(puzzle.pillar) {
 							newClone.x = (newClone.x + puzzle.width) % puzzle.width;
 							if(!isBounded(puzzle, newClone.x, newClone.y)){
-								pos = newClone;
+								filled[0] = newClone;
 								return true;
 							}
 						}
 						else {
-							pos = newClone;
+							filled[0] = newClone;
 							return true;
 						}
 					}
@@ -1530,15 +1532,16 @@ const validate = [
 					return false;
 				}
 				
-				let filled = [pos]
+				let filled = [{'x':sourcex,'y':sourcey}]
 				for(i = 0; i < filled.length; i++){//flood fill loop
 					if (eval(filled[i], dn) && cloneAt(filled, i, dn)) break; //make clone if direction is open, end loop if clone is out-of-bounds.
 					if (eval(filled[i], lf) && cloneAt(filled, i, lf)) break; // && shorts if eval is false, so clones are only made if eval passes.
 					if (eval(filled[i], rt) && cloneAt(filled, i, rt)) break;
+					//if (hasPortal && &&)
 				}
 				
-                if ( !isBounded(puzzle, pos.x, pos.y) ) {
-                    console.info('[!] drop fault at', sourcex, sourcey, 'leaking at', pos.x, pos.y);
+                if ( !isBounded(puzzle, filled[0].x, filled[0].y) ) {
+                    console.info('[!] drop fault at', sourcex, sourcey, 'leaking at', filled[0].x, filled[0].y);
                     global.regionData[regionNum].addInvalid(puzzle, c);
                     if (!puzzle.valid && quick) return;
                 }
