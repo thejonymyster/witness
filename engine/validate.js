@@ -653,7 +653,13 @@ function init(puzzle) { // initialize globals
             }
         }
     }
-    if (global.shapes.includes('bridge')) global.portalColorPos = portalColorPos;
+	for (let shape of ['bridge','drop']){
+		if (global.shapes.includes(shape)){
+			global.portalColorPos = portalColorPos;
+			break;
+		}
+	}
+    
     units.push(performance.now());
     names.push('other works');
     if (console.info !== function(){}) for (let i = 1; i < units.length; i++) console.info(names[i], ':', (units[i] - units[i-1]), 'ms')
@@ -1495,7 +1501,8 @@ const validate = [
         '_name': 'DROP CHECK',
         'or': ['drop'],
         'exec': function(puzzle, regionNum, global, quick) {    
-            for (let c of global.regionCells.cell[regionNum]) {
+			let hasPortal = global.portalRegion?.includes(regionNum);
+			for (let c of global.regionCells.cell[regionNum]) {
                 let [sourcex, sourcey] = xy(c);
                 let cell = puzzle.getCell(sourcex, sourcey);
                 if (!this.or.includes(cell.type)) continue;
@@ -1504,7 +1511,6 @@ const validate = [
 				let dn = DIR[ (cell.count + 1) << 1 & 6];
 				let lf = DIR[ (cell.count + 2) << 1 & 6];
 				
-				//let hasPortal = global.portalRegion?.includes(regionNum);
 				
 				function move(pos, dir){ pos.x += dir.x << 1; pos.y += dir.y << 1 }//move relative to drop orientation
 				function eval(pos, dir){ return( matrix(puzzle, global, pos.x + dir.x, pos.y + dir.y) !== 0 ); }//true if no line in indicated direction
@@ -1528,7 +1534,14 @@ const validate = [
 						if (filled[j].x == newClone.x && filled[j].y == newClone.y)
 							return false;
 					}
-					filled.push(newClone);
+					if ( !(hasPortal && puzzle.grid[newClone.x][newClone.y]?.type == "portal") ){
+						filled.push(newClone);
+					}else{
+						for (let pos of global.portalColorPos[0]){
+							let [portX, portY] = xy(pos);
+							filled.push({'x':portX, 'y':portY});
+						}
+					}
 					return false;
 				}
 				
@@ -1537,7 +1550,6 @@ const validate = [
 					if (eval(filled[i], dn) && cloneAt(filled, i, dn)) break; //make clone if direction is open, end loop if clone is out-of-bounds.
 					if (eval(filled[i], lf) && cloneAt(filled, i, lf)) break; // && shorts if eval is false, so clones are only made if eval passes.
 					if (eval(filled[i], rt) && cloneAt(filled, i, rt)) break;
-					//if (hasPortal && &&)
 				}
 				
                 if ( !isBounded(puzzle, filled[0].x, filled[0].y) ) {
