@@ -1537,7 +1537,7 @@ const validate = [
 					if ( !(hasPortal && puzzle.grid[newClone.x][newClone.y]?.type == "portal") ){
 						filled.push(newClone);
 					}else{
-						for (let pos of global.portalColorPos[0]){
+						for (let pos of global.portalColorPos[puzzle.grid[newClone.x][newClone.y].color]){
 							let [portX, portY] = xy(pos);
 							filled.push({'x':portX, 'y':portY});
 						}
