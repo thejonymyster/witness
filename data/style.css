@@ -306,7 +306,7 @@ input[type="range"]::-ms-thumb {
 
 .theme {
   border-radius: 0.5vw;
-  border: 1px #767676 solid;
+  border: 1px #767676ff solid;
   margin: 16px;
   padding: 8px;
   overflow: hidden;
@@ -316,7 +316,7 @@ input[type="range"]::-ms-thumb {
 }
 
 .theme [type=text] {
-  border: 1px #767676 solid;
+  border: 1px #767676ff solid;
 }
 
 .background {
