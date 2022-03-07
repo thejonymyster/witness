@@ -284,15 +284,15 @@ input[type="range"]::-ms-thumb {
 }
 
 :root {
-  --background:#ffffff; /* used to be PAGE_BACKGROUND*/
-  --outer:#eeeeee; /* used to be OUTER_BACKGROUND*/
-  --inner:#aaaaaa; /* used to be BACKGROUND*/
-  --text:#000000;
-  --line-undone:#333333; /* used to be FOREGROUND*/
-  --line-default:#cccccc;
-  --line-success:#ffffff;
-  --line-primary:#88ffff;
-  --line-secondary:#ffff22;
+  --background:#ffffffff; /* used to be PAGE_BACKGROUND*/
+  --outer:#eeeeeeff; /* used to be OUTER_BACKGROUND*/
+  --inner:#aaaaaaff; /* used to be BACKGROUND*/
+  --text:#000000ff;
+  --line-undone:#333333ff; /* used to be FOREGROUND*/
+  --line-default:#ccccccff;
+  --line-success:#ffffffff;
+  --line-primary:#88ffffff;
+  --line-secondary:#ffff22ff;
   --background-opacity:1;
   /* CANNOT (SHOULD NOT) MODIFY */
   --line-failure: transparent;
@@ -306,7 +306,7 @@ input[type="range"]::-ms-thumb {
 
 .theme {
   border-radius: 0.5vw;
-  border: 1px #767676 solid;
+  border: 1px #767676ff solid;
   margin: 16px;
   padding: 8px;
   overflow: hidden;
@@ -316,7 +316,7 @@ input[type="range"]::-ms-thumb {
 }
 
 .theme [type=text] {
-  border: 1px #767676 solid;
+  border: 1px #767676ff solid;
 }
 
 .background {
