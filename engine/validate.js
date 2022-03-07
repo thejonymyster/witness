@@ -1498,6 +1498,63 @@ const validate = [
             }
         }
     }, {
+            '_name': 'BELL CHECK',
+            'or': ['bell'],
+            'exec': function (puzzle, regionNum, global, quick) {
+
+                // Define check-wide variables
+                let keyValues = [[1, 2, 4, 8], [4, 1, 8, 2], [8, 4, 2, 1], [2, 8, 1, 4]]
+                let correctSidesValues = {};
+                let allBellsByColor = {};
+                let whichColorsFailed = [];
+
+                // Per-cell loop
+                for (let r of global.regionCells.all) for (let c of r) {
+
+                    // Define variables for per-cell loop
+                    let currentSidesValue = 0;
+                    let [x, y] = xy(c);
+                    let cell = puzzle.getCell(x, y);
+
+                    // If cell isn't a bell, then continue
+                    if (!this.or.includes(cell.type)) continue;
+
+                    // Add bells to allBellsByColor
+                    if (!(cell.color in allBellsByColor)) {
+                        allBellsByColor[cell.color] = [c];
+                    } else {
+                        allBellsByColor[cell.color].push(c);
+                    }
+
+                    // Calculate sum currentSidesValue using keyValues and path sides
+                    let r = [ret(x, y - 1), retPillar(puzzle, x + 1, y), ret(x - 1, y), ret(x, y + 1)];
+                    for (let i = 0; i < 4; i++) {
+                        let path = global.pathAll.find(x => x[0] == r[i]);
+                        if (path?.[1] === undefined) continue;
+                        currentSidesValue += keyValues[cell.count - 1][i]
+                    }
+
+                    // When first encountering a color, always accept currentSidesValue
+                    if (!(cell.color in correctSidesValues)) {
+                        correctSidesValues[cell.color] = currentSidesValue;
+                    }
+                    // If we recognize the color, we might have to send its bells to the Shadow Realm
+                    else if (currentSidesValue != correctSidesValues[cell.color]) {
+                        whichColorsFailed.push(cell.color);
+                    }
+
+                }
+
+                // Final pass, marking all bells of each invalid color as invalid
+                if (whichColorsFailed.length > 0) {
+                    whichColorsFailed.forEach(failedColor => allBellsByColor[failedColor]
+                        .forEach(bellCell => global.regionData[regionNum]
+                            .addInvalid(puzzle, bellCell)));
+                    return false;
+                } return true;
+
+            }
+        }, {
         '_name': 'DROP CHECK',
         'or': ['drop'],
         'exec': function(puzzle, regionNum, global, quick) {    

@@ -512,6 +512,7 @@ let symbolData = {
   'squareToPentagon': {'type':'square', 'title':'Square'},
   'whiteAndBlackHole': {'type':'blackhole', 'title':'Pruz\'s Black Holes (Klyzx\'s Revision)'},
   'CrossCurve': {'type':'cross', 'title':'Cross'},
+  'bell': { 'type': 'bell', 'count': 1, 'title': 'Kube\'s Bells' },
   'drop': {'type':'drop', 'count': 1, 'title':'Mail\'s Drop'},
   'none': {'type': 'none', 'title': 'Symbol Coming Soon!'}
 }
@@ -597,6 +598,7 @@ function drawSymbolButtons() {
       case 'atriangle':
       case 'dots':
       case 'eye':
+	  case 'bell':
       case 'drop':
         cycle ??= 4;
         button.onpointerdown = function(event) { buttonBehaviour(event, this, (el) => {
@@ -1055,7 +1057,7 @@ function onElementClicked(event, x, y, update=true) {
         'color': activeParams.color,
         'polyshape': activeParams.polyshape,
       }
-  } else if (['triangle', 'atriangle', 'divdiamond', 'dice', 'crystal', 'eye', 'drop'].includes(activeParams.type)) {
+  } else if (['triangle', 'atriangle', 'divdiamond', 'dice', 'crystal', 'eye', 'bell', 'drop'].includes(activeParams.type)) {
     let cycle;
     if (['divdiamond', 'dice'].includes(activeParams.type)) cycle = 9;
     else if (['crystal'].includes(activeParams.type)) cycle = 5;
