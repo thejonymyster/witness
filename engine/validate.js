@@ -1530,7 +1530,7 @@ const validate = [
                     let r = [ret(x, y - 1), retPillar(puzzle, x + 1, y), ret(x - 1, y), ret(x, y + 1)];
                     for (let i = 0; i < 4; i++) {
                         let path = global.pathAll.find(x => x[0] == r[i]);
-                        if (path?.[1] === undefined) continue;
+                        if (path === undefined) continue;
                         currentSidesValue += keyValues[cell.count - 1][i]
                     }
 
