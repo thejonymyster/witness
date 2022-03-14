@@ -161,7 +161,7 @@ function contains(a, b) {
     for (e of min) if (!max.includes(e)) return false;
     return true;        
 }
-function isBounded(puzzle, x, y) { return (0 <= x && x < puzzle.width && 0 <= y && y < puzzle.height); }
+function isBounded(puzzle, x, y) { return ((puzzle.pillar || (0 <= x && x < puzzle.width)) && 0 <= y && y < puzzle.height); }
 function matrix(puzzle, global, x, y) { return global.regionMatrix[y]?.[puzzle.pillar ? rdiv(x, puzzle.width) : x]; }
 function safepush(obj, k, v, makeset=false) { obj[k] ??= (makeset ? new Set() : []); makeset ? obj[k].add(v) : obj[k].push(v); }
 function getPortalCoords(c, data) { // from: <real>, to: PortalCoords(portalOffset-Adjusted)<virtual>
@@ -820,6 +820,39 @@ const preValidate = [
                 for (const region of regions) bridgeRegions[region].push(color);
             }
             global.bridgeRegions = bridgeRegions;
+        }
+    }, {
+        '_name': 'BELL CHECK',
+        'or': ['bell'],
+        'exec': function (puzzle, global, quick) {
+            const keyValues = [[1, 2, 4, 8], [4, 1, 8, 2], [8, 4, 2, 1], [2, 8, 1, 4], [1, 4, 2, 8], [4, 8, 1, 2], [8, 2, 4, 1], [2, 1, 8, 4]];
+            const dirs = [[0, -1], [1, 0], [-1, 0], [0, 1]];
+            let sides = {};
+            let bells = {};
+
+            for (let region of global.regionCells.cell) for (let c of region) {
+                let cell = cel(puzzle, c);
+                if (!this.or.includes(cell?.type)) continue;
+                bells[cell.color] ??= []; 
+                bells[cell.color].push(c);
+                if (sides[cell.color] === -1) continue;
+                let side = 0;
+                // detect lines
+                for (let i in endEnum) {
+                    let [x, y] = xy(c);
+                    if (matrix(puzzle, global, x + dirs[i][0], y + dirs[i][1]) === 0)
+                        side |= keyValues[(cell.flip << 2) + cell.count - 1][i]
+                }
+                if (sides[cell.color] === undefined) sides[cell.color] = side;
+                else if (sides[cell.color] !== side) {
+                    sides[cell.color] = -1;
+                    if (quick) {
+                        puzzle.invalidElements.push(c);
+                        return;
+                    }
+                }
+            }
+            for (color in sides) if (sides[color] === -1) for (c of bells[color]) puzzle.invalidElements.push(c);
         }
     }
 ];
@@ -1498,119 +1531,41 @@ const validate = [
             }
         }
     }, {
-            '_name': 'BELL CHECK',
-            'or': ['bell'],
-            'exec': function (puzzle, regionNum, global, quick) {
-
-                // Define check-wide variables
-                let keyValues = [[1, 2, 4, 8], [4, 1, 8, 2], [8, 4, 2, 1], [2, 8, 1, 4]]
-                let correctSidesValues = {};
-                let allBellsByColor = {};
-                let whichColorsFailed = [];
-
-                // Per-cell loop
-                for (let r of global.regionCells.all) for (let c of r) {
-
-                    // Define variables for per-cell loop
-                    let currentSidesValue = 0;
-                    let [x, y] = xy(c);
-                    let cell = puzzle.getCell(x, y);
-
-                    // If cell isn't a bell, then continue
-                    if (!this.or.includes(cell.type)) continue;
-
-                    // Add bells to allBellsByColor
-                    if (!(cell.color in allBellsByColor)) {
-                        allBellsByColor[cell.color] = [c];
-                    } else {
-                        allBellsByColor[cell.color].push(c);
-                    }
-
-                    // Calculate sum currentSidesValue using keyValues and path sides
-                    let r = [ret(x, y - 1), retPillar(puzzle, x + 1, y), ret(x - 1, y), ret(x, y + 1)];
-                    for (let i = 0; i < 4; i++) {
-                        let path = global.pathAll.find(x => x[0] == r[i]);
-                        if (path === undefined) continue;
-                        currentSidesValue += keyValues[cell.count - 1][i]
-                    }
-
-                    // When first encountering a color, always accept currentSidesValue
-                    if (!(cell.color in correctSidesValues)) {
-                        correctSidesValues[cell.color] = currentSidesValue;
-                    }
-                    // If we recognize the color, we might have to send its bells to the Shadow Realm
-                    else if (currentSidesValue != correctSidesValues[cell.color]) {
-                        whichColorsFailed.push(cell.color);
-                    }
-
-                }
-
-                // Final pass, marking all bells of each invalid color as invalid
-                if (whichColorsFailed.length > 0) {
-                    whichColorsFailed.forEach(failedColor => allBellsByColor[failedColor]
-                        .forEach(bellCell => global.regionData[regionNum]
-                            .addInvalid(puzzle, bellCell)));
-                    return false;
-                } return true;
-
-            }
-        }, {
         '_name': 'DROP CHECK',
         'or': ['drop'],
-        'exec': function(puzzle, regionNum, global, quick) {    
+        'exec': function(puzzle, regionNum, global, quick) {
+            function eval(x, y, dir) { return matrix(puzzle, global, x + dir.x, y + dir.y) !== 0; } // true if no line in indicated direction
+            function cloneAt(filled, i, dir) { // floodfill. Probably optimizable.
+                let [newx, newy] = xy(filled[i]);
+                newx += (dir.x << 1); newy += (dir.y << 1);
+                let newc = retPillar(puzzle, newx, newy);
+                if (!isBounded(puzzle, newx, newy)) { filled[0] = [newx, newy]; return true; }
+                for (let j = filled.length - 1; j >= 0; j--) // items close together in the puzzle tend to be close in the list, so searching back to front is more efficient.
+                    if (filled[j] === newc) return false;
+                if (!(hasPortal && cel(puzzle, newc)?.type === "portal")) filled.push(newc);
+                else for (let pos of global.portalColorPos[cel(puzzle, newc)?.color]) filled.push(pos);
+                return false;
+            }
+
 			let hasPortal = global.portalRegion?.includes(regionNum);
 			for (let c of global.regionCells.cell[regionNum]) {
-                let [sourcex, sourcey] = xy(c);
-                let cell = puzzle.getCell(sourcex, sourcey);
+                let cell = cel(puzzle, c);
                 if (!this.or.includes(cell.type)) continue;
-				//let up = DIR[ (cell.count - 1) << 1 & 6]; may come in handy later
-				let rt = DIR[ (cell.count    ) << 1 & 6];
-				let dn = DIR[ (cell.count + 1) << 1 & 6];
-				let lf = DIR[ (cell.count + 2) << 1 & 6];
-				
-				
-				function move(pos, dir){ pos.x += dir.x << 1; pos.y += dir.y << 1 }//move relative to drop orientation
-				function eval(pos, dir){ return( matrix(puzzle, global, pos.x + dir.x, pos.y + dir.y) !== 0 ); }//true if no line in indicated direction
-				
-				function cloneAt(filled, i, dir) { //floodfill. Probably optimizable.
-					let newClone = {'x':filled[i].x + (dir.x << 1) , 'y':filled[i].y + (dir.y << 1)}
-					if(!isBounded(puzzle, newClone.x, newClone.y)){
-						if(puzzle.pillar) {
-							newClone.x = (newClone.x + puzzle.width) % puzzle.width;
-							if(!isBounded(puzzle, newClone.x, newClone.y)){
-								filled[0] = newClone;
-								return true;
-							}
-						}
-						else {
-							filled[0] = newClone;
-							return true;
-						}
-					}
-					for (let j = filled.length - 1; j >= 0; j--){//items close together in the puzzle tend to be close in the list, so searching back to front is more efficient.
-						if (filled[j].x == newClone.x && filled[j].y == newClone.y)
-							return false;
-					}
-					if ( !(hasPortal && puzzle.grid[newClone.x][newClone.y]?.type == "portal") ){
-						filled.push(newClone);
-					}else{
-						for (let pos of global.portalColorPos[puzzle.grid[newClone.x][newClone.y].color]){
-							let [portX, portY] = xy(pos);
-							filled.push({'x':portX, 'y':portY});
-						}
-					}
-					return false;
+
+				// let up = DIR[ (cell.count - 1) << 1 & 6]; may come in handy later
+				let rt = DIR[(cell.count    ) << 1 & 6];
+				let dn = DIR[(cell.count + 1) << 1 & 6];
+				let lf = DIR[(cell.count + 2) << 1 & 6];
+
+				let filled = [c];
+				for (let i = 0; i < filled.length; i++) { //flood fill loop
+					if (eval(...xy(filled[i]), dn) && cloneAt(filled, i, dn)) break; //make clone if direction is open, end loop if clone is out-of-bounds.
+					if (eval(...xy(filled[i]), lf) && cloneAt(filled, i, lf)) break; // && shorts if eval is false, so clones are only made if eval passes.
+					if (eval(...xy(filled[i]), rt) && cloneAt(filled, i, rt)) break;
 				}
 				
-				let filled = [{'x':sourcex,'y':sourcey}]
-				for(i = 0; i < filled.length; i++){//flood fill loop
-					if (eval(filled[i], dn) && cloneAt(filled, i, dn)) break; //make clone if direction is open, end loop if clone is out-of-bounds.
-					if (eval(filled[i], lf) && cloneAt(filled, i, lf)) break; // && shorts if eval is false, so clones are only made if eval passes.
-					if (eval(filled[i], rt) && cloneAt(filled, i, rt)) break;
-				}
-				
-                if ( !isBounded(puzzle, filled[0].x, filled[0].y) ) {
-                    console.info('[!] drop fault at', sourcex, sourcey, 'leaking at', filled[0].x, filled[0].y);
+                if (Array.isArray(filled[0])) {
+                    console.info('[!] drop fault at', ...xy(c), 'leaking at', ...filled[0]);
                     global.regionData[regionNum].addInvalid(puzzle, c);
                     if (!puzzle.valid && quick) return;
                 }
