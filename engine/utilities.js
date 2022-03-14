@@ -76,7 +76,7 @@ window.GAP_BREAK     = 1
 window.GAP_FULL      = 2
 window.CUSTOM_LINE = 3
 
-window.symbols = ['square', 'star', 'pentagon', 'triangle', 'arrow', 'dart', 'atriangle', 'vtriangle', 'blackhole', 'whitehole', 'divdiamond', 'pokerchip', 'bridge', 'scaler', 'sizer', 'twobytwo', 'poly', 'ylop', 'polynt', 'nega', 'copier', 'portal', 'celledhex', 'dice', 'xvmino', 'crystal', '!poly', '!ylop', '!polynt', '!xvmino', 'swirl', 'eye'];
+window.symbols = ['square', 'star', 'pentagon', 'triangle', 'arrow', 'dart', 'atriangle', 'vtriangle', 'blackhole', 'whitehole', 'divdiamond', 'pokerchip', 'bridge', 'scaler', 'sizer', 'twobytwo', 'poly', 'ylop', 'polynt', 'nega', 'copier', 'portal', 'celledhex', 'dice', 'xvmino', 'crystal', '!poly', '!ylop', '!polynt', '!xvmino', 'swirl', 'eye', 'bell', 'drop'];
 window.polyominoes = ['poly', 'ylop', 'polynt', 'xvmino'];
 window.endEnum = ['top', 'right', 'left', 'bottom'];
 window.themeArgs = ['background', 'outer', 'inner', 'text', 'line-undone', 'line-default', 'line-success', 'line-primary', 'line-secondary'];
@@ -716,8 +716,9 @@ function getCellData(cell) {
   raw += String.fromCharCode(type);
   raw += String.fromCharCode(cell.color);
   let count = 0;
-  if (['triangle', 'arrow', 'dart', 'atriangle', 'divdiamond', 'dice', 'crystal', 'eye'].includes(cell.type)) count += cell.count;
+  if (['triangle', 'arrow', 'dart', 'atriangle', 'divdiamond', 'dice', 'crystal', 'eye', 'bell', 'drop'].includes(cell.type)) count += cell.count;
   if (['arrow', 'dart'].includes(cell.type)) count = count * 8 + cell.rot;
+  if (['bell'].includes(cell.type)) count += (cell.flip << 2);
   if (['scaler', 'swirl'].includes(cell.type)) raw += String.fromCharCode(!!cell.flip);
   if (count) raw += String.fromCharCode(count);
   if (polyominoes.includes(cell.type)) raw += intToShort(cell.polyshape);
@@ -952,7 +953,12 @@ function cellData(type, color, data1, data2) {
     case 'dice':
     case 'crystal':
     case 'eye':
+	  case 'drop':
       ret.count = data1;
+      return [ret, 1];
+	  case 'bell':
+      ret.flip = !!(data1 >> 2);
+      ret.count = data1 % 4;
       return [ret, 1];
     case 'poly':
     case 'ylop':

@@ -746,6 +746,21 @@ window.drawSymbolWithSvg = function(svg, params) {
           break;
       }
       break;
+	  case 'bell': //------------------------------------KUBE'S BELLS
+        let d = simplePath(svg, params, localStorage.symbolTheme == "Canonical" ? 
+        'm -4.6991 -16.6775 c -0.8446 0.4036 -3.0967 1.2161 -4.2532 4.6855 c -1.1565 3.4694 -1.9871 11.6424 -3.3086 15.7869 c -1.3214 4.1444 -4.0112 7.0215 -5.0222 8.4233 c -1.011 1.4018 -1.0117 2.2554 -0.4552 2.8754 c 0.5565 0.62 2.7183 2.6066 3.3683 1.6966 C -10.28 9.55 -5.53 10.83 -5.72 18.45 c 0 1.36 10.01 1.37 12.98 0.55 C 9.25 18.4 11.24 17.97 13.41 17.04 c 2.08 -0.97 4.34 -1.37 4.74 -2.01 c 0.5565 -0.62 0.5557 -1.4736 -0.4552 -2.8754 C 16.2728 10.8162 13.583 7.9392 12.2615 3.7948 C 10.9401 -0.3497 10.1078 -8.5227 8.9513 -11.9921 C 7.7949 -15.4615 5.5427 -16.2739 4.6982 -16.6775 C 3.2422 -17.2679 1.7406 -17.303 -0.0005 -17.3444 C -1.5758 -17.3136 -3.7618 -17.1218 -4.6991 -16.6775 Z' : 
+        'M 12.6 14 Q 14.14 14 14 12.6 L 12.6 0 C 11.2 -14 -11.2 -14 -12.6 0 L -14 12.6 Q -14.14 14 -12.6 14 L -11.2 14 Q -9.94 14 -9.8 12.6 C -8.96 4.06 -0.56 4.06 0 12.6 Q 0.14 14 1.4 14 M 4.2 -9.8 C 4.2 -15.4 -4.2 -15.4 -4.2 -9.8');
+        transform = rotate(90 * (params.count - 1))
+        transform += ' translate(' + midx + ', ' + midy + ')';
+        if (params.flip) transform += ' scale(-1, 1)';
+        d.setAttribute('transform', transform);
+        break;
+    case 'drop': //------------------------------------MAILDROPFOLDER'S DROPLET
+      let qa = simplePath(svg, params, 'M 0 -14 L 7.33 2.8 A 8 8 0 1 1 -7.33 2.8');
+	  transform = rotate(90 * (params.count - 1) )
+	  transform += ' translate(' + midx + ', ' + midy + ')'
+      qa.setAttribute('transform', transform)
+      break;
     case 'flower':
       let scale = Math.random() + 0.5;
       for (let i = (Math.random() / 2); i < 5; i++)

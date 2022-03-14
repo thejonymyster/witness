@@ -512,6 +512,8 @@ let symbolData = {
   'squareToPentagon': {'type':'square', 'title':'Square'},
   'whiteAndBlackHole': {'type':'blackhole', 'title':'Pruz\'s Black Holes (Klyzx\'s Revision)'},
   'CrossCurve': {'type':'cross', 'title':'Cross'},
+  'bell': { 'type': 'bell', 'count': 1, 'flip': false, 'title': 'Kube\'s Bells' },
+  'drop': {'type':'drop', 'count': 1, 'title':'Mail\'s Drop'},
   'none': {'type': 'none', 'title': 'Symbol Coming Soon!'}
 }
 let xButtons = [];
@@ -596,6 +598,7 @@ function drawSymbolButtons() {
       case 'atriangle':
       case 'dots':
       case 'eye':
+      case 'drop':
         cycle ??= 4;
         button.onpointerdown = function(event) { buttonBehaviour(event, this, (el) => {
           let count = symbolData[activeParams.id].count
@@ -617,6 +620,7 @@ function drawSymbolButtons() {
         })}
         break;
       case 'scaler':
+      case 'bell':
       case 'swirl':
         button.onpointerdown = function(event) { buttonBehaviour(event, this, (el) => {
           let flip = symbolData[activeParams.id].flip
@@ -1053,7 +1057,7 @@ function onElementClicked(event, x, y, update=true) {
         'color': activeParams.color,
         'polyshape': activeParams.polyshape,
       }
-  } else if (['triangle', 'atriangle', 'divdiamond', 'dice', 'crystal', 'eye'].includes(activeParams.type)) {
+  } else if (['triangle', 'atriangle', 'divdiamond', 'dice', 'crystal', 'eye', 'bell', 'drop'].includes(activeParams.type)) {
     let cycle;
     if (['divdiamond', 'dice'].includes(activeParams.type)) cycle = 9;
     else if (['crystal'].includes(activeParams.type)) cycle = 5;
@@ -1062,7 +1066,8 @@ function onElementClicked(event, x, y, update=true) {
     // Only increment count if exact match
     if (puzzle.grid[x][y] != null
      && puzzle.grid[x][y].type === activeParams.type
-     && puzzle.grid[x][y].color === activeParams.color) {
+     && puzzle.grid[x][y].color === activeParams.color
+     && puzzle.grid[x][y].flip === activeParams.flip) {
       puzzle.grid[x][y].count = puzzle.grid[x][y].count % cycle + 1
       // Remove when it matches activeParams -- this allows fluid cycling
       if (puzzle.grid[x][y].count === activeParams.count) {
@@ -1072,6 +1077,7 @@ function onElementClicked(event, x, y, update=true) {
       puzzle.grid[x][y] = {
         'type': activeParams.type,
         'color': activeParams.color,
+        'flip': activeParams.flip,
         'count': activeParams.count
       }
     }

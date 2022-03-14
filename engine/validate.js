@@ -100,7 +100,7 @@ class Polyomino {
     }
 }
 
-const NEGATE_IMMEDIATELY = ['dot', 'cross', 'curve', 'dots', 'triangle', 'atriangle', 'arrow', 'dart', 'twobytwo', 'crystal', 'dice', 'eye']; // these work individually, and can be negated
+const NEGATE_IMMEDIATELY = ['dot', 'cross', 'curve', 'dots', 'triangle', 'atriangle', 'arrow', 'dart', 'twobytwo', 'crystal', 'dice', 'eye', 'drop']; // these work individually, and can be negated
 const CHECK_ALSO = { // removing this 1 thing can affect these other symbols
     'square': ['pentagon'],
     'pentagon': ['square'],
@@ -161,7 +161,7 @@ function contains(a, b) {
     for (e of min) if (!max.includes(e)) return false;
     return true;        
 }
-function isBounded(puzzle, x, y) { return (0 <= x && x < puzzle.width && 0 <= y && y < puzzle.height); }
+function isBounded(puzzle, x, y) { return ((puzzle.pillar || (0 <= x && x < puzzle.width)) && 0 <= y && y < puzzle.height); }
 function matrix(puzzle, global, x, y) { return global.regionMatrix[y]?.[puzzle.pillar ? rdiv(x, puzzle.width) : x]; }
 function safepush(obj, k, v, makeset=false) { obj[k] ??= (makeset ? new Set() : []); makeset ? obj[k].add(v) : obj[k].push(v); }
 function getPortalCoords(c, data) { // from: <real>, to: PortalCoords(portalOffset-Adjusted)<virtual>
@@ -653,7 +653,13 @@ function init(puzzle) { // initialize globals
             }
         }
     }
-    if (global.shapes.includes('bridge')) global.portalColorPos = portalColorPos;
+	for (let shape of ['bridge','drop']){
+		if (global.shapes.includes(shape)){
+			global.portalColorPos = portalColorPos;
+			break;
+		}
+	}
+    
     units.push(performance.now());
     names.push('other works');
     if (console.info !== function(){}) for (let i = 1; i < units.length; i++) console.info(names[i], ':', (units[i] - units[i-1]), 'ms')
@@ -814,6 +820,39 @@ const preValidate = [
                 for (const region of regions) bridgeRegions[region].push(color);
             }
             global.bridgeRegions = bridgeRegions;
+        }
+    }, {
+        '_name': 'BELL CHECK',
+        'or': ['bell'],
+        'exec': function (puzzle, global, quick) {
+            const keyValues = [[1, 2, 4, 8], [4, 1, 8, 2], [8, 4, 2, 1], [2, 8, 1, 4], [1, 4, 2, 8], [4, 8, 1, 2], [8, 2, 4, 1], [2, 1, 8, 4]];
+            const dirs = [[0, -1], [1, 0], [-1, 0], [0, 1]];
+            let sides = {};
+            let bells = {};
+
+            for (let region of global.regionCells.cell) for (let c of region) {
+                let cell = cel(puzzle, c);
+                if (!this.or.includes(cell?.type)) continue;
+                bells[cell.color] ??= []; 
+                bells[cell.color].push(c);
+                if (sides[cell.color] === -1) continue;
+                let side = 0;
+                // detect lines
+                for (let i in endEnum) {
+                    let [x, y] = xy(c);
+                    if (matrix(puzzle, global, x + dirs[i][0], y + dirs[i][1]) === 0)
+                        side |= keyValues[(cell.flip << 2) + cell.count - 1][i]
+                }
+                if (sides[cell.color] === undefined) sides[cell.color] = side;
+                else if (sides[cell.color] !== side) {
+                    sides[cell.color] = -1;
+                    if (quick) {
+                        puzzle.invalidElements.push(c);
+                        return;
+                    }
+                }
+            }
+            for (color in sides) if (sides[color] === -1) for (c of bells[color]) puzzle.invalidElements.push(c);
         }
     }
 ];
@@ -1488,6 +1527,47 @@ const validate = [
                         console.info('[!] Bridge fault on region', regionNum, 'color', color, global.bridges[color]);
                         global.regionData[regionNum].addInvalids(puzzle, global.bridges[color]);
                     }
+                }
+            }
+        }
+    }, {
+        '_name': 'DROP CHECK',
+        'or': ['drop'],
+        'exec': function(puzzle, regionNum, global, quick) {
+            function eval(x, y, dir) { return matrix(puzzle, global, x + dir.x, y + dir.y) !== 0; } // true if no line in indicated direction
+            function cloneAt(filled, i, dir) { // floodfill. Probably optimizable.
+                let [newx, newy] = xy(filled[i]);
+                newx += (dir.x << 1); newy += (dir.y << 1);
+                let newc = retPillar(puzzle, newx, newy);
+                if (!isBounded(puzzle, newx, newy)) { filled[0] = [newx, newy]; return true; }
+                for (let j = filled.length - 1; j >= 0; j--) // items close together in the puzzle tend to be close in the list, so searching back to front is more efficient.
+                    if (filled[j] === newc) return false;
+                if (!(hasPortal && cel(puzzle, newc)?.type === "portal")) filled.push(newc);
+                else for (let pos of global.portalColorPos[cel(puzzle, newc)?.color]) filled.push(pos);
+                return false;
+            }
+
+			let hasPortal = global.portalRegion?.includes(regionNum);
+			for (let c of global.regionCells.cell[regionNum]) {
+                let cell = cel(puzzle, c);
+                if (!this.or.includes(cell.type)) continue;
+
+				// let up = DIR[ (cell.count - 1) << 1 & 6]; may come in handy later
+				let rt = DIR[(cell.count    ) << 1 & 6];
+				let dn = DIR[(cell.count + 1) << 1 & 6];
+				let lf = DIR[(cell.count + 2) << 1 & 6];
+
+				let filled = [c];
+				for (let i = 0; i < filled.length; i++) { //flood fill loop
+					if (eval(...xy(filled[i]), dn) && cloneAt(filled, i, dn)) break; //make clone if direction is open, end loop if clone is out-of-bounds.
+					if (eval(...xy(filled[i]), lf) && cloneAt(filled, i, lf)) break; // && shorts if eval is false, so clones are only made if eval passes.
+					if (eval(...xy(filled[i]), rt) && cloneAt(filled, i, rt)) break;
+				}
+				
+                if (Array.isArray(filled[0])) {
+                    console.info('[!] drop fault at', ...xy(c), 'leaking at', ...filled[0]);
+                    global.regionData[regionNum].addInvalid(puzzle, c);
+                    if (!puzzle.valid && quick) return;
                 }
             }
         }
