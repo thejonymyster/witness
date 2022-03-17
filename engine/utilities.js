@@ -718,7 +718,7 @@ function getCellData(cell) {
   let count = 0;
   if (['triangle', 'arrow', 'dart', 'atriangle', 'divdiamond', 'dice', 'crystal', 'eye', 'bell', 'drop'].includes(cell.type)) count += cell.count;
   if (['arrow', 'dart'].includes(cell.type)) count = count * 8 + cell.rot;
-  if (['bell'].includes(cell.type)) count += (cell.flip << 2);
+  if (['bell'].includes(cell.type)) count += cell.flip << 2;
   if (['scaler', 'swirl'].includes(cell.type)) raw += String.fromCharCode(!!cell.flip);
   if (count) raw += String.fromCharCode(count);
   if (polyominoes.includes(cell.type)) raw += intToShort(cell.polyshape);
@@ -957,7 +957,7 @@ function cellData(type, color, data1, data2) {
       ret.count = data1;
       return [ret, 1];
 	  case 'bell':
-      ret.flip = !!(data1 >> 2);
+      ret.flip = !!((data1 - 1) >> 2);
       ret.count = data1 % 4;
       return [ret, 1];
     case 'poly':
