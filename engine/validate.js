@@ -187,6 +187,7 @@ window.validate = function(puzzle, quick) {
     width = puzzle.width;
     height = puzzle.height;
     [puzzle, global] = init(puzzle);
+    puzzle.failmandering = false;
     if (puzzle.valid) {
         for (fn of preValidate) {
             if (fn.or ? intersects(fn.or, global.shapes) : (fn.orNot ? !intersects(fn.orNot, global.shapes) : fn.orCustom(puzzle, global))) { // prereq for exec
@@ -229,7 +230,7 @@ window.validate = function(puzzle, quick) {
     }
     puzzle.grid = window.savedGrid;
     delete window.savedGrid;
-    puzzle.valid = (puzzle.invalidElements.length == 0) && (!global.failmandering);
+    puzzle.valid = (puzzle.invalidElements.length == 0) && (!puzzle.failmandering);
 }
 
 function init(puzzle) { // initialize globals
@@ -248,8 +249,7 @@ function init(puzzle) { // initialize globals
             line: [],
             corner: [],
             edge: [],
-        },
-        'failmandering': false
+        }
     };
     console.warn(puzzle, global);
     // window.savedGrid = [];
@@ -875,15 +875,16 @@ const preValidate = [
                     colors[color]++;
                 }
                 let mx = Math.max(...Object.values(colors));
-                for (let k in colors) if (colors[k] === mx) {
-                    regions[k] ??= 0;
-                    regions[k]++;
+                let winners = [];
+                for (let k in colors) if (colors[k] === mx) winners.push(k);
+                if (winners.length === 1) {
+                    regions[winners[0]] ??= 0;
+                    regions[winners[0]]++;
                 }
             }
-            let mx = Math.max(...Object.values(regions));
-            if (regions[LINECOLOR] !== mx) {
+            if (Object.keys(regions).reduce((prev, cur) => prev && ((cur === LINECOLOR) || regions[cur] < regions[LINECOLOR]), true)) {
                 console.info('[!] Jerrymandering Failed');
-                global.failmandering = true;
+                puzzle.failmandering = true;
                 if (quick) return;
             }
         }

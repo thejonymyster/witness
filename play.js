@@ -74,6 +74,7 @@ function reloadPanel() {
   while (perfectWrapper.firstChild) perfectWrapper.removeChild(perfectWrapper.firstChild);
   panelNo = localStorage[code].charCodeAt(currentPanel);
   window.puzzle = puzzles[panelNo];
+  if (puzzle.jerrymandering) solsWrapper.appendChild(document.createRange().createContextualFragment(`<svg id="mainMenu" viewbox="0 0 15 15" style="width: 15px; height: 15px;"><path fill="(--text)" d="M 0 4.2 L 12.2 4.2 L 1.6 12 L 6 -0.4 L 10.8 12.2z"></path></svg>`));
   if (puzzle.sols > 1) {
     sols = new Set();
     for (let i = 0; i < puzzle.sols; i++) solsWrapper.appendChild(sol(i+1));
