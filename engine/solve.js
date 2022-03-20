@@ -74,7 +74,7 @@ window.solve = function(p, partialCallback, finalCallback) {
     for (var y=0; y<puzzle.height; y++) {
       var cell = puzzle.grid[x][y]
       if (cell == null) continue;
-      if (cell.start === true) {
+      if (cell.start > 0) {
         startPoints.push({'x': x, 'y': y})
       }
       if (cell.end != null) numEndpoints++
@@ -357,7 +357,7 @@ window.drawPath = function(puzzle, path, target='puzzle') {
   var x = path[0].x
   var y = path[0].y
   var cell = puzzle.getCell(x, y)
-  if (cell == null || cell.start !== true) throw Error('Path does not begin with a startpoint: ' + JSON.stringify(cell))
+  if (cell == null || cell.start === undefined) throw Error('Path does not begin with a startpoint: ' + JSON.stringify(cell))
 
   var start = document.getElementById('start_' + target + '_' + x + '_' + y)
   var symStart = document.getElementById('symStart_' + target + '_' + x + '_' + y)

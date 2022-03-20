@@ -402,7 +402,7 @@ window.Puzzle = class {
         var cell = this.getCell(x, y)
         if (cell == null) output += ' '
         else if (typeof(cell) == 'number') output += cell
-        else if (cell.start === true) output += 'S'
+        else if (cell.start > 0) output += 'S'
         else if (cell.end != null) output += 'E'
         else if (cell.type === 'line') {
           if (cell.line === 0) output += '.'

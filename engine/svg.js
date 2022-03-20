@@ -285,6 +285,9 @@ window.drawSymbolWithSvg = function(svg, params) {
       circ.setAttribute('fill', 'var(--line-undone)')
       circ.setAttribute('r', 24)
       circ.setAttribute('cx', midx); circ.setAttribute('cy', midy);
+      if (params.opposite) {
+        simplePath(svg, params, 'M -3 0 L -3 -9 L 3 -9 L 3 0 L 10 4 L 8 9 L 0 5 L -8 9 L -10 4').setAttribute('fill', 'var(--inner)')
+      }
       break;
     case 'end': //------------------------------------END/GOAL NUB
       rect = createElement('rect')
@@ -667,7 +670,8 @@ window.drawSymbolWithSvg = function(svg, params) {
       simplePath(svg, params, 'M -4 0 L -9 -5 L -5 -9 L 0 -4 L 5 -9 L 9 -5 L 4 0 L 9 5 L 5 9 L 0 4 L -5 9 L -9 5')
       break;
     case 'celledhex': //------------------------------------SHAUN'S CELLED HEXES
-      simplePath(svg, params, 'M -2 -13.5 Q 0 -15 2 -13.5 L 10 -8 Q 12 -7 12 -5 L 12 5 Q 12 7 10 8 L 2 12.6 Q 0 14 -2 12.5 L -10 8 Q -12 7 -12 5 L -12 -5 Q -12 -7 -10 -8')
+    case 'null':
+      simplePath(svg, params, 'M -2 -14 Q 0 -15 2 -14 L 11 -9 Q 13 -8 13 -6 L 13 6 Q 13 8 11 9 L 2 13 Q 0 14 -2 13 L -11 9 Q -13 8 -13 6 L -13 -6 Q -13 -8 -11 -9')
       break;
     case 'scaler':
       if (localStorage.symbolTheme == "Canonical") {

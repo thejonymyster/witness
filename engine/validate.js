@@ -214,6 +214,14 @@ window.validate = function(puzzle, quick) {
     }
     for (r of global.regionData) puzzle.invalidElements = puzzle.invalidElements.concat(r.invalids);
     if (global.invalidXs) puzzle.invalidElements = puzzle.invalidElements.concat(global.invalidXs);
+    if (puzzle.grid[puzzle.startPoint.x][puzzle.startPoint.y].start === 2) {
+        let rc = Array.from(new Set(global.regionCells.all.flat()));
+        for (let c of rc) {
+            if (cel(puzzle, c)?.type == "null") continue;
+            if (puzzle.invalidElements.includes(c)) puzzle.invalidElements.splice(puzzle.invalidElements.indexOf(c), 1);
+            else puzzle.invalidElements.push(c);
+        }
+    }
     for (let i = 0; i < puzzle.invalidElements.length; i++) {
         let c = puzzle.invalidElements[i];
         let [x, y] = xy(c);
@@ -221,7 +229,7 @@ window.validate = function(puzzle, quick) {
     }
     puzzle.grid = window.savedGrid;
     delete window.savedGrid;
-    puzzle.valid = (puzzle.invalidElements.length == 0);
+    puzzle.valid = (puzzle.invalidElements.length == 0) && (!global.failmandering);
 }
 
 function init(puzzle) { // initialize globals
@@ -240,7 +248,8 @@ function init(puzzle) { // initialize globals
             line: [],
             corner: [],
             edge: [],
-        }
+        },
+        'failmandering': false
     };
     console.warn(puzzle, global);
     // window.savedGrid = [];
@@ -358,7 +367,6 @@ function init(puzzle) { // initialize globals
         }
         if (!found) {
             console.info('[!] Eye Fault: no line seen at', o[0], o[1]);   
-            puzzle.valid = false;
             puzzle.invalidElements.push(ret(o[0], o[1]));
         }
     }
@@ -399,8 +407,7 @@ function init(puzzle) { // initialize globals
         // step 1: find two in same region
         for (const region in portalRegionColor) {
             if ((new Set(portalRegionColor[region])).size !== portalRegionColor[region].length) { // check duppes
-                console.info('[!] Portal Fault: dupe portal at region', region);   
-                puzzle.valid = false;
+                console.info('[!] Portal Fault: dupe portal at region', region);
                 puzzle.invalidElements.push(...(portalRegionPos[region]));
             }
         }
@@ -415,10 +422,10 @@ function init(puzzle) { // initialize globals
                         temp = null;
                         break;
                     } else if (contains(portalRegionLinks[i], temp)) {
-                        console.info('[!] Portal Fault: portal loop detected');   
+                        console.info('[!] Portal Fault: portal loop detected');
                         puzzle.valid = false;
-                        console.info(group, portalRegionLinks[i]);
-                        puzzle.invalidElements.push(...group, ...portalRegionLinks[i]);
+                        for (let region of Array.from(new Set([...group, ...portalRegionLinks[i]])))
+                            puzzle.invalidElements.push(...(portalRegionPos[region]));
                         return [puzzle, global];
                     } else if (intersects(portalRegionLinks[i], temp)) {
                         portalRegionLinks[i].push(...temp);
@@ -853,6 +860,32 @@ const preValidate = [
                 }
             }
             for (color in sides) if (sides[color] === -1) for (c of bells[color]) puzzle.invalidElements.push(c);
+        }
+    }, {
+        '_name': 'JERRYMANDERING CHECK',
+        'orCustom': (puzzle, global) => puzzle.jerrymandering,
+        'exec': function (puzzle, global, quick) {
+            const LINECOLOR = 36;
+            let regions = {};
+            for (let region of global.regionCells.cell) {
+                let colors = {};
+                for (let c of region) {
+                    let color = cel(puzzle, c)?.color;
+                    colors[color] ??= 0;
+                    colors[color]++;
+                }
+                let mx = Math.max(...Object.values(colors));
+                for (let k in colors) if (colors[k] === mx) {
+                    regions[k] ??= 0;
+                    regions[k]++;
+                }
+            }
+            let mx = Math.max(...Object.values(regions));
+            if (regions[LINECOLOR] !== mx) {
+                console.info('[!] Jerrymandering Failed');
+                global.failmandering = true;
+                if (quick) return;
+            }
         }
     }
 ];

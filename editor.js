@@ -105,7 +105,7 @@ function drawPuzzle() {
   }
 }
 
-const puzzleCheckbox = ['makePerfect', 'disableFlash', 'makeOptional'];
+const puzzleCheckbox = ['makePerfect', 'disableFlash', 'makeOptional', 'makeJerrymandering'];
 
 function reloadPuzzle() {
   // Disable the Solve (manually) button, clear lines, and redraw the puzzle
@@ -142,6 +142,7 @@ function reloadPuzzle() {
   document.getElementById('epC').value = puzzle.endDest[2];
   document.getElementById('disableFlash').checked = puzzle.disableFlash;
   document.getElementById('makeOptional').checked = puzzle.optional;
+  document.getElementById('makeJerrymandering').checked = puzzle.jerrymandering;
   for (let o of puzzleCheckbox.map(x => document.getElementById(x))) o.style.background = o.checked ? 'var(--text)' : 'var(--background)';
   //* sound ui
   let sounds = puzzle.grid.flat().filter(x => x?.dot >= 40).map(x => x.dot - 39).sort((a, b) => a - b);
@@ -210,7 +211,7 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
     // Intentional fall-through
   case 'Default':
     newPuzzle = new Puzzle(x, y)
-    newPuzzle.grid[0][y*2].start = true;
+    newPuzzle.grid[0][y*2].start = 1;
     newPuzzle.grid[x*2][0].end = 'right';
     break;
 
@@ -218,8 +219,8 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
     x = Math.max(1, x)
     newPuzzle = new Puzzle(x, y)
     newPuzzle.symmetry = {'x':true, 'y':false}
-    newPuzzle.grid[0][y*2].start = true;
-    newPuzzle.grid[x*2][y*2].start = true;
+    newPuzzle.grid[0][y*2].start = 1;
+    newPuzzle.grid[x*2][y*2].start = 1;
     newPuzzle.grid[0][0].end = 'top';
     newPuzzle.grid[x*2][0].end = 'top';
     break;
@@ -228,8 +229,8 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
     y = Math.max(1, y)
     newPuzzle = new Puzzle(x, y)
     newPuzzle.symmetry = {'x':false, 'y':true}
-    newPuzzle.grid[0][0].start = true;
-    newPuzzle.grid[0][y*2].start = true;
+    newPuzzle.grid[0][0].start = 1;
+    newPuzzle.grid[0][y*2].start = 1;
     newPuzzle.grid[x*2][0].end = 'right';
     newPuzzle.grid[x*2][y*2].end = 'right';
     break;
@@ -239,8 +240,8 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
     y = Math.max(1, y)
     newPuzzle = new Puzzle(x, y)
     newPuzzle.symmetry = {'x':true, 'y':true}
-    newPuzzle.grid[0][y*2].start = true;
-    newPuzzle.grid[x*2][0].start = true;
+    newPuzzle.grid[0][y*2].start = 1;
+    newPuzzle.grid[x*2][0].start = 1;
     newPuzzle.grid[0][0].end = 'left';
     newPuzzle.grid[x*2][y*2].end = 'right';
     break;
@@ -250,8 +251,8 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
     y = Math.max(1, y)
     newPuzzle = new Puzzle(x, y, false)
     newPuzzle.symmetry = {'x':false, 'y':false}
-    newPuzzle.grid[0][y*2].start = true;
-    newPuzzle.grid[x][y*2].start = true;
+    newPuzzle.grid[0][y*2].start = 1;
+    newPuzzle.grid[x][y*2].start = 1;
     newPuzzle.grid[0][0].end = 'top';
     newPuzzle.grid[x][0].end = 'top';
     break;
@@ -259,7 +260,7 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
   case 'Pillar':
     x = Math.max(1, x)
     newPuzzle = new Puzzle(x, y, true)
-    newPuzzle.grid[0][y*2].start = true;
+    newPuzzle.grid[0][y*2].start = 1;
     newPuzzle.grid[x][0].end = 'top';
     break;
 
@@ -267,8 +268,8 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
     x = Math.max(2, x)
     newPuzzle = new Puzzle(x, y, true)
     newPuzzle.symmetry = {'x':true, 'y':false}
-    newPuzzle.grid[0][y*2].start = true;
-    newPuzzle.grid[x][y*2].start = true;
+    newPuzzle.grid[0][y*2].start = 1;
+    newPuzzle.grid[x][y*2].start = 1;
     newPuzzle.grid[0][0].end = 'top';
     newPuzzle.grid[x][0].end = 'top';
     break;
@@ -278,8 +279,8 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
     y = Math.max(1, y)
     newPuzzle = new Puzzle(x, y, true)
     newPuzzle.symmetry = {'x':false, 'y':true}
-    newPuzzle.grid[0][y*2].start = true;
-    newPuzzle.grid[x][0].start = true;
+    newPuzzle.grid[0][y*2].start = 1;
+    newPuzzle.grid[x][0].start = 1;
     newPuzzle.grid[0][0].end = 'top';
     newPuzzle.grid[x][y*2].end = 'bottom';
     break;
@@ -289,8 +290,8 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
     y = Math.max(1, y)
     newPuzzle = new Puzzle(x, y, true)
     newPuzzle.symmetry = {'x':true, 'y':true}
-    newPuzzle.grid[0][y*2].start = true;
-    newPuzzle.grid[x][0].start = true;
+    newPuzzle.grid[0][y*2].start = 1;
+    newPuzzle.grid[x][0].start = 1;
     newPuzzle.grid[0][0].end = 'top';
     newPuzzle.grid[x][y*2].end = 'bottom';
     break;
@@ -300,8 +301,8 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
     y = Math.max(1, y)
     newPuzzle = new Puzzle(x, y, true)
     newPuzzle.symmetry = {'x':false, 'y':false}
-    newPuzzle.grid[0][y*2].start = true;
-    newPuzzle.grid[x][y*2].start = true;
+    newPuzzle.grid[0][y*2].start = 1;
+    newPuzzle.grid[x][y*2].start = 1;
     newPuzzle.grid[0][0].end = 'top';
     newPuzzle.grid[x][0].end = 'top';
     break;
@@ -318,6 +319,7 @@ window.createEmptyPuzzle = function(x = 4, y = x) {
   for (let o of ['epA', 'epB', 'epC']) document.getElementById(o).value = 0;
   newPuzzle.disableFlash = !!document.getElementById('disableFlash').checked;
   newPuzzle.optional = !!document.getElementById('makeOptional').checked;
+  newPuzzle.jerrymandering = !!document.getElementById('makeJerrymandering').checked;
   copyTheme(newPuzzle);
   copyImage(newPuzzle);
 
@@ -389,7 +391,7 @@ window.togglePuzzleStyle = function() {
     if (puzzleStyleExpand) o.style.display = 'block';
     o.style.opacity = Number(puzzleStyleExpand)
   }
-  list.style.height = puzzleStyleExpand ? '711px' : '38px'; 
+  list.style.height = puzzleStyleExpand ? '760px' : '38px'; 
   list.style.borderColor = puzzleStyleExpand ? 'var(--text)' : 'transparent'; 
   list.style.padding = puzzleStyleExpand ? '16px' : '0 16px'; 
   button.innerHTML = puzzleStyleExpand ? '-' : 'Puzzle Style (+)';
@@ -467,7 +469,7 @@ window.onSolvedPuzzle = function(paths) {
 }
 
 let symbolData = {
-  'start': {'type':'start', 'title':'Start point'},
+  'start': {'type':'start', 'opposite': false, 'title':'Start point'},
   'end': {'type':'end', 'endType': 0, 'y': 18, 'dir':'top', 'title':'End point'},
   'gap': {'type':'gap', 'title':'Line break'},
   'dot': {'type':'dot', 'sound': 0, 'title':'Dot'},
@@ -514,6 +516,7 @@ let symbolData = {
   'CrossCurve': {'type':'cross', 'title':'Cross'},
   'bell': { 'type': 'bell', 'count': 1, 'flip': false, 'title': 'Kube\'s Bells' },
   'drop': {'type':'drop', 'count': 1, 'title':'Mail\'s Drop'},
+  'null': {'type':'null', 'title':'Null Symbol'},
   'none': {'type': 'none', 'title': 'Symbol Coming Soon!'}
 }
 let xButtons = [];
@@ -579,6 +582,12 @@ function drawSymbolButtons() {
       case 'xvmino':
         button.params.polyshape = activeParams.polyshape
         button.onpointerdown = function(event) { buttonBehaviour(event, this, (el) => { shapeChooser(); })}
+        break;
+      case 'start':
+        button.onpointerdown = function(event) { buttonBehaviour(event, this, (el) => {
+          symbolData[activeParams.id].opposite = !symbolData[activeParams.id].opposite
+          activeParams.opposite = symbolData[activeParams.id].opposite
+        })}
         break;
       case 'end':
         button.onpointerdown = function(event) { buttonBehaviour(event, this, (el) => {
@@ -876,19 +885,15 @@ function onElementClicked(event, x, y, update=true) {
     if (x%2 === 1 && y%2 === 1) return
     if (puzzle.grid[x][y].gap != undefined) return
 
-    if (puzzle.grid[x][y].start !== true) {
-      puzzle.grid[x][y].start = true
-    } else {
-      puzzle.grid[x][y].start = undefined
-    }
+    let scr = 1;
+    if (activeParams.opposite) scr = 2;
+    if (puzzle.grid[x][y].start !== scr) puzzle.grid[x][y].start = scr
+    else puzzle.grid[x][y].start = undefined
     if (puzzle.symmetry != null) {
       let sym = puzzle.getSymmetricalPos(x, y)
-      if (sym.x === x && sym.y === y) {
-        // If the two startpoints would be in the same location, do nothing.
+      if (sym.x === x && sym.y === y) // If the two startpoints would be in the same location, do nothing.
         puzzle.grid[x][y].start = undefined
-      } else {
-        puzzle.updateCell2(sym.x, sym.y, 'start', puzzle.grid[x][y].start)
-      }
+      else puzzle.updateCell2(sym.x, sym.y, 'start', puzzle.grid[x][y].start)
     }
   } else if (activeParams.type == 'end') {
     if (x%2 === 1 && y%2 === 1) return
@@ -1010,7 +1015,7 @@ function onElementClicked(event, x, y, update=true) {
         }
       }
     }
-  } else if (['square', 'star', 'nega', 'bridge', 'sizer', 'twobytwo', 'vtriangle', 'pentagon', 'copier', 'celledhex', 'portal', 'blackhole', 'whitehole', 'pokerchip'].includes(activeParams.type)) {
+  } else if (['square', 'star', 'nega', 'bridge', 'sizer', 'twobytwo', 'vtriangle', 'pentagon', 'copier', 'celledhex', 'portal', 'blackhole', 'whitehole', 'pokerchip', 'null'].includes(activeParams.type)) {
     if (x%2 !== 1 || y%2 !== 1) return
     // Only remove the element if it's an exact match
     if (puzzle.grid[x][y] != null

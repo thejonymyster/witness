@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta property="og:site_name" content="Looksy">
-  <title>Looksy Editor v2.3.2</title>
-  <meta property="og:title" content="Looksy Editor v2.3.2">
+  <title>Looksy Editor v2.3.3</title>
+  <meta property="og:title" content="Looksy Editor v2.3.3">
   <meta name="description" content="Looksy - Modded Witness Editor">
   <meta property="og:description" content="Modded Witness Editor">
   <meta property="og:type" content="Game">
@@ -65,7 +65,7 @@
               <button id="loadButton" onpointerdown="importPuzzle()">Load from Clipboard</button>
             </div>
             <div class="spacer"></div>
-            <div class="vlist" style="width: 50%; height: 679px;" id="puzzle-style">
+            <div class="vlist" style="width: 50%; height: 760px;" id="puzzle-style">
               <h1>Puzzle Style</h1>
               <div class="block">
                 <div id="set-sols" class="hlist">
@@ -194,6 +194,11 @@
                   <label onpointerdown="applyChange('makeOptional', null, 'optional')" style="margin-right: 8px">Optional</label>
                   <div class="spacer"></div>
                 </div>
+                <div class="hlist">
+                  <div onpointerdown="applyChange('makeJerrymandering', null, 'jerrymandering')" class="checkbox" id="makeJerrymandering"></div>
+                  <label onpointerdown="applyChange('makeJerrymandering', null, 'jerrymandering')" style="margin-right: 8px">Jerrymandering</label>
+                  <div class="spacer"></div>
+                </div>
               </div>
               <div id="hide-if-sound-dots" class="block sound-dots-wrapper vlist">
                 <h2>Sound Dots (Drag)</h2>
@@ -252,7 +257,7 @@
                   <td><button id="star"></button></td>
                   <td><button id="pokerchip"></button></td>
                   <td><button id="swirl"></button></td>
-                  <td><button id="none"></button></td>
+                  <td><button id="null"></button></td>
                   <td><button id="none"></button></td>
                   <td><button id="none"></button></td>
                   <td><button id="none"></button></td>
