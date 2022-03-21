@@ -1035,8 +1035,8 @@ const validate = [
             }
             if (color.square == -1) for (let shape of Object.values(pos)) {
                 let mx = [];
-                for (let o of Object.values(shape)) {
-                    console.info(mx.length, o.length);
+                if (Object.values(shape).length === 1) global.regionData[regionNum].addInvalids(puzzle, Object.values(shape)[0]);
+                else for (let o of Object.values(shape)) {
                     if (mx.length >= o.length) global.regionData[regionNum].addInvalids(puzzle, o);
                     if (mx.length <= o.length) {
                         global.regionData[regionNum].addInvalids(puzzle, mx);

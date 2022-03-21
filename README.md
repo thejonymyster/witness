@@ -1,4 +1,4 @@
-# Funny Looksy - The Witness Custom Modded Panels
+# Funny Looksy - Modded Custom [The Witness](https://store.steampowered.com/app/210970/The_Witness/) Panel Editor & Player
 This extension is a fork of [witnesspuzzles.com](https://witnesspuzzles.com/) that adds a lot of custom gimmicks created by the community.
 
 ## People I shamelessly stole codes from
