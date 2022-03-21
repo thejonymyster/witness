@@ -78,7 +78,7 @@ namespace(function () {
             'hash': 0,
             'puzzles': -1,
             'endPoint': [8, 0],
-            'URL': "https://witness.zacharytalis.com/editor"
+            'URL': "https://witness.zacharytalis.com/editor.html"
         }
     ]
 
@@ -102,8 +102,8 @@ namespace(function () {
 
     window.onload = function () {
         let toLoad = (new URL(window.location.href).hash);
-        if (toLoad.startsWith('#vs')) window.location.replace('https://witness.zacharytalis.com/play' + toLoad);
-        else if (toLoad.startsWith('#v')) window.location.replace('https://witness.zacharytalis.com/editor' + toLoad);
+        if (toLoad.startsWith('#vs')) window.location.replace('https://witness.zacharytalis.com/play.html' + toLoad);
+        else if (toLoad.startsWith('#v')) window.location.replace('https://witness.zacharytalis.com/editor.html' + toLoad);
         else {
             window.puzzle = deserializePuzzle("v8_CAiAAQ~EAZ~KAGQAAABk~FADLgD-DEQI-xxjF~7-h2ZK---IlP~6-iP~6-Iv8AAACF~BABAQEBAQEBAQECAgICAgICAgICAwMDAwMDAwMEBAQEBAQEBAQFBQUFBQUGBgYGBgYGBgYGBwcHBwcHCAgJCQkJCQkJCgoKCgoKCwsLCwsLCwsMDAwMDAwMDAwMDQ0NDQ0NDQ4ODg4ODg4ODg4PDw8PDw8PDw8QEBAQEBAQEAEDBQcJCw0PAAIEBggKDA4QAQMFBgcKCwwNDwACBAgKDA4QAQMFBwkKDQ4QAAIECAwOAQIDBAcJCgsNDwAGCAoMDgAQAgQGCAoMDgIDBAcLDwACBAYICgwOAQMFCAkMDQ4PEAACBAgMDhABAwUGBwkKCw0PAAIEBggKDA4QAQMFBwkLDQ8AIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAAEAIAADACAAAwAgACAAIAAgACAAAQAgKQEAIAAgACAAIAAgACAAIBwBACAAAgADACAAIAAgAAQABAAgACAABAAgAAMAIAAgFgQAIAAgACAAIAAgAAEAIAABACAAAQAFACAAIAAEACAABAAgAAEAAwAgAAIAIAAgACAAIAAgACAAIAABACAABAAgACAAIAAgAAIAIAACACAAAwAwAAIAIAAgACAAIAAgACAAIAAgACAAIAAEACAAIAACACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAAFgAAAQEBAgICAgMDBAQEBAUFBQYGBgcEBgIEBwIDBQcEBgACBAcCBAUDBAYFDBAEIBYAFwMkAAIACgAiEwENGwUJAyMcAQQDDgkQDB8dAEcJDRsXAx4GAGMIFAMPDAAZDwMGFhAHCB8AaHR0cHNcOlwvXC9jZG5cLmRpc2NvcmRhcHBcLmNvbVwvYXR0YWNobWVudHNcLzUxNTY3ODgyMTQwODU3MTM5MlwvOTU0ODc2ODgyMjU4NjMyNzU0XC9pbWFnZV84MFwucG5n");
             reloadPanel();
