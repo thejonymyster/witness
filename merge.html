@@ -1,82 +1,92 @@
 <html xmlns="http://www.w3.org/2000/xhtml">
-  <head>
-    <meta charset="utf-8">
-    <meta property="og:site_name" content="Looksy">
-    <title>Looksy Merger</title>
-    <meta property="og:title" content="Looksy Merger v2.3.3">
-    <meta name="description" content="Looksy - Modded Witness Editor">
-    <meta property="og:description" content="Modded Witness Editor">
-    <meta property="og:type" content="Game">
-    <meta property="og:url" content="prodzpod.github.io/witness/merge">
-    <link rel="icon" type="image/png" href="./data/favicon.png">
-    <meta property="og:image" content="https://prodzpod.github.io/witness/data/favicon_black.png">
-    <meta name="author" content="prod">
-    <meta name="robots" content="nosnippet" />
-    <link rel="stylesheet" type="text/css" href="./data/reset.css" id="stylesheet">
-    <link rel="stylesheet" type="text/css" href="./data/style.css" id="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css" ie-ignore>
-    <script type="text/javascript" src="./engine/utilities.js"></script>
-    <script type="text/javascript" src="./engine/svg.js"></script>
-    <script async type="text/javascript" src="./engine/puzzle.js"></script>
-    <script async type="text/javascript" src="./engine/solve.js"></script>
-    <script async type="text/javascript" src="./engine/validate.js"></script>
-    <script async type="text/javascript" src="./engine/polyominos.js"></script>
-    <script async type="text/javascript" src="./engine/display2.js"></script>
-    <script async type="text/javascript" src="./engine/trace2.js"></script>
-    <script async type="text/javascript" src="./merge.js"></script>
-  </head>
-  <body>
-    <div class="background"></div>
-    <div class="wrapper">
-      <div class="hlist">
-        <div class="spacer"></div>
-        <a href='./index.html'><svg id="mainMenu" viewbox="0 0 64 64" style="width: 64px; height: 64px;"><path fill="var(--text)" transform="translate(32, 32)" d="M -24 0 Q 0 -24 24 0 Q 0 24 -24 0 Q 0 12 24 0 Q 0 -12 -24 0 M 0 -6 L -2 -4 L -4 -4 L -4 -2 L -6 0 L -4 2 L -4 4 L -2 4 L 0 6 L 2 4 L 4 4 L 4 2 L 6 0 L 4 -2 L 4 -4 L 2 -4z"></path></svg></a>
-        <header id="header" class="vlist">
-          <button id="header-plus-button" onclick="toggleExpand()"><i id="header-plus" class="xi-plus"></i></button>
-          <div id="header-expand">
-            <br>
-            <div class="hlist">
-              <div class="header-slider vlist">
-                <label for="sens">Mouse Speed</label>
-                <input id="sens" type="range" min='0.1' max='1.3' step='0.1' value='0.7'></input>
-              </div>
-              <div class="header-slider vlist">
-                <label for="volume">Volume</label>
-                <input id="volume" type="range" min='0' max='1' step='0.02' value='0.12'></input>
-              </div>
+
+<head>
+  <meta charset="utf-8">
+  <meta property="og:site_name" content="Looksy">
+  <title>Looksy Merger</title>
+  <meta property="og:title" content="Looksy Merger v2.3.3">
+  <meta name="description" content="Looksy - Modded Witness Editor">
+  <meta property="og:description" content="Modded Witness Editor">
+  <meta property="og:type" content="Game">
+  <meta property="og:url" content="witness.zacharytalis.com//merge">
+  <link rel="icon" type="image/png" href="./data/favicon.png">
+  <meta property="og:image" content="https://witness.zacharytalis.com//data/favicon_black.png">
+  <meta name="author" content="prod">
+  <meta name="robots" content="nosnippet" />
+  <link rel="stylesheet" type="text/css" href="./data/reset.css" id="stylesheet">
+  <link rel="stylesheet" type="text/css" href="./data/style.css" id="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css" ie-ignore>
+  <script type="text/javascript" src="./engine/utilities.js"></script>
+  <script type="text/javascript" src="./engine/svg.js"></script>
+  <script async type="text/javascript" src="./engine/puzzle.js"></script>
+  <script async type="text/javascript" src="./engine/solve.js"></script>
+  <script async type="text/javascript" src="./engine/validate.js"></script>
+  <script async type="text/javascript" src="./engine/polyominos.js"></script>
+  <script async type="text/javascript" src="./engine/display2.js"></script>
+  <script async type="text/javascript" src="./engine/trace2.js"></script>
+  <script async type="text/javascript" src="./merge.js"></script>
+</head>
+
+<body>
+  <div class="background"></div>
+  <div class="wrapper">
+    <div class="hlist">
+      <div class="spacer"></div>
+      <a href='./index.html'><svg id="mainMenu" viewbox="0 0 64 64" style="width: 64px; height: 64px;">
+          <path fill="var(--text)" transform="translate(32, 32)" d="M -24 0 Q 0 -24 24 0 Q 0 24 -24 0 Q 0 12 24 0 Q 0 -12 -24 0 M 0 -6 L -2 -4 L -4 -4 L -4 -2 L -6 0 L -4 2 L -4 4 L -2 4 L 0 6 L 2 4 L 4 4 L 4 2 L 6 0 L 4 -2 L 4 -4 L 2 -4z"></path>
+        </svg></a>
+      <header id="header" class="vlist">
+        <button id="header-plus-button" onclick="toggleExpand()"><i id="header-plus" class="xi-plus"></i></button>
+        <div id="header-expand">
+          <br>
+          <div class="hlist">
+            <div class="header-slider vlist">
+              <label for="sens">Mouse Speed</label>
+              <input id="sens" type="range" min='0.1' max='1.3' step='0.1' value='0.7'></input>
             </div>
-            <div class="vlist">
-              <label for="symboltheme">Symbol Set</label>
-              <input id="symboltheme" type="button" value='Canonical' onclick="changeTheme()"></input>
-            </div>
-            <br>
-          </div>
-        </header>
-        <div class="spacer"></div>
-      </div>
-      <div class="main-wrapper">
-        <div class="main vlist">
-          <div><h1>Looksy Merger</h1></div>
-          <div><p>Merge your looksy puzzles into a panel sequence.</p></div>
-          <div id="warning" style="visibility: hidden;"><p style="color: red;">WARNING: The resulting URL is *long*. it might not work on some browsers.</p></div>
-          <div class="list-wrapper vlist">
-            <div class="hlist">
-              <button onpointerdown="importSequence2()" id="importButton">Import Sequence</button>
-              <button onpointerdown="updateList()" id="updateButton">Update list</button>
-            </div>
-            <div id="list"></div>
-            <div class="hlist">
-              <button onpointerdown="exportSequence2()" id="exportButton">Export Sequence</button>
-              <button onpointerdown="exportSequence2(true)" id="exportIDNButton">Export as Short Link</button>
+            <div class="header-slider vlist">
+              <label for="volume">Volume</label>
+              <input id="volume" type="range" min='0' max='1' step='0.02' value='0.12'></input>
             </div>
           </div>
-          <div class="spacer"></div>
+          <div class="vlist">
+            <label for="symboltheme">Symbol Set</label>
+            <input id="symboltheme" type="button" value='Canonical' onclick="changeTheme()"></input>
+          </div>
+          <br>
         </div>
+      </header>
+      <div class="spacer"></div>
+    </div>
+    <div class="main-wrapper">
+      <div class="main vlist">
+        <div>
+          <h1>Looksy Merger</h1>
+        </div>
+        <div>
+          <p>Merge your looksy puzzles into a panel sequence.</p>
+        </div>
+        <div id="warning" style="visibility: hidden;">
+          <p style="color: red;">WARNING: The resulting URL is *long*. it might not work on some browsers.</p>
+        </div>
+        <div class="list-wrapper vlist">
+          <div class="hlist">
+            <button onpointerdown="importSequence2()" id="importButton">Import Sequence</button>
+            <button onpointerdown="updateList()" id="updateButton">Update list</button>
+          </div>
+          <div id="list"></div>
+          <div class="hlist">
+            <button onpointerdown="exportSequence2()" id="exportButton">Export Sequence</button>
+            <button onpointerdown="exportSequence2(true)" id="exportIDNButton">Export as Short Link</button>
+          </div>
+        </div>
+        <div class="spacer"></div>
       </div>
-      <footer class="noselect">
-        <pre class="footer-text">Funny Looksy, prodzpod 2021-2022</pre>
-        <a href="https://github.com/prodzpod/witness" class="footer-button" title="Source Code"><i class="xi-github"></i></a>
-        <pre>
+    </div>
+    <footer class="noselect">
+      <pre class="footer-text">Funny Looksy, prodzpod 2021-2022</pre>
+      <a href="https://github.com/prodzpod/witness" class="footer-button" title="Source Code"><i class="xi-github"></i></a>
+      <pre>
 BSD 3-Clause License
 
 Copyright (c) 2017, jbzdarkid
@@ -107,8 +117,9 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         </pre>
-      </footer>
-      <script async type="text/javascript" src="./engine/footer.js"></script>
-    </div>
-  </body>
+    </footer>
+    <script async type="text/javascript" src="./engine/footer.js"></script>
+  </div>
+</body>
+
 </html>
