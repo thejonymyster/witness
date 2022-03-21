@@ -420,6 +420,7 @@ window.trace = function(event, puzzle, pos, start, symStart=null) {
             for (var invalidElement of puzzle.invalidElements) {
               data.animations.insertRule('.' + data.svg.id + '_' + invalidElement.x + '_' + invalidElement.y + ' {animation: 0.4s 20 alternate-reverse error}\n')
             }
+            if (puzzle.failmandering) data.animations.insertRule('#jerrymandering {animation: 0.2s 10 alternate-reverse error}\n')
           }
         }
       }, 1)
@@ -444,7 +445,7 @@ window.clearAnimations = function() {
   if (data.animations == null) return
   for (var i=0; i<data.animations.cssRules.length; i++) {
     var rule = data.animations.cssRules[i]
-    if (rule.selectorText != null && rule.selectorText.startsWith('.' + data.svg.id)) {
+    if (rule.selectorText != null && (rule.selectorText.startsWith('.' + data.svg.id) || rule.selectorText.startsWith('#jerrymandering'))) {
       data.animations.deleteRule(i--)
     }
   }

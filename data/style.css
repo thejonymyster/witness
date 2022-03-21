@@ -516,7 +516,7 @@ li button, td button {
   margin: 1px;
 }
 
-#puzzle-style label, #puzzle-style select, #puzzle-style option, #puzzle-style input {
+#puzzle-style label, #puzzle-style a, #puzzle-style select, #puzzle-style option, #puzzle-style input {
   font-size: 16px;
   border-radius: 2px;
 }

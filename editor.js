@@ -20,7 +20,6 @@ window.undo = function() {
   deserializePuzzle(sessionStorage['undo-1']);
   applyThemeButton();
   applyImageButton();
-  updateSoundDotsList();
   reloadPuzzle();
   localStorage.puzzle = sessionStorage['undo-1']; // dont call writepuzzle
   for (let i = 1; i < 10; i++) sessionStorage['undo-' + i] = sessionStorage['undo-' + (i + 1)];
@@ -34,7 +33,6 @@ window.redo = function() {
   deserializePuzzle(sessionStorage['redo-1']);
   applyThemeButton();
   applyImageButton();
-  updateSoundDotsList();
   reloadPuzzle();
   localStorage.puzzle = sessionStorage['redo-1']; // dont call writepuzzle
   for (let i = 1; i < 10; i++) sessionStorage['redo-' + i] = sessionStorage['redo-' + (i + 1)];
@@ -49,7 +47,6 @@ window.load = function() {
   deserializePuzzle(localStorage['puzzle-' + document.getElementById('loadName').value]);
   applyThemeButton();
   applyImageButton();
-  updateSoundDotsList();
   reloadPuzzle();
   writePuzzle();
 }
@@ -391,6 +388,7 @@ window.togglePuzzleStyle = function() {
     if (puzzleStyleExpand) o.style.display = 'block';
     o.style.opacity = Number(puzzleStyleExpand)
   }
+  updateSoundDotsList();
   list.style.height = puzzleStyleExpand ? '760px' : '38px'; 
   list.style.borderColor = puzzleStyleExpand ? 'var(--text)' : 'transparent'; 
   list.style.padding = puzzleStyleExpand ? '16px' : '0 16px'; 
@@ -415,13 +413,11 @@ window.onload = function() {
   let toLoad = (new URL(window.location.href).hash);
   drawSymbolButtons()
   drawColorButtons()
-  togglePuzzleStyle();
   if (toLoad) {
     deserializePuzzle(toLoad.slice(1));
     applyThemeButton();
     applyImageButton();
     reloadPuzzle();
-    writePuzzle();
     document.getElementById('deleteButton').disabled = true
   } else if (localStorage.puzzle !== undefined) {
     window.puzzle = deserializePuzzle(localStorage.puzzle);
@@ -429,7 +425,9 @@ window.onload = function() {
     applyImageButton();
   }
   else createEmptyPuzzle()
-  reloadPuzzle()
+  reloadPuzzle();
+  writePuzzle();
+  togglePuzzleStyle();
   // Add theme-appropriate coloring to the style dropdown
   let puzzleStyle = document.getElementById('puzzleStyle')
   puzzleStyle.style.background = 'var(--background)'
@@ -1551,7 +1549,6 @@ window.importPuzzle = function() {
     deserializePuzzle(clipText.replace(/https?:.+?#/, ''));
     applyThemeButton();
     applyImageButton();
-    updateSoundDotsList();
     reloadPuzzle();
     writePuzzle();
     document.getElementById('deleteButton').disabled = true

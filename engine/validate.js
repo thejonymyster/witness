@@ -215,6 +215,7 @@ window.validate = function(puzzle, quick) {
     }
     for (r of global.regionData) puzzle.invalidElements = puzzle.invalidElements.concat(r.invalids);
     if (global.invalidXs) puzzle.invalidElements = puzzle.invalidElements.concat(global.invalidXs);
+    puzzle.invalidElements = Array.from(new Set(puzzle.invalidElements));
     if (puzzle.grid[puzzle.startPoint.x][puzzle.startPoint.y].start === 2) {
         let rc = Array.from(new Set(global.regionCells.all.flat()));
         for (let c of rc) {
@@ -882,7 +883,8 @@ const preValidate = [
                     regions[winners[0]]++;
                 }
             }
-            if (Object.keys(regions).reduce((prev, cur) => prev && ((cur === LINECOLOR) || regions[cur] < regions[LINECOLOR]), true)) {
+            let k = Object.keys(regions);
+            if (!(k.length && k.reduce((prev, cur) => prev && ((cur == LINECOLOR) || regions[cur] < regions[LINECOLOR]), true))) {
                 console.info('[!] Jerrymandering Failed');
                 puzzle.failmandering = true;
                 if (quick) return;
@@ -1016,26 +1018,32 @@ const validate = [
         '_name': 'SQUARE & PENTAGON',
         'or': ['square', 'pentagon'],
         'exec': function(puzzle, regionNum, global, quick) {
-            let pos = {'square': [], 'pentagon': []};
+            let pos = {'square': {}, 'pentagon': {}};
             let color = {'square': null, 'pentagon': null};
             for (let c of global.regionCells.cell[regionNum]) {
                 let [x, y] = xy(c);
                 let cell = puzzle.getCell(x, y);
                 if (!this.or.includes(cell.type)) continue;
-                pos[cell.type].push(c);
+                pos[cell.type][cell.color] ??= [];
+                pos[cell.type][cell.color].push(c);
                 if (color[cell.type] == -1) continue; // no need to continue already bonked
                 color[cell.type] ??= cell.color; // init
-                if (color[cell.type] != cell.color) { // bonk
+                if (color[cell.type] != cell.color || color.square == color.pentagon) { // bonk
                     console.info('[!] Segregation fault: ', cell.color, cell.type)
-                    color[cell.type] = -1
-                }
-                if (color.square == color.pentagon) {
-                    console.info('[!] Cross-Shape Segregation fault: ', cell.color)
                     color.square = -1; color.pentagon = -1;
                 }
             }
-            if (color.square   == -1) global.regionData[regionNum].addInvalids(puzzle, pos.square);
-            if (color.pentagon == -1) global.regionData[regionNum].addInvalids(puzzle, pos.pentagon);
+            if (color.square == -1) for (let shape of Object.values(pos)) {
+                let mx = [];
+                for (let o of Object.values(shape)) {
+                    console.info(mx.length, o.length);
+                    if (mx.length >= o.length) global.regionData[regionNum].addInvalids(puzzle, o);
+                    if (mx.length <= o.length) {
+                        global.regionData[regionNum].addInvalids(puzzle, mx);
+                        mx = o;
+                    }
+                }
+            }
         }
     }, {
         '_name': 'STAR',
