@@ -8,9 +8,9 @@
   <meta name="description" content="Looksy - Modded Witness Editor">
   <meta property="og:description" content="Modded Witness Editor">
   <meta property="og:type" content="Game">
-  <meta property="og:url" content="prodzpod.github.io/witness/editor">
+  <meta property="og:url" content="witness.zacharytalis.com/editor.html">
   <link rel="icon" type="image/png" href="./data/favicon.png">
-  <meta property="og:image" content="https://prodzpod.github.io/witness/data/favicon_black.png">
+  <meta property="og:image" content="https://witness.zacharytalis.com/data/favicon_black.png">
   <meta name="author" content="prod">
   <meta name="robots" content="nosnippet" />
   <link rel="stylesheet" type="text/css" href="./data/reset.css" id="stylesheet">
@@ -32,7 +32,9 @@
   <div class="wrapper">
     <div class="hlist">
       <div class="spacer"></div>
-      <a href='./index.html'><svg id="mainMenu" viewbox="0 0 64 64" style="width: 64px; height: 64px;"><path fill="var(--text)" transform="translate(32, 32)" d="M -24 0 Q 0 -24 24 0 Q 0 24 -24 0 Q 0 12 24 0 Q 0 -12 -24 0 M 0 -6 L -2 -4 L -4 -4 L -4 -2 L -6 0 L -4 2 L -4 4 L -2 4 L 0 6 L 2 4 L 4 4 L 4 2 L 6 0 L 4 -2 L 4 -4 L 2 -4z"></path></svg></a>
+      <a href='./index.html'><svg id="mainMenu" viewbox="0 0 64 64" style="width: 64px; height: 64px;">
+          <path fill="var(--text)" transform="translate(32, 32)" d="M -24 0 Q 0 -24 24 0 Q 0 24 -24 0 Q 0 12 24 0 Q 0 -12 -24 0 M 0 -6 L -2 -4 L -4 -4 L -4 -2 L -6 0 L -4 2 L -4 4 L -2 4 L 0 6 L 2 4 L 4 4 L 4 2 L 6 0 L 4 -2 L 4 -4 L 2 -4z"></path>
+        </svg></a>
       <header id="header" class="vlist">
         <button id="header-plus-button" onclick="toggleExpand()"><i id="header-plus" class="xi-plus"></i></button>
         <div id="header-expand">
@@ -293,8 +295,12 @@
                   <td><button id="none"></button></td>
                 </tr>
                 <tr>
-                  <td id="more-wrapper" colspan="4"><div class="hlist"><button class="center" id="more" onclick="seeMore()" style="flex: 1 0 auto;">See More</button></div></td>
-                  <td id="less-wrapper" colspan="4"><div class="hlist"><button class="center" id="less" onclick="seeLess()" style="flex: 1 0 auto;">Back</button></div></td>
+                  <td id="more-wrapper" colspan="4">
+                    <div class="hlist"><button class="center" id="more" onclick="seeMore()" style="flex: 1 0 auto;">See More</button></div>
+                  </td>
+                  <td id="less-wrapper" colspan="4">
+                    <div class="hlist"><button class="center" id="less" onclick="seeLess()" style="flex: 1 0 auto;">Back</button></div>
+                  </td>
                 </tr>
               </table>
             </div>
@@ -302,22 +308,14 @@
             <div class="hlist editor-puzzlebox">
               <div class="puzzlebox-wrapper">
                 <div id="puzzleBox" style="position: relative">
-                  <div id="resize-topleft" class="resize"
-                    style="cursor: nwse-resize; left: -10; top: -10; height: 30px; width: 30px"></div>
-                  <div id="resize-top" class="resize"
-                    style="cursor: ns-resize; left: 10; top: -10; right: 10; height: 30px"></div>
-                  <div id="resize-topright" class="resize"
-                    style="cursor: nesw-resize; top: -10; right: -10; height: 30px; width: 30px"></div>
-                  <div id="resize-right" class="resize"
-                    style="cursor: ew-resize; top: 10; right: -10; bottom: 10; width: 30px"></div>
-                  <div id="resize-bottomright" class="resize"
-                    style="cursor: nwse-resize; right: -10; bottom: -10; height: 30px; width: 30px"></div>
-                  <div id="resize-bottom" class="resize"
-                    style="cursor: ns-resize; right: 10; bottom: -10; left: 10; height: 30px"></div>
-                  <div id="resize-bottomleft" class="resize"
-                    style="cursor: nesw-resize; bottom: -10; left: -10; height: 30px; width: 30px"></div>
-                  <div id="resize-left" class="resize"
-                    style="cursor: ew-resize; bottom: 10; left: -10; top: 10; width: 30px"></div>
+                  <div id="resize-topleft" class="resize" style="cursor: nwse-resize; left: -10; top: -10; height: 30px; width: 30px"></div>
+                  <div id="resize-top" class="resize" style="cursor: ns-resize; left: 10; top: -10; right: 10; height: 30px"></div>
+                  <div id="resize-topright" class="resize" style="cursor: nesw-resize; top: -10; right: -10; height: 30px; width: 30px"></div>
+                  <div id="resize-right" class="resize" style="cursor: ew-resize; top: 10; right: -10; bottom: 10; width: 30px"></div>
+                  <div id="resize-bottomright" class="resize" style="cursor: nwse-resize; right: -10; bottom: -10; height: 30px; width: 30px"></div>
+                  <div id="resize-bottom" class="resize" style="cursor: ns-resize; right: 10; bottom: -10; left: 10; height: 30px"></div>
+                  <div id="resize-bottomleft" class="resize" style="cursor: nesw-resize; bottom: -10; left: -10; height: 30px; width: 30px"></div>
+                  <div id="resize-left" class="resize" style="cursor: ew-resize; bottom: 10; left: -10; top: 10; width: 30px"></div>
                   <svg id="puzzle"></svg>
                 </div>
               </div>
@@ -376,8 +374,7 @@
           </div>
           <div>
             <div onpointerdown="setSolveMode(!this.checked)" class="checkbox" id="solveMode"></div>
-            <label onpointerdown="setSolveMode(!document.getElementById('solveMode').checked)" id="solveManual"
-              style="margin-right: 8px">Solve (manually)</label>
+            <label onpointerdown="setSolveMode(!document.getElementById('solveMode').checked)" id="solveManual" style="margin-right: 8px">Solve (manually)</label>
             <button onpointerdown="solvePuzzle()" id="solveAuto" style="margin-right: 8px">Solve
               (automatically)</button>
             <div style="display: inline-block; vertical-align:top">
@@ -392,102 +389,150 @@
               </div>
             </div>
             <button id="save" onpointerdown="exportPuzzle()">Get URL</button>
-            <a href="https://prodzpod.github.io/witness/merge.html"><button>Merge Levels</button></a>
+            <a href="https://witness.zacharytalis.com/merge.html"><button>Merge Levels</button></a>
           </div>
           <div class="theme">
             <h1>Theme Setting</h1>
             <hr>
             <table>
               <tr>
-                <td><h2>Background</h2></td>
-                <td><div class="hlist theme-list">
-                  <input onchange="changeColor(this.id)" type="color" id="background-color" value="#ffffff" />
-                  <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="background-color-alpha">
-                </div></td>
+                <td>
+                  <h2>Background</h2>
+                </td>
+                <td>
+                  <div class="hlist theme-list">
+                    <input onchange="changeColor(this.id)" type="color" id="background-color" value="#ffffff" />
+                    <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="background-color-alpha">
+                  </div>
+                </td>
               </tr>
               <tr>
-                <td><h2>Puzzle Background</h2></td>
-                <td><div class="hlist theme-list">
-                  <input onchange="changeColor(this.id)" type="color" id="outer-color" value="#eeeeee" />
-                  <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="outer-color-alpha">
-                </div></td>
+                <td>
+                  <h2>Puzzle Background</h2>
+                </td>
+                <td>
+                  <div class="hlist theme-list">
+                    <input onchange="changeColor(this.id)" type="color" id="outer-color" value="#eeeeee" />
+                    <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="outer-color-alpha">
+                  </div>
+                </td>
               </tr>
               <tr>
-                <td><h2>Puzzle Line</h2></td>
-                <td><div class="hlist theme-list">
-                  <input onchange="changeColor(this.id)" type="color" id="line-undone-color" value="#333333" />
-                  <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="line-undone-color-alpha">
-                </div></td>
+                <td>
+                  <h2>Puzzle Line</h2>
+                </td>
+                <td>
+                  <div class="hlist theme-list">
+                    <input onchange="changeColor(this.id)" type="color" id="line-undone-color" value="#333333" />
+                    <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="line-undone-color-alpha">
+                  </div>
+                </td>
               </tr>
               <tr>
-                <td><h2>Puzzle Cell</h2></td>
-                <td><div class="hlist theme-list">
-                  <input onchange="changeColor(this.id)" type="color" id="inner-color" value="#aaaaaa" />
-                  <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="inner-color-alpha">
-                </div></td>
+                <td>
+                  <h2>Puzzle Cell</h2>
+                </td>
+                <td>
+                  <div class="hlist theme-list">
+                    <input onchange="changeColor(this.id)" type="color" id="inner-color" value="#aaaaaa" />
+                    <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="inner-color-alpha">
+                  </div>
+                </td>
               </tr>
               <tr>
-                <td><h2>Text</h2></td>
-                <td><div class="hlist theme-list">
-                  <input onchange="changeColor(this.id)" type="color" id="text-color" value="#000000" />
-                  <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="text-color-alpha">
-                </div></td>
+                <td>
+                  <h2>Text</h2>
+                </td>
+                <td>
+                  <div class="hlist theme-list">
+                    <input onchange="changeColor(this.id)" type="color" id="text-color" value="#000000" />
+                    <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="text-color-alpha">
+                  </div>
+                </td>
               </tr>
               <tr>
-                <td><h2>Line (Drawn)</h2></td>
-                <td><div class="hlist theme-list">
-                  <input onchange="changeColor(this.id)" type="color" id="line-default-color" value="#cccccc" />
-                  <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="line-default-color-alpha">
-                </div></td>
+                <td>
+                  <h2>Line (Drawn)</h2>
+                </td>
+                <td>
+                  <div class="hlist theme-list">
+                    <input onchange="changeColor(this.id)" type="color" id="line-default-color" value="#cccccc" />
+                    <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="line-default-color-alpha">
+                  </div>
+                </td>
               </tr>
               <tr>
-                <td><h2>Line (Primary Symmetry)</h2></td>
-                <td><div class="hlist theme-list">
-                  <input onchange="changeColor(this.id)" type="color" id="line-primary-color" value="#88ffff" />
-                  <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="line-primary-color-alpha">
-                </div></td>
+                <td>
+                  <h2>Line (Primary Symmetry)</h2>
+                </td>
+                <td>
+                  <div class="hlist theme-list">
+                    <input onchange="changeColor(this.id)" type="color" id="line-primary-color" value="#88ffff" />
+                    <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="line-primary-color-alpha">
+                  </div>
+                </td>
               </tr>
               <tr>
-                <td><h2>Line (Secondary Symmetry)</h2></td>
-                <td><div class="hlist theme-list">
-                  <input onchange="changeColor(this.id)" type="color" id="line-secondary-color" value="#ffff22" />
-                  <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="line-secondary-color-alpha">
-                </div></td>
+                <td>
+                  <h2>Line (Secondary Symmetry)</h2>
+                </td>
+                <td>
+                  <div class="hlist theme-list">
+                    <input onchange="changeColor(this.id)" type="color" id="line-secondary-color" value="#ffff22" />
+                    <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="line-secondary-color-alpha">
+                  </div>
+                </td>
               </tr>
               <tr>
-                <td><h2>Line (Success)</h2></td>
-                <td><div class="hlist theme-list">
-                  <input onchange="changeColor(this.id)" type="color" id="line-success-color" value="#ffffff" />
-                  <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="line-success-color-alpha">
-                </div></td>
+                <td>
+                  <h2>Line (Success)</h2>
+                </td>
+                <td>
+                  <div class="hlist theme-list">
+                    <input onchange="changeColor(this.id)" type="color" id="line-success-color" value="#ffffff" />
+                    <input onchange="changeColor(this.id)" type="range" min="0" max="255" step="1" value="255" class="slider" id="line-success-color-alpha">
+                  </div>
+                </td>
               </tr>
               <tr>
-                <td><h2>Background Image</h2></td>
+                <td>
+                  <h2>Background Image</h2>
+                </td>
                 <td><input onchange="changeImage(this.id, this.value)" type="text" id="background-image-input" /></td>
               </tr>
               <tr>
-                <td><h2>Foreground Image</h2></td>
+                <td>
+                  <h2>Foreground Image</h2>
+                </td>
                 <td><input onchange="changeImage(this.id, this.value)" type="text" id="foreground-image-input" /></td>
               </tr>
               <tr>
-                <td><h2>Background Music</h2></td>
+                <td>
+                  <h2>Background Music</h2>
+                </td>
                 <td><input onchange="changeImage(this.id, this.value)" type="text" id="background-music-input" /></td>
               </tr>
               <tr>
-                <td><h2>Veil Image (disappears when drawing)</h2></td>
+                <td>
+                  <h2>Veil Image (disappears when drawing)</h2>
+                </td>
                 <td><input onchange="changeImage(this.id, this.value)" type="text" id="veil-image-input" /></td>
               </tr>
               <tr>
-                <td><h2>Cursor Image</h2></td>
+                <td>
+                  <h2>Cursor Image</h2>
+                </td>
                 <td><input onchange="changeImage(this.id, this.value)" type="text" id="cursor-image-input" /></td>
               </tr>
               <tr style="margin: 16px;">
-                <td colspan="2"><div class="hlist">
-                  <button id="export-theme" class="theme-button" onpointerdown="exportTheme()">Export to Clipboard</button>
-                  <button id="import-theme" class="theme-button" onpointerdown="importTheme()">Import from Clipboard</button>
-                  <button id="reset-theme" class="theme-button" onpointerdown="resetTheme()">Reset Theme</button>
-                  <button id="random-theme" class="theme-button" onpointerdown="randomizeTheme()">I Feel Lucky</button>
-                </div></td>
+                <td colspan="2">
+                  <div class="hlist">
+                    <button id="export-theme" class="theme-button" onpointerdown="exportTheme()">Export to Clipboard</button>
+                    <button id="import-theme" class="theme-button" onpointerdown="importTheme()">Import from Clipboard</button>
+                    <button id="reset-theme" class="theme-button" onpointerdown="resetTheme()">Reset Theme</button>
+                    <button id="random-theme" class="theme-button" onpointerdown="randomizeTheme()">I Feel Lucky</button>
+                  </div>
+                </td>
               </tr>
             </table>
           </div>
@@ -497,8 +542,7 @@
     <div class="spacer"></div>
     <footer class="noselect">
       <pre class="footer-text">Funny Looksy, prodzpod 2021-2022</pre>
-      <a href="https://github.com/prodzpod/witness" class="footer-button" title="Source Code"><i
-          class="xi-github"></i></a>
+      <a href="https://github.com/prodzpod/witness" class="footer-button" title="Source Code"><i class="xi-github"></i></a>
       <pre>
 BSD 3-Clause License
 
