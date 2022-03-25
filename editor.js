@@ -512,7 +512,7 @@ let symbolData = {
   'squareToPentagon': {'type':'square', 'title':'Square'},
   'whiteAndBlackHole': {'type':'blackhole', 'title':'Pruz\'s Black Holes (Klyzx\'s Revision)'},
   'CrossCurve': {'type':'cross', 'title':'Cross'},
-  'bell': { 'type': 'bell', 'count': 1, 'flip': false, 'title': 'Kube\'s Bells' },
+  'bell': { 'type': 'bell', 'count': 1, 'title': 'Kube\'s Bells' },
   'drop': {'type':'drop', 'count': 1, 'title':'Mail\'s Drop'},
   'null': {'type':'null', 'title':'Null Symbol'},
   'none': {'type': 'none', 'title': 'Symbol Coming Soon!'}
@@ -606,6 +606,7 @@ function drawSymbolButtons() {
       case 'dots':
       case 'eye':
       case 'drop':
+      case 'bell':
         cycle ??= 4;
         button.onpointerdown = function(event) { buttonBehaviour(event, this, (el) => {
           let count = symbolData[activeParams.id].count
@@ -627,7 +628,6 @@ function drawSymbolButtons() {
         })}
         break;
       case 'scaler':
-      case 'bell':
       case 'swirl':
         button.onpointerdown = function(event) { buttonBehaviour(event, this, (el) => {
           let flip = symbolData[activeParams.id].flip

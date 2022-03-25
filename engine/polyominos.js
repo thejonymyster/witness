@@ -1,9 +1,9 @@
 namespace(function() {
 
 function getPolySize(polyshape) {
-  var size = 0
-  for (var x=0; x<4; x++) {
-    for (var y=0; y<4; y++) {
+  let size = 0
+  for (let x=0; x<4; x++) {
+    for (let y=0; y<4; y++) {
       if (isSet(polyshape, x, y)) size++
     }
   }
@@ -33,9 +33,9 @@ window.isRotated = function(polyshape) {
 function getRotations(polyshape) {
   if (!isRotated(polyshape)) return [polyshape]
 
-  var rotations = [0, 0, 0, 0]
-  for (var x=0; x<4; x++) {
-    for (var y=0; y<4; y++) {
+  let rotations = [0, 0, 0, 0]
+  for (let x=0; x<4; x++) {
+    for (let y=0; y<4; y++) {
       if (isSet(polyshape, x, y)) {
         rotations[0] ^= mask(x, y)
         rotations[1] ^= mask(y, 3-x)
@@ -54,10 +54,11 @@ function getRotations(polyshape) {
 // placing the shape at (x, y) will fill (x, y)
 // Ylops will have -1s on all adjacent cells, to break "overlaps" for polyominos.
 window.polyominoFromPolyshape = function(polyshape, ylop=false) {
-  for (var y=0; y<4; y++) {
-    for (var x=0; x<4; x++) {
+  let topLeft;
+  for (let y=0; y<4; y++) {
+    for (let x=0; x<4; x++) {
       if (isSet(polyshape, x, y)) {
-        var topLeft = {'x':x, 'y':y}
+        topLeft = {'x':x, 'y':y}
         break;
       }
     }
@@ -65,9 +66,9 @@ window.polyominoFromPolyshape = function(polyshape, ylop=false) {
   }
   if (topLeft == null) return [] // Empty polyomino
 
-  var polyomino = []
-  for (var x=0; x<4; x++) {
-    for (var y=0; y<4; y++) {
+  let polyomino = []
+  for (let x=0; x<4; x++) {
+    for (let y=0; y<4; y++) {
       if (!isSet(polyshape, x, y)) continue;
       if (isEnlarged(polyshape)) {
         polyomino.push({'x':4*(x - topLeft.x)    , 'y':4*(y - topLeft.y)    })
@@ -84,7 +85,7 @@ window.polyominoFromPolyshape = function(polyshape, ylop=false) {
 // However, even if they are the same size, that doesn't guarantee that they fit together.
 // As an optimization, we save the results for known combinations of shapes, since there are likely many
 // fewer pairings of shapes than paths through the grid.
-var knownCancellations = {}
+let knownCancellations = {}
 
 // Attempt to fit polyominos in a region into the puzzle.
 // This function checks for early exits, then simplifies the grid to a numerical representation:
@@ -223,14 +224,14 @@ window.polyntFitnt = function(puzzle, regionNum, global, polynts) { // best name
   const data = isPortaled ? global.portalData[isPortaled-1] : null;
   const w = data ? data.width : puzzle.width;
   polynts = polynts.filter(v => getPolySize(v.cell.polyshape) <= global.regions.cell[regionNum].length).map(v => v.cell);
-  var res = true // true until breaks are found
-  for (var polynt of polynts) {
-    for (var polyntshape of getRotations(polynt.polyshape, polynt.rot)) {
+  let res = true // true until breaks are found
+  for (let polynt of polynts) {
+    for (let polyntshape of getRotations(polynt.polyshape, polynt.rot)) {
       console.spam('Selected polyntshape', polyntshape)
       let cells = polyominoFromPolyshape(polyntshape)
-      for (var c of (data ? data.regions.cell : global.regions.cell[regionNum])) {
+      for (let c of (data ? data.regions.cell : global.regions.cell[regionNum])) {
         let [x, y] = (data ? xy(c, w) : xy(c, puzzle.width));
-        var found = true;
+        let found = true;
         for (cell of cells) {
           if ((data && !data.regions.cell.includes(ret(cell.x + x, cell.y + y, w)))
           || (!data && matrix(global, cell.x + x, cell.y + y) != regionNum)) {
@@ -254,16 +255,18 @@ window.polyntFitnt = function(puzzle, regionNum, global, polynts) { // best name
 // If true, poly fits and grid is modified (with the placement)
 function tryPlacePolyshape(cells, y, x, puzzle, sign) {
   console.spam('Placing at', x, y, 'with sign', sign)
-  var numCells = cells.length
-  for (var i=0; i<numCells; i++) {
-    var cell = cells[i]
-    var puzzleCell = puzzle.grid[cell.y + y]?.[cell.x + x]
+  let numCells = cells.length
+  for (let i=0; i<numCells; i++) {
+    let cell = cells[i]
+    let xx = puzzle.pillar ? rdiv(cell.x + x, puzzle.width) : cell.x + x;
+    let puzzleCell = puzzle.grid[cell.y + y]?.[xx]
     if (puzzleCell == null) return false
     cell.value = puzzleCell
   }
-  for (var i=0; i<numCells; i++) {
-    var cell = cells[i]
-    puzzle.grid[cell.y + y][cell.x + x] = cell.value + sign;
+  for (let i=0; i<numCells; i++) {
+    let cell = cells[i]
+    let xx = puzzle.pillar ? rdiv(cell.x + x, puzzle.width) : cell.x + x;
+    puzzle.grid[cell.y + y][xx] = cell.value + sign;
   }
   return true
 }
@@ -274,13 +277,13 @@ function placeYlops(ylops, i, polys, puzzle) {
   // Base case: No more ylops to place, start placing polys
   if (i === ylops.length) return placePolys(polys, puzzle)
 
-  var ylop = ylops[i]
-  var ylopRotations = getRotations(ylop.polyshape, ylop.rot)
-  for (var x=1; x<puzzle.width; x+=2) {
-    for (var y=1; y<puzzle.height; y+=2) {
+  let ylop = ylops[i]
+  let ylopRotations = getRotations(ylop.polyshape, ylop.rot)
+  for (let x=1; x<puzzle.width; x+=2) {
+    for (let y=1; y<puzzle.height; y+=2) {
       console.log('Placing ylop', ylop, 'at', x, y)
-      for (var polyshape of ylopRotations) {
-        var cells = polyominoFromPolyshape(polyshape, true)
+      for (let polyshape of ylopRotations) {
+        let cells = polyominoFromPolyshape(polyshape, true)
         if (!tryPlacePolyshape(cells, y, x, puzzle, -1)) continue;
         console.group('')
         if (placeYlops(ylops, i+1, polys, puzzle)) return true
@@ -298,11 +301,11 @@ function placeYlops(ylops, i, polys, puzzle) {
 // so try every piece to fill it, then recurse.
 function placePolys(polys, puzzle) {
   // Check for overlapping polyominos, and handle exit cases for all polyominos placed.
-  var allPolysPlaced = (polys.length === 0)
-  for (var y=1; y<puzzle.height; y+=2) {
-    var row = puzzle.grid[y]
-    for (var x=1; x<puzzle.width; x+=2) {
-      var cell = row?.[x]
+  let allPolysPlaced = (polys.length === 0)
+  for (let y=1; y<puzzle.height; y+=2) {
+    let row = puzzle.grid[y]
+    for (let x=1; x<puzzle.width; x+=2) {
+      let cell = row?.[x]
       if (cell > 0) {
         console.log('Cell', x, y, 'has been overfilled and no ylops left to place')
         return false
@@ -322,9 +325,9 @@ function placePolys(polys, puzzle) {
   // The top-left (first open cell) must be filled by a polyomino.
   // However in the case of pillars, there is no top-left, so we try all open cells in the
   // top-most open row
-  var openCells = []
-  for (var y=1; y<puzzle.height; y+=2) {
-    for (var x=1; x<puzzle.width; x+=2) {
+  let openCells = []
+  for (let y=1; y<puzzle.height; y+=2) {
+    for (let x=1; x<puzzle.width; x+=2) {
       if (puzzle.grid[y][x] >= 0) continue;
       openCells.push({'x':x, 'y':y})
       if (puzzle.pillar === false) break;
@@ -337,10 +340,10 @@ function placePolys(polys, puzzle) {
     return false
   }
 
-  for (var openCell of openCells) {
-    var attemptedPolyshapes = []
-    for (var i=0; i<polys.length; i++) {
-      var poly = polys[i]
+  for (let openCell of openCells) {
+    let attemptedPolyshapes = []
+    for (let i=0; i<polys.length; i++) {
+      let poly = polys[i]
       console.spam('Selected poly', poly)
       if (attemptedPolyshapes.includes(poly.polyshape)) {
         console.spam('Polyshape', poly.polyshape, 'has already been attempted')
@@ -348,9 +351,9 @@ function placePolys(polys, puzzle) {
       }
       attemptedPolyshapes.push(poly.polyshape)
       polys.splice(i, 1)
-      for (var polyshape of getRotations(poly.polyshape, poly.rot)) {
+      for (let polyshape of getRotations(poly.polyshape, poly.rot)) {
         console.spam('Selected polyshape', polyshape)
-        var cells = polyominoFromPolyshape(polyshape)
+        let cells = polyominoFromPolyshape(polyshape)
         if (!tryPlacePolyshape(cells, openCell.y, openCell.x, puzzle, +1)) {
           console.spam('Polyshape', polyshape, 'does not fit into', openCell.x, openCell.y)
           continue;
