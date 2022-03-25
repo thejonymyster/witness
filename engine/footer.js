@@ -58,3 +58,13 @@ function updateExpand(tf) {
         }, 1);
     }
 }
+
+let loc = window.location.protocol + "//" + window.location.hostname;
+let p = window.location.pathname.indexOf("witness");
+if (p !== -1) loc += window.location.pathname.slice(0, p + "witness".length);
+for (let el of Array.from(document.getElementsByClassName("changehref"))) {
+    el.setAttribute("href", el.getAttribute("href").replace(/%%NAME%%/g, loc));
+}
+for (let el of Array.from(document.getElementsByClassName("changecontent"))) {
+    el.setAttribute("content", el.getAttribute("content").replace(/%%NAME%%/g, loc));
+}

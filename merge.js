@@ -75,7 +75,7 @@ namespace(function () {
 
     window.exportSequence2 = function (useIDN = false) {
         updateList(); // make sure all versions are the same
-        navigator.clipboard.writeText('https://witness.zacharytalis.com/#' + exportSequence(list, useIDN));
+        navigator.clipboard.writeText(window.NAME + '/#' + exportSequence(list, useIDN));
     }
 
     window.updateList = function () {

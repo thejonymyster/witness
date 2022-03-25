@@ -1560,7 +1560,7 @@ namespace(function () {
     return parseInt(`${Math.round(r * 255).toString(16).padStart(2, '0')}${Math.round(g * 255).toString(16).padStart(2, '0')}${Math.round(b * 255).toString(16).padStart(2, '0')}FF`, 16);
   }
 
-  window.exportPuzzle = function () { navigator.clipboard.writeText('https://witness.zacharytalis.com/#' + serializePuzzle(puzzle)).then(); }
+  window.exportPuzzle = function () { navigator.clipboard.writeText(window.NAME + '/#' + serializePuzzle(puzzle)).then(); }
 
   window.importPuzzle = function () {
     navigator.clipboard.readText().then(clipText => {
