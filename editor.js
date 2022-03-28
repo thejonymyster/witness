@@ -1021,13 +1021,13 @@ namespace(function () {
           if (bottomCell != null && bottomCell.gap !== 2) continue;
 
           // At this point, the cell has no defined or non-gap2 neighbors (isolated)
-          puzzle.updateCell2(i, j, 'start', false)
-          puzzle.updateCell2(i, j, 'end', null)
+          puzzle.updateCell2(i, j, 'start', undefined)
+          puzzle.updateCell2(i, j, 'end', undefined)
           if (puzzle.symmetry != null) {
             let sym = puzzle.getSymmetricalPos(i, j)
             console.debug('Enforcing symmetrical startpoint at', sym.x, sym.y)
-            puzzle.updateCell2(sym.x, sym.y, 'start', false, 'end', null)
-            puzzle.updateCell2(sym.x, sym.y, 'end', null)
+            puzzle.updateCell2(sym.x, sym.y, 'start', undefined, 'end', undefined)
+            puzzle.updateCell2(sym.x, sym.y, 'end', undefined)
           }
         }
       }
