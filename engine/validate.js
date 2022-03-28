@@ -849,7 +849,7 @@ const preValidate = [
                 for (let i in endEnum) {
                     let [x, y] = xy(c);
                     if (matrix(puzzle, global, x + dirs[i][0], y + dirs[i][1]) === 0)
-                        side |= keyValues[(cell.flip << 2) + cell.count - 1][i]
+                        side |= keyValues[/* (cell.flip << 2) + */ cell.count - 1][i]
                 }
                 if (sides[cell.color] === undefined) sides[cell.color] = side;
                 else if (sides[cell.color] !== side) {
