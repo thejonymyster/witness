@@ -386,13 +386,13 @@ namespace(function () {
     for (let o of Array.from(list.childNodes)) {
       if (o === button || !o?.style) continue;
       if (puzzleStyleExpand) o.style.display = 'block';
-      o.style.opacity = Number(puzzleStyleExpand)
+      o.style.opacity = Number(puzzleStyleExpand);
     }
     updateSoundDotsList();
     list.style.height = puzzleStyleExpand ? '760px' : '38px';
     list.style.borderColor = puzzleStyleExpand ? 'var(--text)' : 'transparent';
     list.style.padding = puzzleStyleExpand ? '16px' : '0 16px';
-    button.innerHTML = puzzleStyleExpand ? '-' : 'Puzzle Style (+)';
+    button.innerHTML = puzzleStyleExpand ? 'Puzzle Style (-)' : 'Puzzle Style (+)';
     setTimeout(() => {
       if (!puzzleStyleExpand) for (let o of Array.from(list.childNodes)) {
         if (o === button || !o?.style) continue;
