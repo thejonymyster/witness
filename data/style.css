@@ -288,6 +288,7 @@ input[type="range"]::-ms-thumb {
   --outer:#eeeeeeff; /* used to be OUTER_BACKGROUND*/
   --inner:#aaaaaaff; /* used to be BACKGROUND*/
   --text:#000000ff;
+  --symbol:#000000ff;
   --line-undone:#333333ff; /* used to be FOREGROUND*/
   --line-default:#ccccccff;
   --line-success:#ffffffff;
