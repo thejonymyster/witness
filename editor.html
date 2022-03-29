@@ -68,10 +68,10 @@
             </div>
             <div class="spacer"></div>
             <div class="vlist" style="width: 50%; height: 760px;" id="puzzle-style">
-              <h1>Puzzle Style</h1>
-              <div class="block">
+              <button id="expandPuzzleStyle" onclick="togglePuzzleStyle()">Puzzle Style (-)</button>
+              <div class="block" style="margin-top: 16px;">
                 <div id="set-sols" class="hlist">
-                  <label style="margin-right: 8px">Solutions:</label>
+                  <label style="margin-right: 8px;">Solutions:</label>
                   <input type="number" min="1" step="1" value="1" id="sols" onchange="applyChange(this, this.value, ['sols'])"></input>
                   <div class="spacer"></div>
                 </div>
@@ -206,7 +206,6 @@
                 <h2>Sound Dots (Drag)</h2>
                 <div id="sound-dots" class="hlist"></div>
               </div>
-              <button id="expandPuzzleStyle" onclick="togglePuzzleStyle()">-</button>
             </div>
           </div>
           <div class="hlist utils">
