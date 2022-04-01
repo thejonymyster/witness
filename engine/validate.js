@@ -180,6 +180,7 @@ function getPortalCoords(c, data) { // from: <real>, to: PortalCoords(portalOffs
 // invalidElements: Array[Object{'x':int, 'y':int}]
 // negations: Array[Object{'source':{'x':int, 'y':int}, 'target':{'x':int, 'y':int}}]
 window.validate = function(puzzle, quick) {
+    if (puzzle.grid[puzzle.startPoint.x][puzzle.startPoint.y].start === 2) quick = false;
     let global;
     puzzle.invalidElements = []; // once elements go in this list, nothing is removed
     puzzle.negations = [];
