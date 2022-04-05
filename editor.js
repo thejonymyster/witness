@@ -386,13 +386,13 @@ namespace(function () {
     for (let o of Array.from(list.childNodes)) {
       if (o === button || !o?.style) continue;
       if (puzzleStyleExpand) o.style.display = 'block';
-      o.style.opacity = Number(puzzleStyleExpand)
+      o.style.opacity = Number(puzzleStyleExpand);
     }
     updateSoundDotsList();
     list.style.height = puzzleStyleExpand ? '760px' : '38px';
     list.style.borderColor = puzzleStyleExpand ? 'var(--text)' : 'transparent';
     list.style.padding = puzzleStyleExpand ? '16px' : '0 16px';
-    button.innerHTML = puzzleStyleExpand ? '-' : 'Puzzle Style (+)';
+    button.innerHTML = puzzleStyleExpand ? 'Puzzle Style (-)' : 'Puzzle Style (+)';
     setTimeout(() => {
       if (!puzzleStyleExpand) for (let o of Array.from(list.childNodes)) {
         if (o === button || !o?.style) continue;
@@ -556,11 +556,11 @@ namespace(function () {
       if (params.type == 'x') xButtons.push(button.id)
       if (activeParams.id === button.id) {
         if (['x-lu', 'x-ru', 'x-ld', 'x-rd'].includes(button.id)) {
-          if (document.getElementById('x-fakebutton')) document.getElementById('x-fakebutton').style.backgroundColor = window.symbolColors[activeParams.color];
+          if (document.getElementById('x-fakebutton')) document.getElementById('x-fakebutton').style.backgroundColor = 'var(--text)';
           button.parentElement.style.backgroundColor = null;
         } else {
           if (document.getElementById('x-fakebutton')) document.getElementById('x-fakebutton').style.backgroundColor = null;
-          button.parentElement.style.backgroundColor = window.symbolColors[activeParams.color];
+          button.parentElement.style.backgroundColor = 'var(--text)';
         }
       } else button.parentElement.style.backgroundColor = null;
       button.style.padding = 0
@@ -569,7 +569,14 @@ namespace(function () {
       button.style.width = params.width + 2 * params.border
       button.title = params.title
       button.params = params
-      button.params.color = (params.type == 'x') ? '#F66' : 'var(--text)'
+      button.params.color = (params.type == 'x') ? '#F66' : 'var(--symbol)'
+      if (getComputedStyle(document.documentElement).getPropertyValue('--symbol') == '#00000000') {
+        button.params.stroke = 'black';
+        button.params.strokewidth = '2px';
+      } else {
+        button.params.stroke = '#00000000';
+        button.params.strokewidth = '0px';
+      }
       button.style.display = null
 
       let cycle;
@@ -751,19 +758,21 @@ namespace(function () {
       reloadPuzzle() // Disable manual solve mode to allow puzzle editing
       activeParams.color = symbolColors.indexOf(this.id);
       let symbolTable = document.getElementById('symbolButtons')
+      document.documentElement.style.setProperty('--symbol', window.symbolColors[activeParams.color])
       for (let button of symbolTable.getElementsByTagName('button')) {
         if (activeParams.id === button.id) {
           if (['x-lu', 'x-ru', 'x-ld', 'x-rd'].includes(button.id)) {
-            if (document.getElementById('x-fakebutton')) document.getElementById('x-fakebutton').style.backgroundColor = window.symbolColors[activeParams.color];
+            if (document.getElementById('x-fakebutton')) document.getElementById('x-fakebutton').style.backgroundColor = 'var(--text)';
             button.parentElement.style.backgroundColor = null;
           } else {
             if (document.getElementById('x-fakebutton')) document.getElementById('x-fakebutton').style.backgroundColor = null;
-            button.parentElement.style.backgroundColor = window.symbolColors[activeParams.color];
+            button.parentElement.style.backgroundColor = 'var(--text)';
           }
         } else {
           button.parentElement.style.backgroundColor = null;
         }
       }
+
       drawColorButtons()
     }
     for (let button of colorTable.getElementsByTagName('button')) {
@@ -789,6 +798,7 @@ namespace(function () {
       let crayon = window.drawSymbol(params)
       button.appendChild(crayon)
     }
+    drawSymbolButtons();
   }
 
   function shapeChooser() {
@@ -1021,13 +1031,13 @@ namespace(function () {
           if (bottomCell != null && bottomCell.gap !== 2) continue;
 
           // At this point, the cell has no defined or non-gap2 neighbors (isolated)
-          puzzle.updateCell2(i, j, 'start', false)
-          puzzle.updateCell2(i, j, 'end', null)
+          puzzle.updateCell2(i, j, 'start', undefined)
+          puzzle.updateCell2(i, j, 'end', undefined)
           if (puzzle.symmetry != null) {
             let sym = puzzle.getSymmetricalPos(i, j)
             console.debug('Enforcing symmetrical startpoint at', sym.x, sym.y)
-            puzzle.updateCell2(sym.x, sym.y, 'start', false, 'end', null)
-            puzzle.updateCell2(sym.x, sym.y, 'end', null)
+            puzzle.updateCell2(sym.x, sym.y, 'start', undefined, 'end', undefined)
+            puzzle.updateCell2(sym.x, sym.y, 'end', undefined)
           }
         }
       }

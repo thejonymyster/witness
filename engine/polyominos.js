@@ -229,12 +229,14 @@ window.polyntFitnt = function(puzzle, regionNum, global, polynts) { // best name
     for (let polyntshape of getRotations(polynt.polyshape, polynt.rot)) {
       console.spam('Selected polyntshape', polyntshape)
       let cells = polyominoFromPolyshape(polyntshape)
+      let found;
       for (let c of (data ? data.regions.cell : global.regions.cell[regionNum])) {
         let [x, y] = (data ? xy(c, w) : xy(c, puzzle.width));
-        let found = true;
+        found = true;
         for (cell of cells) {
-          if ((data && !data.regions.cell.includes(ret(cell.x + x, cell.y + y, w)))
-          || (!data && matrix(global, cell.x + x, cell.y + y) != regionNum)) {
+          let xx = puzzle.pillar ? rdiv(cell.x + x, puzzle.width) : (cell.x + x);
+          if ((data && !data.regions.cell.includes(ret(xx, cell.y + y, w)))
+          || (!data && matrix(global, xx, cell.y + y) != regionNum)) {
             found = false;
             break;
           }

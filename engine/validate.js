@@ -180,6 +180,7 @@ function getPortalCoords(c, data) { // from: <real>, to: PortalCoords(portalOffs
 // invalidElements: Array[Object{'x':int, 'y':int}]
 // negations: Array[Object{'source':{'x':int, 'y':int}, 'target':{'x':int, 'y':int}}]
 window.validate = function(puzzle, quick) {
+    if (puzzle.grid[puzzle.startPoint.x][puzzle.startPoint.y].start === 2) quick = false;
     let global;
     puzzle.invalidElements = []; // once elements go in this list, nothing is removed
     puzzle.negations = [];
@@ -849,7 +850,7 @@ const preValidate = [
                 for (let i in endEnum) {
                     let [x, y] = xy(c);
                     if (matrix(puzzle, global, x + dirs[i][0], y + dirs[i][1]) === 0)
-                        side |= keyValues[(cell.flip << 2) + cell.count - 1][i]
+                        side |= keyValues[/* (cell.flip << 2) + */ cell.count - 1][i]
                 }
                 if (sides[cell.color] === undefined) sides[cell.color] = side;
                 else if (sides[cell.color] !== side) {
