@@ -126,10 +126,10 @@ namespace(function () {
 
   function levelUp(type = -1) {
     if (type === -1) { levelUp(0); levelUp(1); levelUp(2); return; }
-    if (isNewPanel() && !isLastPanel(type)) {
+    if (isNewPanel() && !isLastPanel(type) && (endDest(type) != panelNo)) {
       localStorage[code] += String.fromCharCode(endDest(type));
     }
-    if (!isLastPanel(type)) {
+    if (!isLastPanel(type) && (endDest(type) != panelNo)) {
       open[type] = true;
       for (let i = 0; i < type; i++) if (endDest(type) === endDest(i)) open[type] = false;
     }

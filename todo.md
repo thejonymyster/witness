@@ -1,4 +1,4 @@
-# TODO v2.5
+# TODO v2.4
 ## Long-term projects
 - [ ] Graph Editor (similar to one from artless)
 - [ ] Negators
