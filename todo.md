@@ -25,7 +25,6 @@
 )
 - [ ] proper documentation of editor
 - [ ] new "benis" symbol type (complete with suspicious start points!)
-- [ ] minimaps for sequences with branching paths!
 - [ ] some new symbols, maybe (minesweeper if i figure the design out, (secret), something someone posted few weeks ago i have to check again but i thought it was cool)
 - [ ] way to turn on/off puzzle transformations in editor!
 - [ ] looksy randomizer! auto-generates a few panels of your configuration that are probably better than sigma's, share a code to race with others!
