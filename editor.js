@@ -892,22 +892,7 @@ namespace(function () {
   // This function also ensures that the resulting puzzle is still sane, and will modify
   // the puzzle to add symmetrical elements, remove newly invalidated elements, etc.
   function onElementClicked(event, x, y, update = true) {
-    if (event.isRightClick()) {
-      // Clear the associated cell
-      if (x % 2 === 1 && y % 2 === 1) {
-        puzzle.grid[x][y] = null
-      } else {
-        puzzle.grid[x][y].end = undefined
-        puzzle.grid[x][y].start = undefined
-        puzzle.grid[x][y].dot = undefined
-        puzzle.grid[x][y].gap = undefined
-        if (puzzle.symmetry != undefined) {
-          let sym = puzzle.getSymmetricalPos(x, y)
-          puzzle.updateCell2(sym.x, sym.y, 'start', null)
-          puzzle.updateCell2(sym.x, sym.y, 'end', null)
-        }
-      }
-    } else if (activeParams.type == 'start') {
+    if (activeParams.type == 'start') {
       if (x % 2 === 1 && y % 2 === 1) return
       if (puzzle.grid[x][y].gap != undefined) return
 
@@ -915,7 +900,7 @@ namespace(function () {
       if (activeParams.opposite) scr = 2;
       if (puzzle.grid[x][y].start !== scr) puzzle.grid[x][y].start = scr
       else puzzle.grid[x][y].start = undefined
-      if (puzzle.symmetry != null) {
+      if (puzzle.symmetry != null && !event.isRightClick()) {
         let sym = puzzle.getSymmetricalPos(x, y)
         if (sym.x === x && sym.y === y) // If the two startpoints would be in the same location, do nothing.
           puzzle.grid[x][y].start = undefined
@@ -933,7 +918,7 @@ namespace(function () {
       let dir = (puzzle.grid[x][y].endType === activeParams.endType) ? getNextValue(validDirs, puzzle.grid[x][y].end) : validDirs[0];
       puzzle.grid[x][y].end = dir
       puzzle.grid[x][y].endType = activeParams.endType
-      if (puzzle.symmetry != null) {
+      if (puzzle.symmetry != null && !event.isRightClick()) {
         let sym = puzzle.getSymmetricalPos(x, y)
         if (sym.x === x && sym.y === y) {
           // If the two endpoints would be in the same location, do nothing.
@@ -941,6 +926,21 @@ namespace(function () {
         } else {
           let symmetricalDir = puzzle.getSymmetricalDir(dir)
           puzzle.updateCell2(sym.x, sym.y, 'end', symmetricalDir)
+        }
+      }
+    } else if (event.isRightClick()) {
+      // Clear the associated cell
+      if (x % 2 === 1 && y % 2 === 1) {
+        puzzle.grid[x][y] = null
+      } else {
+        puzzle.grid[x][y].end = undefined
+        puzzle.grid[x][y].start = undefined
+        puzzle.grid[x][y].dot = undefined
+        puzzle.grid[x][y].gap = undefined
+        if (puzzle.symmetry != undefined) {
+          let sym = puzzle.getSymmetricalPos(x, y)
+          puzzle.updateCell2(sym.x, sym.y, 'start', null)
+          puzzle.updateCell2(sym.x, sym.y, 'end', null)
         }
       }
     } else if (activeParams.type == 'dot') {
@@ -1143,7 +1143,7 @@ namespace(function () {
         let validDirs = puzzle.getValidEndDirs(i, j)
         if (!validDirs.includes(cell.end)) {
           puzzle.grid[i][j].end = validDirs[0]
-          if (puzzle.symmetry != null) {
+          if (puzzle.symmetry != null && !event.isRightClick()) {
             let sym = puzzle.getSymmetricalPos(i, j)
             puzzle.grid[sym.x][sym.y] = validDirs[0]
           }

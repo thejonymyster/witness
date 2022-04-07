@@ -280,6 +280,7 @@ namespace(function () {
           }
         break;
       case 'start': //------------------------------------START/CIRCLE LINE
+        // if (params.opposite === undefined) break;
         circ = createElement('circle')
         svg.appendChild(circ)
         circ.setAttribute('fill', 'var(--line-undone)')

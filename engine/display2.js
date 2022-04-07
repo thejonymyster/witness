@@ -376,7 +376,7 @@ function drawStartAndEnd(puzzle, svg) {
           var sym = puzzle.getSymmetricalPos(x, y)
           var symCell = puzzle.getCell(sym.x, sym.y)
           if (symCell.end == null) {
-            console.error('Found an endpoint at', x, y, 'but there was no symmetrical endpoint at', sym.x, sym.y)
+            console.warn('Found an endpoint at', x, y, 'but there was no symmetrical endpoint at', sym.x, sym.y)
           }
         }
         window.drawSymbolWithSvg(svg, {
@@ -396,18 +396,19 @@ function drawStartAndEnd(puzzle, svg) {
           var sym = puzzle.getSymmetricalPos(x, y)
           var symCell = puzzle.getCell(sym.x, sym.y)
           if (symCell.start === undefined) {
-            console.error('Found a startpoint at', x, y, 'but there was no symmetrical startpoint at', sym.x, sym.y)
+            console.warn('Found a startpoint at', x, y, 'but there was no symmetrical startpoint at', sym.x, sym.y)
           }
           window.drawSymbolWithSvg(svg, {
             'type': 'start',
             'width': 58,
             'height': 58,
-            'opposite': cell.start === 2,
+            'opposite': symCell.start === 2,
             'x': sym.x*41 + 23,
             'y': sym.y*41 + 23,
           })
           symStart = svg.lastChild
-          if (cell.start === 2) symStart = symStart.previousSibling;
+          symStart.style.display = 'none'
+          if (symCell.start === 2) symStart = symStart.previousSibling;
           symStart.style.display = 'none'
           symStart.id = 'symStart_' + svg.id + '_' + x + '_' + y
         }

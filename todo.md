@@ -26,6 +26,10 @@
 - [ ] proper documentation of editor
 - [ ] new "benis" symbol type (complete with suspicious start points!)
 - [ ] some new symbols, maybe (minesweeper if i figure the design out, (secret), something someone posted few weeks ago i have to check again but i thought it was cool)
+- - [ ] Minesweeper
+- - [ ] Line Division Triangle
+- - [ ] Status Coloring
+- - [ ] Unique Dots
 - [ ] way to turn on/off puzzle transformations in editor!
 - [ ] looksy randomizer! auto-generates a few panels of your configuration that are probably better than sigma's, share a code to race with others!
 ## Tutorials
@@ -54,9 +58,9 @@
 - [x] XV Polyomino
 - [x] Antipolyomino
 - [ ] Jerry-mandering
-- [ ] Antitriangles
-- [ ] Bells
-- [ ] Drops
+- [x] Antitriangles
+- [x] Bells
+- [x] Drops
 - [ ] Black Holes
 - [ ] White Holes
 - [ ] Die
