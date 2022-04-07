@@ -131,7 +131,9 @@ namespace(function () {
     }
     if (!isLastPanel(type) && (endDest(type) != panelNo)) {
       open[type] = true;
-      for (let i = 0; i < type; i++) if (endDest(type) === endDest(i)) open[type] = false;
+      for (let i = 0; i < type; i++) if (endDest(type) === endDest(i)) {
+        open[type] = false;
+      }
     }
     updateArrows();
   }
