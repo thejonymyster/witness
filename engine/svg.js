@@ -773,11 +773,11 @@ namespace(function () {
         break;
       case 'line':
         if (!params.rot) {
-          simpleLine(svg, params, 28, 2, 90)
-          simpleLine(svg, params, 28, 2, -90)
+          simpleLine(svg, params, 28, 2, 90).setAttribute('fill', 'var(--line-default)')
+          simpleLine(svg, params, 28, 2, -90).setAttribute('fill', 'var(--line-default)')
         } else {
-          simpleLine(svg, params, 28, 2, 0)
-          simpleLine(svg, params, 28, 2, 180)
+          simpleLine(svg, params, 28, 2, 0).setAttribute('fill', 'var(--line-default)')
+          simpleLine(svg, params, 28, 2, 180).setAttribute('fill', 'var(--line-default)')
         }
         break;
       case 'none': break;
