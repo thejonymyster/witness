@@ -176,9 +176,17 @@ namespace(function () {
     if (event.keyCode == '37') {
       getPrev();
     }
-    // Right keypress, move to next panel
+    // Right keypress, move to next panel A
     else if (event.keyCode == '39') {
-      getNext();
+      getNext(0);
+    }
+    // Down keypress, move to next panel B
+    else if (event.keyCode == '40') {
+      getNext(1);
+    }
+    // Up keypress, move to next panel C
+    else if (event.keyCode == '38') {
+      getNext(2);
     }
   }
 
