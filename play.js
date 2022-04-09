@@ -167,4 +167,19 @@ namespace(function () {
     reloadPanel();
   }
 
+  // Keyboard navigation between panels
+  document.onkeydown = keyNav;
+  function keyNav(event) {
+    event = event || window.event;
+
+    // Left keypress, move to previous panel
+    if (event.keyCode == '37') {
+      getPrev();
+    }
+    // Right keypress, move to next panel
+    else if (event.keyCode == '39') {
+      getNext();
+    }
+  }
+
 });
