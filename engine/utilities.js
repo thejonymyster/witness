@@ -495,6 +495,22 @@ namespace(function () {
           showSolution(puzzle, paths, num + 1)
         }
       }
+
+      // Keyboard navigation between solutions
+      document.onkeydown = keyNav;
+      function keyNav(event) {
+        event = event || window.event;
+
+        // Left keypress, move to previous solution
+        if (event.keyCode == '37' && previousSolution.disabled == false) {
+          showSolution(puzzle, paths, num - 1);
+        }
+        // Right keypress, move to next solution
+        else if (event.keyCode == '39' && nextSolution.disabled == false) {
+          showSolution(puzzle, paths, num + 1);
+        }
+      }
+
     }
 
     if (paths[num] != null) {
