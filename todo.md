@@ -30,6 +30,8 @@
 - - [ ] Line Division Triangle
 - - [ ] Status Coloring
 - - [ ] Unique Dots
+- - [ ] Middle Dots
+- - [ ] Mirrors
 - [ ] way to turn on/off puzzle transformations in editor!
 - [ ] looksy randomizer! auto-generates a few panels of your configuration that are probably better than sigma's, share a code to race with others!
 ## Tutorials

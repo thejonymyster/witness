@@ -772,12 +772,21 @@ namespace(function () {
           simplePath(svg, params, 'M 0 -4 C -14 -4 0 -24 0 -24 C 0 -24 14 -4 0 -4 L 0 -8 C 7 -8 0 -18 0 -19 C 0 -18 -7 -8 0 -8 M 6 -8 L 6 0 L -6 0 L -6 -8').setAttribute('transform', `translate(${midx}, ${midy}) rotate(${i * 72}) scale(${scale})`);
         break;
       case 'line':
+        let el;
         if (!params.rot) {
-          simpleLine(svg, params, 28, 2, 90).setAttribute('fill', 'var(--line-default)')
-          simpleLine(svg, params, 28, 2, -90).setAttribute('fill', 'var(--line-default)')
+          el = simpleLine(svg, params, 28, 2, 90);
+          el.setAttribute('fill', 'var(--line-default)')
+          el.setAttribute('stroke', 'transparent')
+          el = simpleLine(svg, params, 28, 2, -90)
+          el.setAttribute('fill', 'var(--line-default)')
+          el.setAttribute('stroke', 'transparent')
         } else {
-          simpleLine(svg, params, 28, 2, 0).setAttribute('fill', 'var(--line-default)')
-          simpleLine(svg, params, 28, 2, 180).setAttribute('fill', 'var(--line-default)')
+          el = simpleLine(svg, params, 28, 2, 0)
+          el.setAttribute('fill', 'var(--line-default)')
+          el.setAttribute('stroke', 'transparent')
+          el = simpleLine(svg, params, 28, 2, 180)
+          el.setAttribute('fill', 'var(--line-default)')
+          el.setAttribute('stroke', 'transparent')
         }
         break;
       case 'none': break;
