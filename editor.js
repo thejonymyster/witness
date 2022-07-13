@@ -599,17 +599,6 @@ namespace(function () {
             })
           }
           break;
-        case 'end':
-          button.onpointerdown = function (event) {
-            buttonBehaviour(event, this, (el) => {
-              let endType = symbolData[activeParams.id].endType
-              if (endType == undefined) endType = 0
-              endType = (endType + (event.isRightClick() ? 2 : 1)) % 3;
-              symbolData[activeParams.id].endType = endType
-              activeParams.endType = endType
-            })
-          }
-          break;
         case 'divdiamond':
         case 'dice':
           cycle ??= 9;

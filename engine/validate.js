@@ -118,7 +118,12 @@ window.validate = function(puzzle, quick) {
     console.warn(puzzle, global);
     let res = validatePuzzleForCopiers(puzzle, global, global.thingsToCopy, quick);
     puzzle.invalidElements = res.invalid;
-    puzzle.metaresult = res.transform;
+    puzzle.copierResults = {};
+    puzzle.negatorResults = {};
+    for (let k in res.transform) {
+        let isCopy = cel(puzzle, k).type === "copier";
+        (isCopy ? puzzle.copierResults : puzzle.negatorResults)[k] = res.transform[k];
+    }
     puzzle.grid = window.savedGrid;
     delete window.savedGrid;
     puzzle.valid = !puzzle.invalidElements.length;
@@ -228,8 +233,8 @@ function validatePuzzleForBridges(puzzle, quick) {
     [puzzle, global] = init(puzzle);
     let inv = new Set();
     let getEnd = function(br) {
-        if (br.pos.x % 2) return br.type === 4 ? 'bottom' : 'top';
-        else return br.type === 4 ? 'right' : 'left';
+        if (br.pos.x % 2) return br.type === 4 ? 'right' : 'left';
+        else return br.type === 4 ? 'bottom' : 'top';
     }
     for (let kv of validatePuzzle(puzzle, global, quick)) inv.add(kv);
     if (global.bridgeBranches?.length) for (let br of global.bridgeBranches) {
@@ -239,9 +244,10 @@ function validatePuzzleForBridges(puzzle, quick) {
         puzzle2.endPoint = {...puzzle.endPoint}; // break reference
         puzzle2.endPoint = br.pos;
         puzzle2.path = [...puzzle.path.slice(0, br.path), 0];
-        puzzle2.getCell(br.pos.x, br.pos.y).end = getEnd(br);
-        for (let br2 of global.bridgeBranches) puzzle2.getCell(br2.pos.x, br2.pos.y).gap = 0; // no brig
+        puzzle2.grid[br.pos.x][br.pos.y].end = getEnd(br);
+        for (let br2 of global.bridgeBranches) puzzle2.grid[br2.pos.x][br2.pos.y].gap = 0; // no brig
         [puzzle2, global2] = init(puzzle2);
+        console.warn(puzzle2, global2)
         for (let kv of validatePuzzle(puzzle2, global2, quick)) inv.add(kv);
     }
     return inv;
@@ -278,6 +284,7 @@ function validatePuzzle(puzzle, global, quick) {
     }
     for (r of global.regionData) puzzle.invalidElements = puzzle.invalidElements.concat(r);
     if (global.invalidXs) puzzle.invalidElements = puzzle.invalidElements.concat(global.invalidXs);
+    if (global.invalidEyes) puzzle.invalidElements.push(...global.invalidEyes)
     puzzle.invalidElements = Array.from(new Set(puzzle.invalidElements));
     if (puzzle.grid[puzzle.startPoint.x][puzzle.startPoint.y].start === 2) {
         let rc = Array.from(new Set(global.regionCells.all.flat()));
@@ -341,6 +348,7 @@ function init(puzzle) { // initialize globals
             }
         }
     }
+    console.warn(...global.path);
     global.pathSym = [];
     global.pathAll = [...global.path];
     units.push(performance.now());
@@ -436,7 +444,8 @@ function init(puzzle) { // initialize globals
         }
         if (!found) {
             console.info('[!] Eye Fault: no line seen at', o[0], o[1]);   
-            puzzle.invalidElements.push(ret(o[0], o[1]));
+            global.invalidEyes ??= [];
+            global.invalidEyes.push(ret(o[0], o[1]));
         }
     }
     units.push(performance.now());
