@@ -179,12 +179,14 @@ function validatePuzzleForNegators(puzzle, global, copy, quick) {
             || (((dotToSpokes(copy[k].dot) - 1) & 0x8) && global.regions.cell[regionNum].includes(k + 1 + puzzle.width))
         )))
         || transformed.includes(copy[k])) continue;
-        transformed.push(copy[k]);
         let puzzle2 = clonePuzzle(puzzle);
         let [x1, y1] = xy(c);
         let [x2, y2] = xy(k);
+        if ((x2 % 2 !== 1 || y2 % 2 !== 1) && !puzzle.grid[x2][y2].dot) continue;
+        transformed.push(copy[k])
         puzzle2.grid[x1][y1] = null;
-        puzzle2.grid[x2][y2] = null;
+        if (x2 % 2 !== 1 || y2 % 2 !== 1) delete puzzle2.grid[x2][y2].dot
+        else puzzle2.grid[x2][y2] = null;
         puzzle2.metaresult[c] = k;
         let ccopy = {...copy};
         delete ccopy[k];
