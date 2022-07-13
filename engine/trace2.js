@@ -397,12 +397,6 @@ window.trace = function(event, puzzle, pos, start, symStart=null) {
         puzzle.path.push(0)
         window.validate(puzzle, false) // We want all invalid elements so we can show the user.
 
-        for (var negation of puzzle.negations) {
-          console.debug('Rendering negation', negation)
-          data.animations.insertRule('.' + data.svg.id + '_' + negation.source.x + '_' + negation.source.y + ' {animation: 0.75s 1 forwards fade}\n')
-          data.animations.insertRule('.' + data.svg.id + '_' + negation.target.x + '_' + negation.target.y + ' {animation: 0.75s 1 forwards fade}\n')
-        }
-
         if (puzzle.valid) {
           window.PLAY_SOUND('success')
           window.onSolvedPuzzle(data.path)

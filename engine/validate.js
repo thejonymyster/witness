@@ -104,7 +104,8 @@ function getPortalCoords(c, data) { // from: <real>, to: PortalCoords(portalOffs
 // negations: Array[Object{'source':{'x':int, 'y':int}, 'target':{'x':int, 'y':int}}]
 window.validate = function(puzzle, quick) {
     puzzle.invalidElements = []; // once elements go in this list, nothing is removed
-    puzzle.negations = [];
+    puzzle.copierResults = [];
+    puzzle.negatorResults = [];
     puzzle.valid = true; // puzzle true until proven false
     width = puzzle.width;
     height = puzzle.height;
@@ -118,13 +119,8 @@ window.validate = function(puzzle, quick) {
     console.warn(puzzle, global);
     let res = validatePuzzleForCopiers(puzzle, global, global.thingsToCopy, quick);
     puzzle.invalidElements = res.invalid;
-    puzzle.metaresult = {};
-    puzzle.copierResults = {};
-    puzzle.negatorResults = {};
-    for (let k in res.transform) {
-        let isCopy = cel(puzzle, k).type === "copier";
-        (isCopy ? puzzle.copierResults : puzzle.negatorResults)[k] = res.transform[k];
-    }
+    puzzle.copierResults = res.copier;
+    puzzle.negatorResults = res.negator;
     puzzle.grid = window.savedGrid;
     delete window.savedGrid;
     puzzle.valid = !puzzle.invalidElements.length;
@@ -141,7 +137,6 @@ function validatePuzzleForCopiers(puzzle, global, copy, quick) {
     delete copy[c];
     let regionNum = global.regionCells.cell.findIndex(x => x.includes(c));
     if (regionNum === -1) return validatePuzzleForCopiers(puzzle, global, copy, quick);
-    puzzle.metaresult ??= {};
     let transformed = [];
     let [x, y] = xy(c);
     let inv;
@@ -151,12 +146,12 @@ function validatePuzzleForCopiers(puzzle, global, copy, quick) {
         if (copy[k].type === 'copier'
         || copy[k].type === 'x'
         || !global.regionCells.cell[regionNum]?.includes(k)
-        || transformed.includes(copy[k])) continue;
-        transformed.push(copy[k]);
+        || transformed.includes([c, copy[k].type, copy[k].count, copy[k].flip, copy[k].rot].join('-'))) continue;
+        transformed.push([c, copy[k].type, copy[k].count, copy[k].flip, copy[k].rot].join('-'));
         let puzzle2 = clonePuzzle(puzzle);
         Object.assign(cel(puzzle2, c), copy[k]);
         copy[c] = {...copy[k]};
-        puzzle2.metaresult[c] = k;
+        puzzle2.copierResults[c] = k;
         inv = validatePuzzleForCopiers(puzzle2, global, {...copy}, quick);
         found = true;
         if (!inv.invalid.length) return inv;
@@ -172,13 +167,13 @@ function validatePuzzleForCopiers(puzzle, global, copy, quick) {
 function validatePuzzleForNegators(puzzle, global, copy, quick) {
     let c = Number(Object.keys(copy).find(x => copy[x].type === 'nega'));
     if (isNaN(c)) return {
-        'transform': puzzle.metaresult,
+        'negator': puzzle.negatorResults,
+        'copier': puzzle.copierResults,
         'invalid': validatePuzzleForStatusColoring(puzzle, quick)
     };
     delete copy[c];
     let regionNum = global.regionCells.cell.findIndex(x => x.includes(c));
     if (regionNum === -1) return validatePuzzleForNegators(puzzle, global, copy, quick);
-    puzzle.metaresult ??= {};
     let transformed = [];
     let [x, y] = xy(c);
     let inv;
@@ -192,16 +187,16 @@ function validatePuzzleForNegators(puzzle, global, copy, quick) {
             || (((dotToSpokes(copy[k].dot) - 1) & 0x4) && global.regions.cell[regionNum].includes(k - 1 + puzzle.width))
             || (((dotToSpokes(copy[k].dot) - 1) & 0x8) && global.regions.cell[regionNum].includes(k + 1 + puzzle.width))
         )))
-        || transformed.includes(copy[k])) continue;
+        || transformed.includes([c, copy[k].type, copy[k].count, copy[k].flip, copy[k].rot, copy[k].dot].join('-'))) continue;
         let puzzle2 = clonePuzzle(puzzle);
         let [x1, y1] = xy(c);
         let [x2, y2] = xy(k);
         if ((x2 % 2 !== 1 || y2 % 2 !== 1) && !puzzle.grid[x2][y2].dot) continue;
-        transformed.push(copy[k])
+        transformed.push([c, copy[k].type, copy[k].count, copy[k].flip, copy[k].rot, copy[k].dot].join('-'))
         puzzle2.grid[x1][y1] = null;
         if (x2 % 2 !== 1 || y2 % 2 !== 1) delete puzzle2.grid[x2][y2].dot
         else puzzle2.grid[x2][y2] = null;
-        puzzle2.metaresult[c] = k;
+        puzzle2.negatorResults[c] = k;
         let ccopy = {...copy};
         delete ccopy[k];
         inv = validatePuzzleForNegators(puzzle2, global, ccopy, quick);
@@ -256,7 +251,6 @@ function validatePuzzleForBridges(puzzle, quick) {
         puzzle2.grid[br.pos.x][br.pos.y].end = getEnd(br);
         for (let br2 of global.bridgeBranches) puzzle2.grid[br2.pos.x][br2.pos.y].gap = 0; // no brig
         [puzzle2, global2] = init(puzzle2);
-        console.warn(puzzle2, global2)
         for (let kv of validatePuzzle(puzzle2, global2, quick)) inv.add(kv);
     }
     return inv;
@@ -266,6 +260,8 @@ function clonePuzzle(puzzle, grid = puzzle.grid) {
     let puzzle2 = new Puzzle(1, 1) // default puzzle gen
     for (let k in puzzle) puzzle2[k] = puzzle[k];
     puzzle2.grid = JSON.parse(JSON.stringify(grid));
+    puzzle2.negatorResults ??= {};
+    puzzle2.copierResults ??= {};
     return puzzle2;
 }
 
@@ -1096,12 +1092,25 @@ const lineValidate = [
 const validate = [
     {
         '_name': 'DOT CHECK',
-        'or': ['dot', 'cross', 'curve', 'dots', 'soundDot', 'bridgeButActually'],
+        'or': ['dot', 'cross', 'curve', 'dots', 'soundDot'],
         'exec': function(puzzle, regionNum, global, quick) {
             const dots = [window.DOT_BLACK, window.DOT_BLUE, window.DOT_YELLOW, window.DOT_INVISIBLE, window.CUSTOM_CROSS_FILLED, window.CUSTOM_CROSS_BLUE_FILLED, window.CUSTOM_CROSS_YELLOW_FILLED, window.CUSTOM_CURVE_FILLED, window.CUSTOM_CURVE_BLUE_FILLED, window.CUSTOM_CURVE_YELLOW_FILLED, 13, 15, 17, 18, 20, 22, 24, 25, 27, 29, 31, 32, 34, 36, 38, 39];
             for (let c of global.regionCells.line[regionNum]) {
                 let cell = cel(puzzle, c);
                 if (dots.includes(cell?.dot) || cell?.dot >= window.SOUND_DOT || cell?.gap >= window.CUSTOM_BRIDGE) { // bonk
+                    global.regionData[regionNum].push(c);
+                    if (!puzzle.valid && quick) return;
+                }
+            }
+        }
+    }, {
+        '_name': 'BRIDGE CHECK',
+        'or': ['bridgeButActually'],
+        'exec': function(puzzle, regionNum, global, quick) {
+            let br = global.bridgeBranches.map(x => ret(x.pos.x, x.pos.y));
+            for (let c of global.regionCells.edge[regionNum]) {
+                let cell = cel(puzzle, c);
+                if (cell?.gap >= window.CUSTOM_BRIDGE && !br.includes(c)) { // bonk
                     global.regionData[regionNum].push(c);
                     if (!puzzle.valid && quick) return;
                 }
