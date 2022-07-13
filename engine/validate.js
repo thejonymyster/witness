@@ -121,7 +121,6 @@ window.validate = function(puzzle, quick) {
         || puzzle.statuscoloring
         || global.shapes.includes('nega')) quick = false;
     let res = validatePuzzleForStatusColoring(puzzle, global, global.thingsToCopy, quick);
-    console.warn(res);
     puzzle.invalidElements = res.invalid;
     puzzle.copierResults = res.copier;
     puzzle.negatorResults = res.negator;
@@ -164,7 +163,6 @@ function validatePuzzleForBridges(puzzle, global, copy, quick) {
     let ccopy = {};
     for (let k in copy) ccopy[k] = {...copy[k]};
     res = validatePuzzleForCopiers(puzzle3, global3, ccopy, quick);
-    console.warn(puzzle3.grid);
     if (global.bridgeBranches?.length) for (let br of global.bridgeBranches) {
         let global2;
         if (quick && inv.length) return;
@@ -185,7 +183,6 @@ function validatePuzzleForBridges(puzzle, global, copy, quick) {
         puzzle2.grid[br.pos.x][br.pos.y].end = getEnd(br);
         for (let br2 of global.bridgeBranches) puzzle2.grid[br2.pos.x][br2.pos.y].gap = 0; // no brig
         [puzzle2, global2] = init(puzzle2);
-        console.error(global2);
         let ccopy = {};
         for (let k in copy) ccopy[k] = {...copy[k]};
         res.invalid.push(...validatePuzzleForCopiers(puzzle2, global2, ccopy, quick).invalid);
