@@ -139,14 +139,14 @@ function validatePuzzleForStatusColoring(puzzle, global, copy, quick) {
     let res = validatePuzzleForBridges(puzzle3, global3, ccopy, quick);
     if (puzzle.statuscoloring) {
         puzzle.statusRight = [];
-        puzzle.statusWrong = [...res.invalid];
+        puzzle.statusWrong = res.invalid.filter(q => puzzle.grid?.[q.x]?.[q.y]?.color !== undefined);
         for (let x = 0; x < puzzle.width; x++) for (let y = 0; y < puzzle.height; y++) {
             if (isNaN(puzzle.getCell(x, y)?.color)) continue;
             if (puzzle.statusWrong.findIndex(q => q.x === x && q.y === y) !== -1) continue;
-            puzzle.statusRight.push({'x': x, 'y': y});
+            if (puzzle.grid?.[x]?.[y]?.color !== undefined) puzzle.statusRight.push({'x': x, 'y': y});
         }
-        for (let q of puzzle.statusRight) if (puzzle.grid?.[q.x]?.[q.y]?.color !== undefined) puzzle.grid[q.x][q.y].color = 0;
-        for (let q of puzzle.statusWrong) if (puzzle.grid?.[q.x]?.[q.y]?.color !== undefined) puzzle.grid[q.x][q.y].color = 1;
+        for (let q of puzzle.statusRight) puzzle.grid[q.x][q.y].color = 0;
+        for (let q of puzzle.statusWrong) puzzle.grid[q.x][q.y].color = 1;
         return validatePuzzleForBridges(puzzle, global, copy, quick);
     }
     return res;
@@ -171,7 +171,7 @@ function validatePuzzleForBridges(puzzle, global, copy, quick) {
         let puzzle2 = clonePuzzle(puzzle); 
         puzzle2.endPoint = {...puzzle.endPoint}; // break reference
         let [x, y] = [puzzle2.endPoint.x, puzzle2.endPoint.y];
-        for (let k of puzzle.path.slice(br.path).reverse()) {
+        for (let k of puzzle.path.slice(br.path + 1).reverse()) {
             [x, y] = [[x, y], [x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]][k];
             if (puzzle2.pillar) x = rdiv(x, puzzle.width);
             puzzle2.grid[x][y].line = 0;
@@ -185,6 +185,7 @@ function validatePuzzleForBridges(puzzle, global, copy, quick) {
         puzzle2.grid[br.pos.x][br.pos.y].end = getEnd(br);
         for (let br2 of global.bridgeBranches) puzzle2.grid[br2.pos.x][br2.pos.y].gap = 0; // no brig
         [puzzle2, global2] = init(puzzle2);
+        console.error(global2);
         let ccopy = {};
         for (let k in copy) ccopy[k] = {...copy[k]};
         res.invalid.push(...validatePuzzleForCopiers(puzzle2, global2, ccopy, quick).invalid);
