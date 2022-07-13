@@ -143,7 +143,7 @@ function validatePuzzleForCopiers(puzzle, global, copy, quick) {
         k = Number(k);
         if (copy[k].type === 'copier'
         || copy[k].type === 'x'
-        || !global.regionCells.cell[regionNum].includes(k)
+        || !global.regionCells.cell[regionNum]?.includes(k)
         || transformed.includes(copy[k])) continue;
         transformed.push(copy[k]);
         let puzzle2 = clonePuzzle(puzzle);
