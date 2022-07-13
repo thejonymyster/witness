@@ -171,7 +171,7 @@ function validatePuzzleForNegators(puzzle, global, copy, quick) {
     let found = false;
     for (let k in copy) {
         k = Number(k);
-        if ((!global.regionCells.cell[regionNum].includes(k)
+        if ((!global.regionCells.all[regionNum].includes(k)
         && !(copy[k].dot <= window.CUSTOM_X && (
                (((dotToSpokes(copy[k].dot) - 1) & 0x1) && global.regions.cell[regionNum].includes(k - 1 - puzzle.width))
             || (((dotToSpokes(copy[k].dot) - 1) & 0x2) && global.regions.cell[regionNum].includes(k + 1 - puzzle.width))
