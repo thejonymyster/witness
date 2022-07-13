@@ -1107,10 +1107,10 @@ const validate = [
         '_name': 'BRIDGE CHECK',
         'or': ['bridgeButActually'],
         'exec': function(puzzle, regionNum, global, quick) {
-            let br = global.bridgeBranches.map(x => ret(x.pos.x, x.pos.y));
+            let br = global.bridgeBranches?.map(x => ret(x.pos.x, x.pos.y));
             for (let c of global.regionCells.edge[regionNum]) {
                 let cell = cel(puzzle, c);
-                if (cell?.gap >= window.CUSTOM_BRIDGE && !br.includes(c)) { // bonk
+                if (cell?.gap >= window.CUSTOM_BRIDGE && !br?.includes(c)) { // bonk
                     global.regionData[regionNum].push(c);
                     if (!puzzle.valid && quick) return;
                 }
