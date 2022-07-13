@@ -370,11 +370,11 @@ function init(puzzle) { // initialize globals
         for (let y = 0; y < puzzle.height; y++) {
             let cell = puzzle.grid[x][y];
             if (cell == null) continue;
+            global.thingsToCopy[ret(x, y)] = {...cell};
+            delete global.thingsToCopy[ret(x, y)].color;
+            delete global.thingsToCopy[ret(x, y)].line;
+            delete global.thingsToCopy[ret(x, y)].dir;
             if ((x % 2) == 1 && (y % 2) == 1) {
-                global.thingsToCopy[ret(x, y)] = {...cell};
-                delete global.thingsToCopy[ret(x, y)].color;
-                delete global.thingsToCopy[ret(x, y)].line;
-                delete global.thingsToCopy[ret(x, y)].dir;
                 if (cell.type == 'portal') {
                     global.shapes.add('portal');
                     safepush(portalColorPos, cell.color, ret(x, y));
