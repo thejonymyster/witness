@@ -134,6 +134,7 @@ function validatePuzzleForCopiers(puzzle, global, copy, quick) {
     if (isNaN(c)) return validatePuzzleForNegators(puzzle, global, {...copy}, quick);
     delete copy[c];
     let regionNum = global.regionCells.cell.findIndex(x => x.includes(c));
+    if (regionNum === -1) return validatePuzzleForCopiers(puzzle, global, copy, quick);
     puzzle.metaresult ??= {};
     let transformed = [];
     let [x, y] = xy(c);
@@ -148,6 +149,7 @@ function validatePuzzleForCopiers(puzzle, global, copy, quick) {
         transformed.push(copy[k]);
         let puzzle2 = clonePuzzle(puzzle);
         Object.assign(cel(puzzle2, c), copy[k]);
+        copy[c] = {...copy[k]};
         puzzle2.metaresult[c] = k;
         inv = validatePuzzleForCopiers(puzzle2, global, {...copy}, quick);
         found = true;
@@ -169,6 +171,7 @@ function validatePuzzleForNegators(puzzle, global, copy, quick) {
     };
     delete copy[c];
     let regionNum = global.regionCells.cell.findIndex(x => x.includes(c));
+    if (regionNum === -1) return validatePuzzleForNegators(puzzle, global, copy, quick);
     puzzle.metaresult ??= {};
     let transformed = [];
     let [x, y] = xy(c);

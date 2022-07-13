@@ -438,7 +438,8 @@ window.trace = function(event, puzzle, pos, start, symStart=null) {
         }
         if (puzzle.negatorResults) for (let r of [...Object.keys(puzzle.negatorResults), ...Object.values(puzzle.negatorResults)]) {
           r = Number(r);
-          data.animations.insertRule('.' + data.svg.id + '_' + (r % puzzle.width) + '_' + div(r, puzzle.width) + ' {opacity: 0.25}\n')
+          let [x, y] = [r % puzzle.width, div(r, puzzle.width)];
+          data.animations.insertRule('.' + data.svg.id + '_' + x + '_' + y + (puzzle.getCell(x, y).type === 'copier' ? '_copier' : '') + ' {opacity: 0.25}\n')
         }
         if (puzzle.copierResults) for (let r in puzzle.copierResults) {
           r = Number(r);
