@@ -104,8 +104,8 @@ function getPortalCoords(c, data) { // from: <real>, to: PortalCoords(portalOffs
 // negations: Array[Object{'source':{'x':int, 'y':int}, 'target':{'x':int, 'y':int}}]
 window.validate = function(puzzle, quick) {
     puzzle.invalidElements = []; // once elements go in this list, nothing is removed
-    puzzle.copierResults = [];
-    puzzle.negatorResults = [];
+    puzzle.copierResults = {};
+    puzzle.negatorResults = {};
     puzzle.valid = true; // puzzle true until proven false
     width = puzzle.width;
     height = puzzle.height;
