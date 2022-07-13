@@ -1051,8 +1051,8 @@ namespace(function () {
     let ret = { 'type': 'line', 'line': 0 };
     if (dot) {
       if (altStart >= 2) {
-        ret.endType = (start >> 6);
-        ret.dot = (dot & 0x3F) - 29;
+        ret.endType = (dot >> 6);
+        if (dot & 0x3F) ret.dot = (dot & 0x3F) - 29;
       }
       else ret.dot = dot - 29;
     }
