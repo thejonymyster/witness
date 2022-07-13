@@ -1597,6 +1597,10 @@ const validate = [
                         if (matrix(puzzle, global, x, y) == regionNum) global.regionData[regionNum].push(c);
                     }
                 } else { // valid, start logic
+                    if (global.bridges[color].length === 1) {
+                        global.regionData[regionNum].push(global.bridges[color][0]);
+                        continue;
+                    }
                     let res = false;
                     //* make adjacency graph
                     let adj = {};
