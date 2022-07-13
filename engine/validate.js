@@ -118,6 +118,7 @@ window.validate = function(puzzle, quick) {
     console.warn(puzzle, global);
     let res = validatePuzzleForCopiers(puzzle, global, global.thingsToCopy, quick);
     puzzle.invalidElements = res.invalid;
+    puzzle.metaresult = {};
     puzzle.copierResults = {};
     puzzle.negatorResults = {};
     for (let k in res.transform) {
@@ -131,7 +132,12 @@ window.validate = function(puzzle, quick) {
 
 function validatePuzzleForCopiers(puzzle, global, copy, quick) {
     let c = Number(Object.keys(copy).find(x => copy[x].type === 'copier'));
-    if (isNaN(c)) return validatePuzzleForNegators(puzzle, global, {...copy}, quick);
+    if (isNaN(c)) {
+        let inv = validatePuzzleForStatusColoring(puzzle, false).map(x => ret(x.x, x.y));
+        let newCopy = {};
+        for (let q of Object.keys(copy).filter(x => copy[x].type === 'nega' || inv.includes(Number(x)))) newCopy[q] = {...copy[q]};
+        return validatePuzzleForNegators(puzzle, global, newCopy, quick);
+    }
     delete copy[c];
     let regionNum = global.regionCells.cell.findIndex(x => x.includes(c));
     if (regionNum === -1) return validatePuzzleForCopiers(puzzle, global, copy, quick);
