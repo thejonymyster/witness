@@ -348,7 +348,6 @@ function init(puzzle) { // initialize globals
             }
         }
     }
-    console.warn(...global.path);
     global.pathSym = [];
     global.pathAll = [...global.path];
     units.push(performance.now());

@@ -455,7 +455,7 @@ window.trace = function(event, puzzle, pos, start, symStart=null) {
           q.color = puzzle.getCell(x, y).color;
           data.animations.insertRule('.' + data.svg.id + '_' + x + '_' + y + ' {opacity: 0}\n')
           window.drawSymbolWithSvg(data.svg, q);
-          document.getElementsByClassName(data.svg.id + '_' + x + '_' + y + '_copier')[0].classList.add('copierResult');
+          for (let el of Array.from(document.getElementsByClassName(data.svg.id + '_' + x + '_' + y + '_copier'))) el.classList.add('copierResult');
         }
       }, 1)
 
