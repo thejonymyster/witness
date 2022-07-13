@@ -346,6 +346,18 @@ function init(puzzle) { // initialize globals
                     'path': k + 1
                 });
             }
+            if (puzzle.symmetry != null) {
+                let sym = puzzle.getSymmetricalPos(_x, _y);
+                let symCell = puzzle.getCell(sym.x, sym.y);
+                if (symCell?.gap >= window.CUSTOM_BRIDGE) {
+                    global.bridgeBranches ??= [];
+                    global.bridgeBranches.push({
+                        'type': symCell.gap,
+                        'pos': {'x': sym.x, 'y': sym.y},
+                        'path': k + 1
+                    });
+                }
+            }
         }
     }
     global.pathSym = [];
