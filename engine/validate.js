@@ -260,8 +260,8 @@ function clonePuzzle(puzzle, grid = puzzle.grid) {
     let puzzle2 = new Puzzle(1, 1) // default puzzle gen
     for (let k in puzzle) puzzle2[k] = puzzle[k];
     puzzle2.grid = JSON.parse(JSON.stringify(grid));
-    puzzle2.negatorResults ??= {};
-    puzzle2.copierResults ??= {};
+    puzzle2.negatorResults = {...puzzle.negatorResults};
+    puzzle2.copierResults = {...puzzle.copierResults};
     return puzzle2;
 }
 
