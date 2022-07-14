@@ -1319,7 +1319,7 @@ namespace(function () {
     if (!list.length) return '';
     let veri = list[0].indexOf('_');
     let version = list[0].slice(0, veri);
-    list = list.map(x => serializePuzzle(deserializePuzzleV9(deserializePuzzlePre(x.slice(veri + 1))), true));
+    list = list.map(x => serializePuzzle(deserializePuzzleV10(deserializePuzzlePre(x.slice(veri + 1))), true));
     let ret = (useIDN ? 'vs3i_' : 'vs3_') + version + '_';
     let res = String.fromCharCode(list.length);
     /**
