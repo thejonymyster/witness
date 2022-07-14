@@ -59,7 +59,7 @@ namespace(function () {
   ];
   let currentChallenge = [];
   const challengeEndpoints = [{'x': 8, 'y': 5}, {'x': 5, 'y': 8}, {'x': 5, 'y': 2}];
-  const challengeCode = -1645616191
+  const challengeCode = 899824571
 
   window.onload = function () {
     solsWrapper = document.getElementById('solsWrapper')
@@ -70,7 +70,7 @@ namespace(function () {
       puzzles = importSequence(decodeURIComponent(toLoad.slice(1))).map(e => window.deserializePuzzle(e));
       if (!localStorage[code]?.length) localStorage[code] = '\0';
       currentPanel = localStorage[code].length - 1;
-      if (code == challengeCode && localStorage['currentChallenge']) currentChallenge = localStorage['currentChallenge'].split('').map(x => Number(x));
+      if (code === challengeCode && localStorage['currentChallenge']) currentChallenge = localStorage['currentChallenge'].split('').map(x => Number(x));
       reloadPanel();
     } else window.location.replace(window.NAME + '/');    
   }
@@ -128,7 +128,7 @@ namespace(function () {
     window.clearAnimations();
     applyTheme(puzzle);
     applyImage(puzzle);
-    if (currentPanel <= 3 && code == challengeCode) { // challenge
+    if (currentPanel <= 3 && code === challengeCode) { // challenge
       let _q = challengeExits;
       for (let q of currentChallenge) _q = _q[q];
       main: for (let i = 0; i < 3; i++) {
@@ -172,7 +172,7 @@ namespace(function () {
     if (type === -1) { levelUp(0); levelUp(1); levelUp(2); return; }
     if (isNewPanel() && !isLastPanel(type) && (endDest(type) != panelNo)) {
       localStorage[code] += String.fromCharCode(endDest(type));
-      if (code == challengeCode) localStorage['currentChallenge'] = currentChallenge.join('') + type;
+      if (code === challengeCode) localStorage['currentChallenge'] = currentChallenge.join('') + type;
     }
     if (!isLastPanel(type) && (endDest(type) != panelNo)) {
       open[type] = true;
@@ -202,17 +202,17 @@ namespace(function () {
     if (!open[type]) return;
     if (endDest(type) !== localStorage[code].charCodeAt(currentPanel + 1)) {
       localStorage[code] = localStorage[code].slice(0, currentPanel + 1) + String.fromCharCode(endDest(type));
-      if (code == challengeCode) localStorage['currentChallenge'] = currentChallenge.join('') + type;
+      if (code === challengeCode) localStorage['currentChallenge'] = currentChallenge.join('') + type;
     }
     currentPanel++;
-    if (code == challengeCode) currentChallenge.push(type);
+    if (code === challengeCode) currentChallenge.push(type);
     reloadPanel();
   }
 
   window.getPrev = function () {
     if (currentPanel == 0) return;
     currentPanel--;
-    if (code == challengeCode) currentChallenge.pop();
+    if (code === challengeCode) currentChallenge.pop();
     reloadPanel();
   }
 
