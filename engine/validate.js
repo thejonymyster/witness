@@ -1174,7 +1174,7 @@ const validate = [
 					}
 					for (let shape of Object.keys(color)) {
 						if (!color[shape].length) continue; //skip empty arrays
-						if (~maxSep[shape][0] && color[shape].length >= maxSep[shape].length) {
+						if (maxSep[shape].length && ~maxSep[shape][0] && color[shape].length >= maxSep[shape].length) {
 							global.regionData[regionNum].push(...maxSep[shape]);
 							maxSep[shape][0] = -1; //label as 'already failed'
 						}
