@@ -180,7 +180,7 @@ namespace(function () {
           break;
       }
     }
-    if (vanillaCode.includes(code) && (puzzle.endPoint.x, puzzle.endPoint.y).endType == 1) window.location.href = "https://store.steampowered.com/app/210970/The_Witness/"
+    if (vanillaCode.includes(code) && puzzle.getCell(puzzle.endPoint.x, puzzle.endPoint.y).endType == 1) window.location.href = "https://store.steampowered.com/app/210970/The_Witness/"
     let dir = pathsToDir(puzzle.path);
     if (puzzle.optional || isNewPanel()) {
       if (puzzle.sols > 1) {
