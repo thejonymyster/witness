@@ -61,6 +61,7 @@ namespace(function () {
   const challengeEndpoints = [{'x': 8, 'y': 5}, {'x': 5, 'y': 8}, {'x': 5, 'y': 2}];
   const challengeCode = 899824571;
   const moonGateCode = -1875047686;
+  const vanillaCode = [744706933, 1678930068];
   function flower(x, y, i=0) {
     return {
       'type': 'flower',
@@ -179,6 +180,7 @@ namespace(function () {
           break;
       }
     }
+    if (vanillaCode.includes(code) && (puzzle.endPoint.x, puzzle.endPoint.y).endType == 1) window.location.href = "https://store.steampowered.com/app/210970/The_Witness/"
     let dir = pathsToDir(puzzle.path);
     if (puzzle.optional || isNewPanel()) {
       if (puzzle.sols > 1) {
