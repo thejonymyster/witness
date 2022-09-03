@@ -196,7 +196,7 @@ namespace(function () {
     localStorage[`${code}_${panelNo}`] = dir;
     if (vanillaCode.includes(code) && puzzle.getCell(puzzle.endPoint.x, puzzle.endPoint.y).endType == 1) {
       window.location.href = "https://store.steampowered.com/app/210970/The_Witness/"
-      for (let k of vanillaCode) localStorage[k] = localstorage[code];
+      for (let k of vanillaCode) localStorage[k] = localStorage[code];
     }
   }
 
