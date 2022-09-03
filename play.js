@@ -195,9 +195,8 @@ namespace(function () {
     } else levelUp(puzzle.getCell(puzzle.endPoint.x, puzzle.endPoint.y).endType ?? 0);
     localStorage[`${code}_${panelNo}`] = dir;
     if (vanillaCode.includes(code) && puzzle.getCell(puzzle.endPoint.x, puzzle.endPoint.y).endType == 1) {
-      localStorage[code] += String.fromCharCode(0xFF);
-      for (let k of vanillaCode) localStorage[k] = localStorage[code];
-      window.location.href = "https://store.steampowered.com/app/210970/The_Witness/"
+      for (let k of vanillaCode) localStorage[code] += String.fromCharCode(0xFF);
+      window.location.href = "https://store.steampowered.com/app/210970/The_Witness/";
     }
   }
 
