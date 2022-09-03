@@ -167,7 +167,6 @@ namespace(function () {
   window.onSolvedPuzzle = function (paths) {
     if (puzzle.moongate) {
       let pth = puzzle.path.slice(1).filter((_, index) => !(index % 4)).map(x => ['', 'l', 'r', 'u', 'd'][x]).join('')
-      console.error(pth);
       switch (pth) {
         case "rdrdldrrurdd":
         case "rddrurddldrr":
@@ -180,7 +179,6 @@ namespace(function () {
           break;
       }
     }
-    if (vanillaCode.includes(code) && puzzle.getCell(puzzle.endPoint.x, puzzle.endPoint.y).endType == 1) window.location.href = "https://store.steampowered.com/app/210970/The_Witness/"
     let dir = pathsToDir(puzzle.path);
     if (puzzle.optional || isNewPanel()) {
       if (puzzle.sols > 1) {
@@ -196,6 +194,10 @@ namespace(function () {
       if (((sols?.size ?? 1) >= puzzle.sols) && (!perfectActivated || !solsPerfect.length)) for (let o of Array.from(ends)) levelUp(o);
     } else levelUp(puzzle.getCell(puzzle.endPoint.x, puzzle.endPoint.y).endType ?? 0);
     localStorage[`${code}_${panelNo}`] = dir;
+    if (vanillaCode.includes(code) && puzzle.getCell(puzzle.endPoint.x, puzzle.endPoint.y).endType == 1) {
+      window.location.href = "https://store.steampowered.com/app/210970/The_Witness/"
+      for (let k of vanillaCode) localStorage[k] = localstorage[code];
+    }
   }
 
   function levelUp(type = -1) {
