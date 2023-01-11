@@ -41,11 +41,11 @@ const CHECK_ALSO = { // removing this 1 thing can affect these other symbols
     'pentagon': ['square'],
     'celledhex': ['dart', 'divdiamond', 'poly', 'ylop', 'xvmino']
 };
-const ALWAYS_CHECK = ['bridge', 'star', 'pokerchip'];
+const ALWAYS_CHECK = ['bridge', 'star', 'pokerchip', 'boat'];
 const METASHAPES = ['nega', 'copier'];
 const NONSYMBOLS = ['line']; // extension sake
 const NONSYMBOL_PROPERTY = ['type', 'line', 'start', 'end'];
-const COLOR_DEPENDENT = ['square', 'star', 'pentagon', 'vtriangle', 'bridge'];
+const COLOR_DEPENDENT = ['square', 'star', 'pentagon', 'vtriangle', 'bridge', 'boat'];
 
 // coordinate conversion
 let width; 
@@ -1789,6 +1789,13 @@ const validate = [
                     if (!puzzle.valid && quick) return;
                 }
             }
+        }
+    }, {
+	'_name': 'BOAT CHECK',
+        'or': ['boat'],
+        'exec': function(puzzle, regionNum, global, quick) {
+            for (let c of global.regionCells.cell[regionNum])  
+            if (global.invalidHoles.includes(c)) global.regionData[regionNum].push(c);
         }
     }
 ];
